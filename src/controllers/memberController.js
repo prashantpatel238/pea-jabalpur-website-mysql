@@ -1,0 +1,122 @@
+const bcrypt = require("bcryptjs");
+
+const site = require("../config/site");
+const { Member } = require("../models/Member");
+const { calculateAge } = require("./publicController");
+
+function getPage(path, title) {
+  return { path, title: `${title} - ${site.title}` };
+}
+
+function parseCheckbox(body, fieldName) {
+  return Boolean(body[fieldName]);
+}
+
+async function renderMemberLogin(req, res) {
+  if (req.session.member) {
+    return res.redirect("/member/profile");
+  }
+
+  return res.render("member/login", {
+    page: getPage("/member/login", "Member Login")
+  });
+}
+
+async function handleMemberLogin(req, res) {
+  const email = (req.body.email || "").trim().toLowerCase();
+  const password = req.body.password || "";
+
+  const member = await Member.findOne({ email });
+
+  if (!member || member.membership_status !== "approved") {
+    return res.status(401).render("member/login", {
+      page: getPage("/member/login", "Member Login"),
+      errorMessage: "Only approved members can sign in."
+    });
+  }
+
+  const isValid = await bcrypt.compare(password, member.password_hash);
+
+  if (!isValid) {
+    return res.status(401).render("member/login", {
+      page: getPage("/member/login", "Member Login"),
+      errorMessage: "Invalid member credentials."
+    });
+  }
+
+  member.last_login_at = new Date();
+  await member.save();
+
+  req.session.member = {
+    id: member._id.toString(),
+    full_name: member.full_name,
+    email: member.email
+  };
+  req.session.flash = { type: "success", message: "Member login successful." };
+  return res.redirect("/member/profile");
+}
+
+function handleMemberLogout(req, res) {
+  req.session.destroy(() => {
+    res.redirect("/member/login");
+  });
+}
+
+async function renderMemberProfile(req, res) {
+  const member = await Member.findById(req.session.member.id).lean();
+
+  if (!member) {
+    req.session.flash = { type: "error", message: "Member profile not found." };
+    return res.redirect("/member/login");
+  }
+
+  return res.render("member/profile", {
+    page: getPage("/member/profile", "Member Profile"),
+    member
+  });
+}
+
+async function handleUpdateMemberProfile(req, res) {
+  const member = await Member.findById(req.session.member.id);
+
+  if (!member) {
+    req.session.flash = { type: "error", message: "Member profile not found." };
+    return res.redirect("/member/login");
+  }
+
+  member.full_name = (req.body.full_name || "").trim();
+  member.phone = (req.body.phone || "").trim();
+  member.profession = (req.body.profession || "").trim();
+  member.city = (req.body.city || "").trim();
+  member.address = (req.body.address || "").trim();
+  member.dob = req.body.dob || null;
+  member.gender = (req.body.gender || "").toLowerCase();
+  member.marital_status = (req.body.marital_status || "").toLowerCase();
+  member.marriage_date = req.body.marriage_date || null;
+  member.spouse_name = (req.body.spouse_name || "").trim();
+  member.show_in_directory = parseCheckbox(req.body, "show_in_directory");
+  member.show_mobile_in_directory = parseCheckbox(req.body, "show_mobile_in_directory");
+  member.show_email_in_directory = parseCheckbox(req.body, "show_email_in_directory");
+  member.show_city_in_directory = parseCheckbox(req.body, "show_city_in_directory");
+  member.show_profession_in_directory = parseCheckbox(req.body, "show_profession_in_directory");
+  member.show_photo_in_directory = parseCheckbox(req.body, "show_photo_in_directory");
+  member.age = calculateAge(member.dob);
+
+  if (req.body.password) {
+    member.password_hash = await bcrypt.hash(req.body.password, 12);
+  }
+
+  await member.save();
+
+  req.session.member.full_name = member.full_name;
+  req.session.flash = { type: "success", message: "Profile updated successfully." };
+  return res.redirect("/member/profile");
+}
+
+module.exports = {
+  renderMemberLogin,
+  handleMemberLogin,
+  handleMemberLogout,
+  renderMemberProfile,
+  handleUpdateMemberProfile
+};

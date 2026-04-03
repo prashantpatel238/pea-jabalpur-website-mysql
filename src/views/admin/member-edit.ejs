@@ -1,0 +1,44 @@
+<%- include("../partials/head") %>
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-slate-50 px-4 pt-28">
+  <section class="mx-auto max-w-5xl py-16">
+    <div class="mb-6"><a href="/admin" class="text-sm font-semibold text-primary">Back to Dashboard</a></div>
+    <div class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+      <h1 class="mb-6 text-3xl font-bold text-slate-900">Edit Member</h1>
+      <form action="/admin/members/<%= member._id %>/edit" method="post" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <input name="full_name" value="<%= member.full_name %>" required placeholder="Full name" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input name="email" value="<%= member.email %>" required type="email" placeholder="Email" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input name="phone" value="<%= member.phone || '' %>" placeholder="Phone" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input name="profession" value="<%= member.profession || '' %>" placeholder="Profession" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input name="city" value="<%= member.city || '' %>" placeholder="City" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <select name="role" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900"><% memberRoles.forEach((role) => { %><option <%= member.role === role ? 'selected' : '' %>><%= role %></option><% }) %></select>
+        <select name="membership_status" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900"><option value="pending" <%= member.membership_status === 'pending' ? 'selected' : '' %>>Pending</option><option value="approved" <%= member.membership_status === 'approved' ? 'selected' : '' %>>Approved</option><option value="rejected" <%= member.membership_status === 'rejected' ? 'selected' : '' %>>Rejected</option></select>
+        <input name="member_id" value="<%= member.member_id || '' %>" placeholder="Member ID" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input name="leadership_title" value="<%= member.leadership_title || '' %>" placeholder="Leadership title" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input name="important_member_order" type="number" min="0" value="<%= member.important_member_order || 0 %>" placeholder="Important member order" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input name="dob" type="date" value="<%= member.dob ? new Date(member.dob).toISOString().split('T')[0] : '' %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input name="marriage_date" type="date" value="<%= member.marriage_date ? new Date(member.marriage_date).toISOString().split('T')[0] : '' %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input name="spouse_name" value="<%= member.spouse_name || '' %>" placeholder="Spouse name" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input name="password" type="password" placeholder="New password (optional)" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <textarea name="address" placeholder="Address" class="min-h-[100px] rounded-xl border-slate-200 bg-slate-50 text-slate-900 md:col-span-2"><%= member.address || '' %></textarea>
+        <textarea name="notes" placeholder="Member notes" class="min-h-[100px] rounded-xl border-slate-200 bg-slate-50 text-slate-900"><%= member.notes || '' %></textarea>
+        <textarea name="admin_notes" placeholder="Admin notes" class="min-h-[100px] rounded-xl border-slate-200 bg-slate-50 text-slate-900"><%= member.admin_notes || '' %></textarea>
+        <div class="md:col-span-2 grid grid-cols-1 gap-3 md:grid-cols-3">
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_in_directory" <%= member.show_in_directory ? 'checked' : '' %> /> Show in directory</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_mobile_in_directory" <%= member.show_mobile_in_directory ? 'checked' : '' %> /> Show mobile</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_email_in_directory" <%= member.show_email_in_directory ? 'checked' : '' %> /> Show email</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_city_in_directory" <%= member.show_city_in_directory ? 'checked' : '' %> /> Show city</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_profession_in_directory" <%= member.show_profession_in_directory ? 'checked' : '' %> /> Show profession</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_photo_in_directory" <%= member.show_photo_in_directory ? 'checked' : '' %> /> Show photo</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_in_leadership_section" <%= member.show_in_leadership_section ? 'checked' : '' %> /> Show in leadership section</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="is_important_member" <%= member.is_important_member ? 'checked' : '' %> /> Important member</label>
+        </div>
+        <button type="submit" class="md:col-span-2 rounded-2xl bg-primary px-6 py-4 text-base font-semibold text-white">Save Changes</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<%- include("../partials/footer") %>
+<%- include("../partials/scripts") %>

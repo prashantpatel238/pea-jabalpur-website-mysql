@@ -22,8 +22,9 @@ const site = {
   primaryNav: [
     { label: "Home", href: "/" },
     { label: "About", href: "/about" },
-    { label: "Leadership", href: "/leadership" },
+    { label: "Important Members", href: "/important-members" },
     { label: "Directory", href: "/member-directory" },
+    { label: "Notices", href: "/notices" },
     { label: "Contact", href: "/contact" }
   ],
   resourceLinks: [

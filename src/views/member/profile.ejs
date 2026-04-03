@@ -1,0 +1,44 @@
+<%- include("../partials/head") %>
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-slate-50 px-4 pt-28">
+  <section class="mx-auto max-w-5xl py-16">
+    <%- include("../partials/flash") %>
+    <div class="mb-8 flex flex-col gap-4 rounded-4xl border border-slate-200 bg-white p-8 shadow-sm md:flex-row md:items-center md:justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-slate-900">Member Profile</h1>
+        <p class="mt-2 text-slate-600">Update your profile and control which fields appear publicly in the directory.</p>
+      </div>
+      <form action="/member/logout" method="post"><button type="submit" class="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700">Logout</button></form>
+    </div>
+
+    <div class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+      <form action="/member/profile" method="post" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <input name="full_name" value="<%= member.full_name %>" required placeholder="Full name" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input value="<%= member.email %>" disabled class="rounded-xl border-slate-200 bg-slate-100 text-slate-500" />
+        <input name="phone" value="<%= member.phone || '' %>" placeholder="Phone" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input name="profession" value="<%= member.profession || '' %>" placeholder="Profession" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input name="city" value="<%= member.city || '' %>" placeholder="City" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input name="dob" type="date" value="<%= member.dob ? new Date(member.dob).toISOString().split('T')[0] : '' %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <select name="gender" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900"><option value="" <%= !member.gender ? 'selected' : '' %>>Select gender</option><option value="male" <%= member.gender === 'male' ? 'selected' : '' %>>Male</option><option value="female" <%= member.gender === 'female' ? 'selected' : '' %>>Female</option><option value="other" <%= member.gender === 'other' ? 'selected' : '' %>>Other</option><option value="prefer_not_to_say" <%= member.gender === 'prefer_not_to_say' ? 'selected' : '' %>>Prefer not to say</option></select>
+        <select name="marital_status" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900"><option value="" <%= !member.marital_status ? 'selected' : '' %>>Select marital status</option><option value="single" <%= member.marital_status === 'single' ? 'selected' : '' %>>Single</option><option value="married" <%= member.marital_status === 'married' ? 'selected' : '' %>>Married</option><option value="divorced" <%= member.marital_status === 'divorced' ? 'selected' : '' %>>Divorced</option><option value="widowed" <%= member.marital_status === 'widowed' ? 'selected' : '' %>>Widowed</option><option value="prefer_not_to_say" <%= member.marital_status === 'prefer_not_to_say' ? 'selected' : '' %>>Prefer not to say</option></select>
+        <input name="marriage_date" type="date" value="<%= member.marriage_date ? new Date(member.marriage_date).toISOString().split('T')[0] : '' %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input name="spouse_name" value="<%= member.spouse_name || '' %>" placeholder="Spouse name" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input name="password" type="password" placeholder="New password (optional)" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900 md:col-span-2" />
+        <textarea name="address" class="min-h-[120px] rounded-xl border-slate-200 bg-slate-50 text-slate-900 md:col-span-2" placeholder="Address"><%= member.address || '' %></textarea>
+        <div class="md:col-span-2 grid grid-cols-1 gap-3 md:grid-cols-3">
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_in_directory" <%= member.show_in_directory ? 'checked' : '' %> /> Show profile in directory</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_mobile_in_directory" <%= member.show_mobile_in_directory ? 'checked' : '' %> /> Show mobile</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_email_in_directory" <%= member.show_email_in_directory ? 'checked' : '' %> /> Show email</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_city_in_directory" <%= member.show_city_in_directory ? 'checked' : '' %> /> Show city</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_profession_in_directory" <%= member.show_profession_in_directory ? 'checked' : '' %> /> Show profession</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_photo_in_directory" <%= member.show_photo_in_directory ? 'checked' : '' %> /> Show photo</label>
+        </div>
+        <button type="submit" class="md:col-span-2 rounded-2xl bg-primary px-6 py-4 text-base font-semibold text-white">Save Profile</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<%- include("../partials/footer") %>
+<%- include("../partials/scripts") %>

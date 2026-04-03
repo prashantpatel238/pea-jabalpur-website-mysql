@@ -10,26 +10,30 @@
     </div>
     <div class="relative z-10 mx-auto w-full max-w-7xl px-4 py-20 text-center sm:px-6 lg:px-8">
       <div class="mx-auto max-w-3xl">
-        <h1 class="mb-6 text-white">Our <span class="bg-gradient-to-r from-blue-400 to-secondary bg-clip-text text-transparent">Leadership</span> Team</h1>
-        <p class="text-lg leading-relaxed text-slate-300 md:text-xl">Meet the dedicated professionals guiding our association towards excellence, innovation, and community impact.</p>
+        <h1 class="mb-6 text-white">Our <span class="bg-gradient-to-r from-blue-400 to-secondary bg-clip-text text-transparent">Important Members</span></h1>
+        <p class="text-lg leading-relaxed text-slate-300 md:text-xl">This page highlights all approved members except General Members.</p>
       </div>
     </div>
   </section>
 
   <section class="min-h-[50vh] bg-slate-50 py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="mb-8 rounded-3xl border border-amber-200 bg-amber-50 px-6 py-4 text-sm text-amber-900">
-        TODO: replace these curated placeholder leadership entries with approved records from MongoDB while respecting public visibility toggles.
-      </div>
       <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <% if (!members.length) { %>
+          <div class="col-span-full rounded-3xl border border-slate-200 bg-white p-8 text-slate-600 shadow-sm">No important members are available yet.</div>
+        <% } %>
         <% members.forEach((member) => { %>
           <article class="group flex flex-col items-center rounded-3xl border border-slate-200 bg-white p-6 text-center transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/50">
             <div class="mb-6 flex h-32 w-32 items-center justify-center rounded-3xl border-4 border-white bg-slate-50 shadow-md">
-              <img src="/assets/images/default-avatar.svg" alt="<%= member.name %>" class="h-16 w-16 opacity-60" />
+              <img src="<%= member.photo %>" alt="<%= member.full_name %>" class="h-28 w-28 rounded-3xl object-cover" />
             </div>
-            <div class="mb-4 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary"><%= member.role %></div>
-            <h3 class="mb-2 text-xl font-bold text-slate-900"><%= member.name %></h3>
-            <div class="w-full rounded-xl bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600"><%= member.phone %></div>
+            <div class="mb-4 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary"><%= member.leadership_title %></div>
+            <h3 class="mb-2 text-xl font-bold text-slate-900"><%= member.full_name %></h3>
+            <% if (member.profession) { %><div class="mb-2 text-sm text-slate-500"><%= member.profession %></div><% } %>
+            <% if (member.city) { %><div class="mb-4 text-sm text-slate-500"><%= member.city %></div><% } %>
+            <% if (member.phone || member.email) { %>
+              <div class="w-full rounded-xl bg-slate-50 px-3 py-2 text-sm font-medium text-slate-600"><%= member.phone || member.email %></div>
+            <% } %>
           </article>
         <% }) %>
       </div>

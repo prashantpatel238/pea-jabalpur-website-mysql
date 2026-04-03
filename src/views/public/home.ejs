@@ -68,17 +68,17 @@
           <h2 class="mb-4 text-slate-900">Guided by Experience</h2>
           <p class="text-lg text-slate-600">Meet the dedicated professionals and industry veterans guiding our association towards excellence.</p>
         </div>
-        <a href="/leadership" class="hidden text-sm font-semibold text-primary md:inline-flex">View Full Board</a>
+        <a href="/important-members" class="hidden text-sm font-semibold text-primary md:inline-flex">View Important Members</a>
       </div>
       <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
         <% leaders.forEach((leader) => { %>
           <article class="rounded-3xl border border-slate-100 bg-slate-50 p-6 text-center transition duration-300 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50">
             <div class="mx-auto mb-6 flex h-32 w-32 items-center justify-center rounded-3xl border-4 border-white bg-white shadow-md">
-              <img src="/assets/images/default-avatar.svg" alt="<%= leader.name %>" class="h-16 w-16 opacity-60" />
+              <img src="<%= leader.photo %>" alt="<%= leader.full_name %>" class="h-24 w-24 rounded-3xl object-cover" />
             </div>
-            <div class="mb-4 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary"><%= leader.role %></div>
-            <h3 class="mb-2 text-xl font-bold text-slate-900"><%= leader.name %></h3>
-            <div class="text-sm font-medium text-slate-500"><%= leader.phone %></div>
+            <div class="mb-4 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary"><%= leader.leadership_title %></div>
+            <h3 class="mb-2 text-xl font-bold text-slate-900"><%= leader.full_name %></h3>
+            <div class="text-sm font-medium text-slate-500"><%= leader.profession || leader.role %></div>
           </article>
         <% }) %>
       </div>

@@ -2,11 +2,133 @@
 <%- include("../partials/header") %>
 
 <main class="min-h-screen bg-slate-50 px-4 pt-28">
-  <section class="mx-auto max-w-5xl py-20 sm:px-6 lg:px-8">
-    <div class="rounded-4xl border border-slate-200 bg-white p-10 shadow-sm">
-      <h1 class="mb-4 text-3xl font-bold text-slate-900">Admin Dashboard</h1>
-      <p class="text-lg text-slate-600">This view is intentionally a placeholder. Backend authentication, approval flow, and content management are not added in this cleanup pass.</p>
+  <section class="mx-auto max-w-7xl py-16 sm:px-6 lg:px-8">
+    <%- include("../partials/flash") %>
+
+    <div class="mb-10 flex flex-col gap-4 rounded-4xl border border-slate-200 bg-white p-8 shadow-sm md:flex-row md:items-center md:justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-slate-900">Admin Dashboard</h1>
+        <p class="mt-2 text-slate-600">Approve registrations, manage members, control profile visibility, and publish notices/events.</p>
+      </div>
+      <form action="/admin/logout" method="post">
+        <button type="submit" class="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700">Logout</button>
+      </form>
     </div>
+
+    <div class="mb-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+        <h2 class="mb-6 text-2xl font-bold text-slate-900">Pending Approvals</h2>
+        <div class="space-y-4">
+          <% if (!pendingMembers.length) { %><div class="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-600">No pending registrations.</div><% } %>
+          <% pendingMembers.forEach((member) => { %>
+            <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+              <div class="mb-3 text-lg font-bold text-slate-900"><%= member.full_name %></div>
+              <div class="mb-4 text-sm text-slate-600"><%= member.email %> | <%= member.phone %> | <%= member.role %></div>
+              <div class="flex flex-col gap-3 md:flex-row">
+                <form action="/admin/members/<%= member._id %>/approve" method="post" class="flex flex-1 gap-3">
+                  <input name="member_id" required placeholder="Member ID" class="w-full rounded-xl border-slate-200 bg-white text-slate-900" />
+                  <button type="submit" class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">Approve</button>
+                </form>
+                <form action="/admin/members/<%= member._id %>/reject" method="post">
+                  <button type="submit" class="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white">Reject</button>
+                </form>
+                <a href="/admin/members/<%= member._id %>/edit" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Edit</a>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </section>
+
+      <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+        <h2 class="mb-6 text-2xl font-bold text-slate-900">Add Member</h2>
+        <form action="/admin/members" method="post" class="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <input name="full_name" required placeholder="Full name" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          <input name="email" required type="email" placeholder="Email" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          <input name="phone" placeholder="Phone" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          <input name="profession" placeholder="Profession" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          <input name="city" placeholder="City" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          <select name="role" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900"><% memberRoles.forEach((role) => { %><option><%= role %></option><% }) %></select>
+          <select name="membership_status" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900">
+            <option value="approved">Approved</option>
+            <option value="pending">Pending</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          <input name="member_id" placeholder="Member ID for approved members" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          <input name="password" required type="password" placeholder="Password" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900 md:col-span-2" />
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_in_directory" /> Show in directory</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="is_important_member" /> Mark important member</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_city_in_directory" checked /> Show city</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_profession_in_directory" checked /> Show profession</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_photo_in_directory" checked /> Show photo</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_mobile_in_directory" /> Show mobile</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_email_in_directory" /> Show email</label>
+          <button type="submit" class="md:col-span-2 rounded-2xl bg-primary px-6 py-4 text-base font-semibold text-white">Create Member</button>
+        </form>
+      </section>
+    </div>
+
+    <div class="mb-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
+      <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+        <h2 class="mb-6 text-2xl font-bold text-slate-900">Notice & Event Manager</h2>
+        <form action="/admin/notices" method="post" class="grid grid-cols-1 gap-4">
+          <input name="title" required placeholder="Title" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          <textarea name="content" placeholder="Notice content" class="min-h-[120px] rounded-xl border-slate-200 bg-slate-50 text-slate-900"></textarea>
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <select name="type" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900"><option value="notice">Notice</option><option value="event">Event</option></select>
+            <input name="event_date" type="date" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+            <input name="expiry_date" type="date" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          </div>
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <input name="publish_date" type="date" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+            <input name="sort_order" type="number" min="0" value="0" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          </div>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="is_published" checked /> Publish immediately</label>
+          <button type="submit" class="rounded-2xl bg-primary px-6 py-4 text-base font-semibold text-white">Save Notice</button>
+        </form>
+      </section>
+
+      <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+        <h2 class="mb-6 text-2xl font-bold text-slate-900">Current Notices</h2>
+        <div class="space-y-4">
+          <% if (!notices.length) { %><div class="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-600">No notices or events have been added yet.</div><% } %>
+          <% notices.forEach((notice) => { %>
+            <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+              <div class="mb-2 text-lg font-bold text-slate-900"><%= notice.title %></div>
+              <div class="mb-4 text-sm text-slate-500"><%= notice.type %></div>
+              <div class="flex gap-3">
+                <a href="/admin/notices/<%= notice._id %>/edit" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Edit</a>
+                <form action="/admin/notices/<%= notice._id %>/delete" method="post"><button type="submit" class="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white">Delete</button></form>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </section>
+    </div>
+
+    <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+      <h2 class="mb-6 text-2xl font-bold text-slate-900">All Members</h2>
+      <div class="overflow-x-auto">
+        <table class="min-w-full text-left text-sm">
+          <thead><tr class="border-b border-slate-200 text-slate-500"><th class="px-3 py-3">Name</th><th class="px-3 py-3">Role</th><th class="px-3 py-3">Status</th><th class="px-3 py-3">Email</th><th class="px-3 py-3">Actions</th></tr></thead>
+          <tbody>
+            <% members.forEach((member) => { %>
+              <tr class="border-b border-slate-100">
+                <td class="px-3 py-3 font-medium text-slate-900"><%= member.full_name %></td>
+                <td class="px-3 py-3"><%= member.role %></td>
+                <td class="px-3 py-3"><%= member.membership_status %></td>
+                <td class="px-3 py-3"><%= member.email %></td>
+                <td class="px-3 py-3">
+                  <div class="flex flex-wrap gap-2">
+                    <a href="/admin/members/<%= member._id %>/edit" class="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700">Edit</a>
+                    <form action="/admin/members/<%= member._id %>/delete" method="post"><button type="submit" class="rounded-xl bg-red-600 px-3 py-2 text-xs font-semibold text-white">Delete</button></form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </section>
   </section>
 </main>
 

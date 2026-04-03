@@ -1,0 +1,51 @@
+<%- include("../partials/head") %>
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-slate-50 pt-28">
+  <section class="mx-auto max-w-7xl px-4 pb-24 sm:px-6 lg:px-8">
+    <div class="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+      <div>
+        <h1 class="mb-2 text-3xl font-bold text-slate-900 md:text-4xl">Member Directory</h1>
+        <p class="text-slate-600">Prepared as a public-facing layout shell for the future database-driven directory.</p>
+      </div>
+    </div>
+
+    <div class="mb-6 rounded-3xl border border-amber-200 bg-amber-50 px-6 py-4 text-sm text-amber-900">
+      TODO: replace sample member cards with approved members from MongoDB and only expose fields allowed by directory visibility settings.
+    </div>
+
+    <div class="mb-10 flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm sm:flex-row">
+      <input type="text" placeholder="Search by name or category..." class="w-full flex-1 rounded-2xl border-slate-200 bg-slate-50 text-slate-900" />
+      <select class="w-full rounded-2xl border-slate-200 bg-slate-50 text-slate-900 sm:w-64">
+        <option>All Categories</option>
+        <option>General Member</option>
+        <option>Associate Member</option>
+        <option>Student Member</option>
+      </select>
+    </div>
+
+    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <% members.forEach((member) => { %>
+        <article class="flex flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div class="mb-4 flex items-center gap-4 border-b border-slate-100 pb-4">
+            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <img src="/assets/images/default-avatar.svg" alt="<%= member.name %>" class="h-8 w-8 opacity-60" />
+            </div>
+            <div class="min-w-0 flex-1">
+              <h3 class="truncate text-lg font-bold text-slate-900"><%= member.name %></h3>
+              <span class="mt-1 inline-block rounded-full border border-slate-200 bg-slate-50 px-2 py-0.5 text-xs text-slate-500"><%= member.category %></span>
+            </div>
+          </div>
+          <div class="space-y-3 text-sm text-slate-600">
+            <div><a href="mailto:<%= member.email %>" class="hover:text-primary"><%= member.email %></a></div>
+            <div><%= member.phone %></div>
+          </div>
+          <div class="mt-6 border-t border-slate-100 pt-4 text-sm font-medium text-primary">Full profile view will be added during backend integration.</div>
+        </article>
+      <% }) %>
+    </div>
+  </section>
+</main>
+
+<%- include("../partials/footer") %>
+<%- include("../partials/scripts") %>

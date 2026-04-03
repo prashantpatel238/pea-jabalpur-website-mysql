@@ -1,17 +1,19 @@
 {
-  "name": "monorepo",
-  "version": "0.0.0",
+  "name": "pea-jabalpur-site",
+  "version": "1.0.0",
   "private": true,
+  "description": "Express + EJS rebuild of the Professional Engineers Association Jabalpur website.",
+  "main": "src/server.js",
   "scripts": {
-    "dev": "concurrently --kill-others --raw \"npm run dev --prefix apps/web\" \"npm run dev --prefix apps/api\" \"npm run dev --prefix apps/pocketbase\"",
-    "build": "concurrently --raw \"npm run build --prefix apps/web\"",
-    "start": "concurrently --kill-others --raw \"npm run start --prefix apps/api\" \"npm run start --prefix apps/pocketbase\"",
-    "lint": "concurrently --raw \"npm run lint --prefix apps/web\" \"npm run lint --prefix apps/api\""
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0"
   },
   "devDependencies": {
-    "concurrently": "^9.1.2"
-  },
-  "workspaces": [
-    "apps/*"
-  ]
+    "nodemon": "^3.1.10"
+  }
 }

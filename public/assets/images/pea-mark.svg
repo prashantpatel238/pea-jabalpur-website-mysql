@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="peaTitle peaDesc">
+  <title id="peaTitle">PEA Jabalpur mark</title>
+  <desc id="peaDesc">Simple blue square with stylized PEA lettering</desc>
+  <rect width="128" height="128" rx="28" fill="#1E40AF"/>
+  <path d="M30 34h28c17.121 0 31 13.879 31 31S75.121 96 58 96H30V34zm22 18v26h6c7.18 0 13-5.82 13-13s-5.82-13-13-13h-6z" fill="#fff"/>
+  <path d="M90 34h8v62h-8z" fill="#0D9488"/>
+  <path d="M74 98h24v-8H74z" fill="#93C5FD"/>
+</svg>

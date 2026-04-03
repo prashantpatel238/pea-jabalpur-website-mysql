@@ -1,0 +1,29 @@
+<%- include("../partials/head") %>
+<%- include("../partials/header") %>
+
+<main>
+  <section class="relative flex min-h-[50vh] items-center overflow-hidden pt-20">
+    <div class="absolute inset-0 z-0">
+      <img src="<%= resource.image %>" alt="<%= resource.title %>" class="h-full w-full object-cover object-center" />
+      <div class="hero-overlay"></div>
+      <div class="hero-gradient"></div>
+    </div>
+    <div class="relative z-10 mx-auto w-full max-w-5xl px-4 py-20 text-center sm:px-6 lg:px-8">
+      <h1 class="mb-6 text-white"><%= resource.title %></h1>
+      <p class="mx-auto text-lg text-slate-300 md:text-xl"><%= resource.description %></p>
+    </div>
+  </section>
+
+  <section class="bg-slate-50 py-20">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+      <div class="rounded-4xl border border-slate-200 bg-white p-10 shadow-sm">
+        <div class="rounded-3xl border border-amber-200 bg-amber-50 px-6 py-4 text-sm text-amber-900">
+          TODO: replace this prepared content area with database-driven resource content and file/document management.
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include("../partials/footer") %>
+<%- include("../partials/scripts") %>

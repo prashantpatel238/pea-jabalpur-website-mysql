@@ -1,0 +1,103 @@
+<%- include("../partials/head") %>
+<%- include("../partials/header") %>
+
+<main>
+  <section class="relative flex min-h-[90vh] items-center overflow-hidden pt-20">
+    <div class="absolute inset-0 z-0">
+      <img src="/assets/images/home-hero.png" alt="Engineers collaborating" class="h-full w-full object-cover object-center" />
+      <div class="hero-overlay"></div>
+      <div class="hero-gradient"></div>
+    </div>
+    <div class="relative z-10 mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+      <div class="max-w-3xl">
+        <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 backdrop-blur-md">
+          <span class="h-2 w-2 animate-pulse rounded-full bg-secondary"></span>
+          <span class="text-sm font-medium tracking-wide text-white">Empowering Engineering Excellence</span>
+        </div>
+        <h1 class="mb-6 text-white">Building the Future of <span class="bg-gradient-to-r from-blue-400 to-secondary bg-clip-text text-transparent">Engineering</span> Together</h1>
+        <p class="mb-10 max-w-2xl text-lg text-slate-300 md:text-xl">Join <%= site.title %> to connect with industry leaders, access exclusive resources, and drive innovation in your professional journey.</p>
+        <div class="flex flex-col gap-4 sm:flex-row">
+          <a href="/register" class="inline-flex h-14 items-center justify-center rounded-full bg-primary px-8 text-base font-semibold text-white shadow-primary-soft transition hover:-translate-y-1 hover:bg-blue-700">Become a Member</a>
+          <a href="/about" class="inline-flex h-14 items-center justify-center rounded-full border border-white/20 bg-white/5 px-8 text-base font-semibold text-white backdrop-blur-md transition hover:-translate-y-1 hover:bg-white/10">Discover Our Mission</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="relative z-20 -mt-12 mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
+    <% stats.forEach((stat) => { %>
+      <div class="rounded-3xl border border-slate-100 bg-white p-8 text-center shadow-xl shadow-slate-200/50">
+        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/5 text-primary">
+          <i data-lucide="<%= stat.icon %>" class="h-7 w-7"></i>
+        </div>
+        <div class="mb-2 text-4xl font-extrabold text-slate-900"><%= stat.value %></div>
+        <div class="text-sm font-semibold uppercase tracking-wider text-slate-500"><%= stat.label %></div>
+      </div>
+    <% }) %>
+  </section>
+
+  <section class="bg-slate-50 py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-16 text-center">
+        <h2 class="mb-4 text-slate-900">Why Join Our Association?</h2>
+        <p class="mx-auto max-w-2xl text-lg text-slate-600">We provide the platform, resources, and network you need to accelerate your engineering career and make a lasting impact.</p>
+      </div>
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <% features.forEach((feature) => { %>
+          <article class="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/50">
+            <div class="h-48 overflow-hidden">
+              <img src="<%= feature.image %>" alt="<%= feature.title %>" class="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
+            </div>
+            <div class="p-8">
+              <div class="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-primary">
+                <i data-lucide="<%= feature.icon %>" class="h-6 w-6"></i>
+              </div>
+              <h3 class="mb-3 text-xl font-bold text-slate-900"><%= feature.title %></h3>
+              <p class="text-slate-600"><%= feature.description %></p>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-white py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+        <div class="max-w-2xl">
+          <h2 class="mb-4 text-slate-900">Guided by Experience</h2>
+          <p class="text-lg text-slate-600">Meet the dedicated professionals and industry veterans guiding our association towards excellence.</p>
+        </div>
+        <a href="/leadership" class="hidden text-sm font-semibold text-primary md:inline-flex">View Full Board</a>
+      </div>
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <% leaders.forEach((leader) => { %>
+          <article class="rounded-3xl border border-slate-100 bg-slate-50 p-6 text-center transition duration-300 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50">
+            <div class="mx-auto mb-6 flex h-32 w-32 items-center justify-center rounded-3xl border-4 border-white bg-white shadow-md">
+              <img src="/assets/images/default-avatar.svg" alt="<%= leader.name %>" class="h-16 w-16 opacity-60" />
+            </div>
+            <div class="mb-4 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary"><%= leader.role %></div>
+            <h3 class="mb-2 text-xl font-bold text-slate-900"><%= leader.name %></h3>
+            <div class="text-sm font-medium text-slate-500"><%= leader.phone %></div>
+          </article>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+
+  <section class="relative overflow-hidden py-24">
+    <div class="absolute inset-0 bg-slate-950"></div>
+    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-primary/40 via-slate-950 to-slate-950"></div>
+    <div class="relative z-10 mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
+      <h2 class="mb-6 text-white">Take the Next Step in Your Career</h2>
+      <p class="mx-auto mb-10 max-w-2xl text-xl leading-relaxed text-slate-300">Join a thriving community of engineers. Share knowledge, discover opportunities, and shape the future of our industry.</p>
+      <div class="flex flex-col justify-center gap-4 sm:flex-row">
+        <a href="/register" class="inline-flex h-14 items-center justify-center rounded-full bg-white px-8 text-base font-semibold text-slate-900 transition hover:-translate-y-1 hover:bg-slate-100">Apply for Membership</a>
+        <a href="/contact" class="inline-flex h-14 items-center justify-center rounded-full border border-slate-700 px-8 text-base font-semibold text-white transition hover:-translate-y-1 hover:bg-slate-800">Contact Us</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include("../partials/footer") %>
+<%- include("../partials/scripts") %>

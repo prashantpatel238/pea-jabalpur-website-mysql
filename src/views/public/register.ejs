@@ -1,0 +1,103 @@
+<%- include("../partials/head") %>
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-slate-50 px-4 py-12 pt-28 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-3xl">
+    <% if (typeof formSubmitted !== "undefined" && formSubmitted) { %>
+      <div class="mb-8 rounded-3xl border border-emerald-200 bg-emerald-50 px-6 py-4 text-sm text-emerald-800">
+        Application captured as a placeholder submission. TODO: save registrations as pending records in MongoDB and keep member ID generation for approval time only.
+      </div>
+    <% } %>
+    <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+      <div class="bg-primary px-8 py-10 text-center">
+        <h1 class="text-3xl font-bold tracking-tight text-white">Join the Association</h1>
+        <p class="mt-2 text-white/80">Fill out the form below to apply for membership</p>
+      </div>
+
+      <form action="/register" method="post" class="space-y-8 p-8">
+        <!-- TODO: add server-side validation, photo upload, and pending approval workflow when backend integration begins. -->
+        <div>
+          <h2 class="mb-4 border-b border-slate-100 pb-2 text-lg font-semibold text-slate-900">Account Details</h2>
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div class="space-y-2">
+              <label for="name" class="text-sm font-medium text-slate-700">Full Name *</label>
+              <input id="name" name="name" required class="w-full rounded-xl border-slate-200 text-slate-900" placeholder="John Doe" />
+            </div>
+            <div class="space-y-2">
+              <label for="email" class="text-sm font-medium text-slate-700">Email Address *</label>
+              <input id="email" name="email" type="email" required class="w-full rounded-xl border-slate-200 text-slate-900" placeholder="john@example.com" />
+            </div>
+            <div class="space-y-2">
+              <label for="phone" class="text-sm font-medium text-slate-700">Phone Number *</label>
+              <input id="phone" name="phone" type="tel" required class="w-full rounded-xl border-slate-200 text-slate-900" placeholder="9876543210" />
+            </div>
+            <div class="space-y-2">
+              <label for="member_category" class="text-sm font-medium text-slate-700">Membership Category</label>
+              <select id="member_category" name="member_category" class="w-full rounded-xl border-slate-200 text-slate-900">
+                <option>General Member</option>
+                <option>Student Member</option>
+                <option>Associate Member</option>
+              </select>
+            </div>
+            <div class="space-y-2">
+              <label for="password" class="text-sm font-medium text-slate-700">Password *</label>
+              <input id="password" name="password" type="password" required class="w-full rounded-xl border-slate-200 text-slate-900" placeholder="********" />
+            </div>
+            <div class="space-y-2">
+              <label for="confirm_password" class="text-sm font-medium text-slate-700">Confirm Password *</label>
+              <input id="confirm_password" name="confirm_password" type="password" required class="w-full rounded-xl border-slate-200 text-slate-900" placeholder="********" />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h2 class="mb-4 border-b border-slate-100 pb-2 text-lg font-semibold text-slate-900">Personal Details</h2>
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div class="space-y-2">
+              <label for="gender" class="text-sm font-medium text-slate-700">Gender</label>
+              <select id="gender" name="gender" class="w-full rounded-xl border-slate-200 text-slate-900">
+                <option value="">Select gender</option>
+                <option>Male</option>
+                <option>Female</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="space-y-2">
+              <label for="date_of_birth" class="text-sm font-medium text-slate-700">Date of Birth</label>
+              <input id="date_of_birth" name="date_of_birth" type="date" class="w-full rounded-xl border-slate-200 text-slate-900" />
+            </div>
+            <div class="space-y-2">
+              <label for="marital_status" class="text-sm font-medium text-slate-700">Marital Status</label>
+              <select id="marital_status" name="marital_status" class="w-full rounded-xl border-slate-200 text-slate-900">
+                <option value="">Select status</option>
+                <option>Single</option>
+                <option>Married</option>
+                <option>Divorced</option>
+                <option>Widowed</option>
+              </select>
+            </div>
+            <div class="space-y-2">
+              <label for="spouse_name" class="text-sm font-medium text-slate-700">Spouse Name</label>
+              <input id="spouse_name" name="spouse_name" class="w-full rounded-xl border-slate-200 text-slate-900" />
+            </div>
+            <div class="space-y-2">
+              <label for="marriage_date" class="text-sm font-medium text-slate-700">Marriage Date</label>
+              <input id="marriage_date" name="marriage_date" type="date" class="w-full rounded-xl border-slate-200 text-slate-900" />
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-4">
+          <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-primary px-6 py-4 text-lg font-semibold text-white transition hover:bg-blue-700">Submit Application</button>
+        </div>
+      </form>
+
+      <div class="border-t border-slate-200 bg-slate-50 px-8 py-6 text-center">
+        <p class="text-sm text-slate-600">Admin login and approval workflow will be added in the next backend phase.</p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include("../partials/footer") %>
+<%- include("../partials/scripts") %>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= page.title %></title>
+    <meta name="description" content="<%= page.description || site.tagline %>" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#1E40AF",
+              secondary: "#0D9488",
+              slate: tailwind.colors.slate
+            },
+            boxShadow: {
+              "primary-soft": "0 20px 40px rgba(30, 64, 175, 0.18)"
+            },
+            borderRadius: {
+              "4xl": "2rem"
+            }
+          }
+        }
+      };
+    </script>
+    <link rel="stylesheet" href="/css/site.css" />
+  </head>
+  <body class="bg-slate-50 text-slate-900 antialiased">

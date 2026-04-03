@@ -1,0 +1,89 @@
+<%- include("../partials/head") %>
+<%- include("../partials/header") %>
+
+<main>
+  <section class="relative flex min-h-[60vh] items-center overflow-hidden pt-20">
+    <div class="absolute inset-0 z-0">
+      <img src="/assets/images/about-hero.jpg" alt="Professional team in corporate office" class="h-full w-full object-cover object-center" />
+      <div class="hero-overlay"></div>
+      <div class="hero-gradient"></div>
+    </div>
+    <div class="relative z-10 mx-auto w-full max-w-7xl px-4 py-20 text-center sm:px-6 lg:px-8">
+      <div class="mx-auto max-w-3xl">
+        <h1 class="mb-6 text-white">Advancing Engineering <span class="bg-gradient-to-r from-blue-400 to-secondary bg-clip-text text-transparent">Excellence</span></h1>
+        <p class="text-lg leading-relaxed text-slate-300 md:text-xl">A premier organization dedicated to uniting, empowering, and advancing the engineering community in Jabalpur and beyond.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="relative z-20 -mt-10 rounded-t-[3rem] bg-white py-24">
+    <div class="mx-auto grid max-w-7xl grid-cols-1 gap-8 px-4 sm:px-6 lg:grid-cols-2 lg:gap-12 lg:px-8">
+      <article class="rounded-3xl border border-slate-100 bg-slate-50 p-8 transition hover:shadow-xl hover:shadow-slate-200/50 lg:p-12">
+        <div class="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 text-primary"><i data-lucide="target" class="h-8 w-8"></i></div>
+        <h2 class="mb-6 text-3xl font-bold text-slate-900">Our Mission</h2>
+        <p class="text-lg leading-relaxed text-slate-600">To create a dynamic platform that empowers engineering professionals through knowledge sharing, networking opportunities, and collaborative initiatives. We aim to foster innovation, promote best practices, and contribute to the advancement of engineering excellence in our region.</p>
+      </article>
+      <article class="rounded-3xl border border-slate-100 bg-slate-50 p-8 transition hover:shadow-xl hover:shadow-slate-200/50 lg:p-12">
+        <div class="mb-8 flex h-16 w-16 items-center justify-center rounded-2xl bg-secondary/10 text-secondary"><i data-lucide="eye" class="h-8 w-8"></i></div>
+        <h2 class="mb-6 text-3xl font-bold text-slate-900">Our Vision</h2>
+        <p class="text-lg leading-relaxed text-slate-600">To be recognized as the leading professional association for engineers, known for our commitment to excellence, innovation, and community development. We envision a future where every engineering professional has access to resources, mentorship, and opportunities for continuous growth.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="relative overflow-hidden bg-slate-950 py-24 text-white">
+    <div class="pointer-events-none absolute right-0 top-0 h-full w-1/2 rounded-full bg-primary/5 blur-[100px]"></div>
+    <div class="relative z-10 mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+      <div>
+        <h2 class="mb-8 text-3xl font-bold text-white md:text-4xl">Our Legacy of Impact</h2>
+        <div class="space-y-6 text-lg leading-relaxed text-slate-300">
+          <p>The Professional Engineers Association was founded with a clear purpose: to bridge the gap between various engineering disciplines and create a unified voice for professionals in the region.</p>
+          <p>Over the years, we have grown from a small group of passionate engineers into a robust network of industry leaders, innovators, and young professionals. Our journey is marked by successful technical seminars, community projects, and continuous professional development.</p>
+          <p>Today, we stand as a pillar of the engineering community, committed to upholding the highest standards of the profession while adapting to the ever-changing technological landscape.</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+        <% [{ year: '1998', text: 'Association Founded' }, { year: '500+', text: 'Active Members' }, { year: '50+', text: 'Corporate Partners' }, { year: '150+', text: 'Technical Seminars' }].forEach((item) => { %>
+          <div class="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur-sm">
+            <div class="mb-2 text-4xl font-bold text-white"><%= item.year %></div>
+            <div class="font-medium text-slate-400"><%= item.text %></div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+
+  <section class="bg-slate-50 py-24">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div class="mb-16 text-center">
+        <h2 class="mb-4 text-slate-900">Our Core Values</h2>
+        <p class="mx-auto max-w-2xl text-lg text-slate-600">The fundamental principles that guide our association, shape our culture, and drive our members towards excellence.</p>
+      </div>
+      <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+        <% values.forEach((value) => { %>
+          <article class="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/50">
+            <div class="h-48 overflow-hidden">
+              <img src="<%= value.image %>" alt="<%= value.title %>" class="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
+            </div>
+            <div class="p-8">
+              <div class="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-50 text-primary"><i data-lucide="<%= value.icon %>" class="h-7 w-7"></i></div>
+              <h3 class="mb-3 text-xl font-bold text-slate-900"><%= value.title %></h3>
+              <p class="text-slate-600"><%= value.description %></p>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    </div>
+  </section>
+
+  <section class="border-t border-slate-100 bg-white py-24">
+    <div class="mx-auto max-w-4xl px-4 text-center">
+      <h2 class="mb-6 text-slate-900">Ready to join our community?</h2>
+      <p class="mx-auto mb-10 max-w-2xl text-xl text-slate-600">Connect with peers, access exclusive resources, and take your engineering career to the next level.</p>
+      <a href="/register" class="inline-flex h-14 items-center justify-center rounded-full bg-primary px-8 text-base font-semibold text-white shadow-primary-soft transition hover:-translate-y-1 hover:bg-blue-700">Become a Member</a>
+    </div>
+  </section>
+</main>
+
+<%- include("../partials/footer") %>
+<%- include("../partials/scripts") %>

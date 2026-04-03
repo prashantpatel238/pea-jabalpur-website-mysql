@@ -1,0 +1,29 @@
+/// <reference path="../pb_data/types.d.ts" />
+migrate((app) => {
+  const collection = app.findCollectionByNameOrId("users");
+  const record = new Record(collection);
+  record.set("email", "ramnarayan.senger@example.com");
+  record.setPassword("TempPass123!");
+  record.set("name", "Er. Ramnarayan Senger");
+  record.set("role", "member");
+  try {
+    return app.save(record);
+  } catch (e) {
+    if (e.message.includes("Value must be unique")) {
+      console.log("Record with unique value already exists, skipping");
+      return;
+    }
+    throw e;
+  }
+}, (app) => {
+  try {
+    const record = app.findFirstRecordByData("users", "email", "ramnarayan.senger@example.com");
+    app.delete(record);
+  } catch (e) {
+    if (e.message.includes("no rows in result set")) {
+      console.log("Auth record not found, skipping rollback");
+      return;
+    }
+    throw e;
+  }
+})

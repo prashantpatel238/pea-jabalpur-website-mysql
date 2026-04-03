@@ -44,7 +44,7 @@ const renderLeadership = (req, res) => {
 
 const renderDirectory = (req, res) => {
   res.render("public/directory", {
-    ...getBaseViewData({ title: `Member Directory - ${site.title}`, path: "/directory" }),
+    ...getBaseViewData({ title: `Member Directory - ${site.title}`, path: "/member-directory" }),
     members: directoryMembers
   });
 };

@@ -23,7 +23,7 @@ const site = {
     { label: "Home", href: "/" },
     { label: "About", href: "/about" },
     { label: "Leadership", href: "/leadership" },
-    { label: "Directory", href: "/directory" },
+    { label: "Directory", href: "/member-directory" },
     { label: "Contact", href: "/contact" }
   ],
   resourceLinks: [

@@ -1,7 +1,6 @@
 const path = require("path");
 const express = require("express");
 const session = require("express-session");
-const connectMongo = require("connect-mongo");
 
 const publicRoutes = require("./routes/publicRoutes");
 const authRoutes = require("./routes/authRoutes");
@@ -16,8 +15,7 @@ const { getAppConfig } = require("./config/env");
 
 function createApp() {
   const app = express();
-  const mongoStoreFactory = connectMongo.default || connectMongo.MongoStore || connectMongo;
-  const { isProduction, mongoUri, sessionSecret } = getAppConfig();
+  const { isProduction, sessionSecret } = getAppConfig();
 
   if (isProduction) {
     app.set("trust proxy", 1);
@@ -34,7 +32,6 @@ function createApp() {
     secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
-    store: mongoUri ? mongoStoreFactory.create({ mongoUrl: mongoUri }) : undefined,
     cookie: {
       httpOnly: true,
       sameSite: "lax",

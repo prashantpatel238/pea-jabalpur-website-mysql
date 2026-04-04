@@ -1,28 +1,42 @@
-const mongoose = require("mongoose");
-
 const { getAppConfig } = require("./env");
+const { closePool, getPool, pingDatabase } = require("../db/mysql");
 
-let listenersAttached = false;
+async function connectToDatabase() {
+  const { database } = getAppConfig();
 
-function getMongoConnectionSummary(mongoUri) {
-  if (!mongoUri) {
-    return "MongoDB URI not provided";
-  }
+  console.log(`Connecting to MySQL: ${getDatabaseConnectionSummary(database)}`);
 
   try {
-    const parsedUrl = new URL(mongoUri);
-    const databaseName = parsedUrl.pathname.replace(/^\//, "") || "(default)";
-    const hosts = parsedUrl.host || "(unknown host)";
-
-    return `${hosts}/${databaseName}`;
+    await pingDatabase();
+    console.log(`MySQL connected: ${getDatabaseConnectionSummary(database)}`);
   } catch (error) {
-    return "Unable to parse MongoDB URI";
+    console.error("MySQL connection failed:");
+    console.error(formatDatabaseConnectionError(error, database));
+    throw error;
   }
+
+  return getPool();
 }
 
-function formatMongoConnectionError(error, mongoUri) {
+async function disconnectFromDatabase() {
+  await closePool();
+}
+
+function getDatabaseConnectionSummary(databaseConfig) {
+  if (!databaseConfig) {
+    return "MySQL configuration not provided";
+  }
+
+  const host = databaseConfig.host || "(unknown host)";
+  const port = databaseConfig.port || 3306;
+  const databaseName = databaseConfig.name || "(unknown database)";
+
+  return `${host}:${port}/${databaseName}`;
+}
+
+function formatDatabaseConnectionError(error, databaseConfig) {
   const details = [
-    `Target: ${getMongoConnectionSummary(mongoUri)}`,
+    `Target: ${getDatabaseConnectionSummary(databaseConfig)}`,
     `Error type: ${error.name || "UnknownError"}`,
     `Message: ${error.message || "No error message provided"}`
   ];
@@ -31,79 +45,24 @@ function formatMongoConnectionError(error, mongoUri) {
     details.push(`Code: ${error.code}`);
   }
 
-  if (error.cause && error.cause.message) {
-    details.push(`Cause: ${error.cause.message}`);
+  if (error.errno) {
+    details.push(`Errno: ${error.errno}`);
   }
 
-  if (error.name === "MongooseServerSelectionError") {
-    details.push("Hint: Check the Atlas URI, database user credentials, IP allowlist, and current network access.");
-  } else if (/authentication/i.test(error.message || "")) {
-    details.push("Hint: Verify the Atlas username, password, and auth database in MONGODB_URI.");
-  } else if (/ENOTFOUND|querySrv/i.test(error.message || "")) {
-    details.push("Hint: DNS lookup failed. Confirm the Atlas cluster hostname and local DNS/network access.");
-  } else if (/ECONNREFUSED|timed out|timeout/i.test(error.message || "")) {
-    details.push("Hint: The database could not be reached in time. Check firewall rules, Atlas IP access, and internet connectivity.");
+  if (/ER_ACCESS_DENIED_ERROR/i.test(error.code || "")) {
+    details.push("Hint: Verify DB_USER and DB_PASSWORD for the selected Hostinger database.");
+  } else if (/ECONNREFUSED|ETIMEDOUT|PROTOCOL_CONNECTION_LOST/i.test(error.code || "")) {
+    details.push("Hint: Confirm DB_HOST, DB_PORT, and Hostinger remote MySQL access settings.");
+  } else if (/ER_BAD_DB_ERROR/i.test(error.code || "")) {
+    details.push("Hint: Check that DB_NAME matches the database created in Hostinger.");
   }
 
   return details.join("\n");
 }
 
-function attachConnectionListeners() {
-  if (listenersAttached) {
-    return;
-  }
-
-  listenersAttached = true;
-
-  mongoose.connection.on("connected", () => {
-    console.log(`MongoDB connected: ${mongoose.connection.host}/${mongoose.connection.name}`);
-  });
-
-  mongoose.connection.on("error", (error) => {
-    console.error("MongoDB runtime error:");
-    console.error(formatMongoConnectionError(error, getAppConfig().mongoUri));
-  });
-
-  mongoose.connection.on("disconnected", () => {
-    console.warn("MongoDB disconnected.");
-  });
-}
-
-async function connectToDatabase() {
-  const { mongoUri } = getAppConfig();
-
-  if (!mongoUri) {
-    throw new Error("MONGODB_URI is required to connect to MongoDB.");
-  }
-
-  mongoose.set("strictQuery", true);
-  attachConnectionListeners();
-
-  console.log(`Connecting to MongoDB Atlas: ${getMongoConnectionSummary(mongoUri)}`);
-
-  try {
-    await mongoose.connect(mongoUri, {
-      serverSelectionTimeoutMS: 10000
-    });
-  } catch (error) {
-    console.error("MongoDB connection failed:");
-    console.error(formatMongoConnectionError(error, mongoUri));
-    throw error;
-  }
-
-  return mongoose.connection;
-}
-
-async function disconnectFromDatabase() {
-  if (mongoose.connection.readyState !== 0) {
-    await mongoose.disconnect();
-  }
-}
-
 module.exports = {
   connectToDatabase,
   disconnectFromDatabase,
-  formatMongoConnectionError,
-  getMongoConnectionSummary,
-  mongoose
+  formatDatabaseConnectionError,
+  getDatabaseConnectionSummary
 };

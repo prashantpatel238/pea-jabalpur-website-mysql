@@ -1,15 +1,10 @@
 const dotenv = require("dotenv");
 
 const { createApp } = require("./app");
-const { connectToDatabase, disconnectFromDatabase, formatMongoConnectionError } = require("./config/database");
+const { connectToDatabase, disconnectFromDatabase, formatDatabaseConnectionError } = require("./config/database");
 const { getAppConfig, validateEnvironment } = require("./config/env");
 const { ensureInitialAdmin } = require("./services/adminBootstrap");
 const { ensureSiteSettings } = require("./services/siteSettingsService");
-
-require("./models/Admin");
-require("./models/Member");
-require("./models/Notice");
-require("./models/SiteSetting");
 
 dotenv.config();
 
@@ -56,7 +51,7 @@ async function startServer() {
   validateEnvironment();
 
   const app = createApp();
-  const { port, mongoUri } = getAppConfig();
+  const { port, database } = getAppConfig();
 
   try {
     await connectToDatabase();
@@ -64,12 +59,7 @@ async function startServer() {
     await ensureSiteSettings();
   } catch (error) {
     console.error("Server startup halted during dependency initialization.");
-
-    if (error.name && error.name.includes("Mongo")) {
-      console.error(formatMongoConnectionError(error, mongoUri));
-    } else {
-      console.error(error);
-    }
+    console.error(formatDatabaseConnectionError(error, database));
 
     throw error;
   }

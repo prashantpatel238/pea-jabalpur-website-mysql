@@ -1,8 +1,13 @@
 const requiredEnvironmentVariables = [
-  "MONGODB_URI",
+  "DB_HOST",
+  "DB_PORT",
+  "DB_USER",
+  "DB_PASSWORD",
+  "DB_NAME",
   "SESSION_SECRET",
   "ADMIN_EMAIL",
-  "ADMIN_PASSWORD"
+  "ADMIN_PASSWORD",
+  "ADMIN_NAME"
 ];
 
 function getMissingEnvironmentVariables() {
@@ -21,9 +26,20 @@ function getAppConfig() {
   return {
     isProduction: process.env.NODE_ENV === "production",
     port: Number(process.env.PORT) || 3000,
-    mongoUri: process.env.MONGODB_URI,
+    database: {
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT) || 3306,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      name: process.env.DB_NAME
+    },
     sessionSecret: process.env.SESSION_SECRET,
-    siteUrl: process.env.SITE_URL
+    siteUrl: process.env.SITE_URL,
+    admin: {
+      email: process.env.ADMIN_EMAIL,
+      password: process.env.ADMIN_PASSWORD,
+      name: process.env.ADMIN_NAME
+    }
   };
 }
 

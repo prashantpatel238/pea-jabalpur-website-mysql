@@ -11,8 +11,10 @@ function formatDisplayDate(value) {
 }
 
 function buildDirectoryMember(member) {
+  const memberIdentifier = member.id ?? member._id?.toString();
+
   return {
-    id: member._id.toString(),
+    id: String(memberIdentifier || ""),
     full_name: member.full_name,
     role: member.role,
     city: member.show_city_in_directory ? member.city : "",
@@ -26,8 +28,10 @@ function buildDirectoryMember(member) {
 }
 
 function buildImportantMember(member) {
+  const memberIdentifier = member.id ?? member._id?.toString();
+
   return {
-    id: member._id.toString(),
+    id: String(memberIdentifier || ""),
     full_name: member.full_name,
     role: member.role,
     leadership_title: member.leadership_title || member.role,

@@ -9,6 +9,14 @@ const {
 } = require("../config/publicContent");
 const { Member } = require("../models/Member");
 const Notice = require("../models/Notice");
+const {
+  createPendingMemberRegistration,
+  findMemberIdByEmail
+} = require("../repositories/memberRepository");
+const {
+  getPublicDirectoryFilterOptions,
+  getPublicDirectoryMembers
+} = require("../repositories/publicMemberRepository");
 const { buildDirectoryMember, buildImportantMember } = require("../utils/memberView");
 const { calculateAge, normalizePublicMemberInput } = require("../utils/memberData");
 const { buildMemberCelebrationNotices } = require("../utils/noticeFeed");
@@ -86,41 +94,9 @@ async function renderDirectory(req, res) {
   const city = (req.query.city || "").trim();
   const profession = (req.query.profession || "").trim();
 
-  const filters = {
-    membership_status: "approved",
-    show_in_directory: true
-  };
-
-  if (search) {
-    filters.full_name = { $regex: search, $options: "i" };
-  }
-
-  if (city) {
-    filters.city = { $regex: `^${city.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, $options: "i" };
-  }
-
-  if (profession) {
-    filters.profession = { $regex: `^${profession.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, $options: "i" };
-  }
-
-  const members = await Member.find(filters)
-    .select("full_name role city profession email phone photo member_id join_date show_city_in_directory show_profession_in_directory show_email_in_directory show_mobile_in_directory show_photo_in_directory")
-    .sort({ role: 1, full_name: 1 })
-    .lean();
-
-  const [cities, professions] = await Promise.all([
-    Member.distinct("city", {
-      membership_status: "approved",
-      show_in_directory: true,
-      show_city_in_directory: true,
-      city: { $nin: ["", null] }
-    }),
-    Member.distinct("profession", {
-      membership_status: "approved",
-      show_in_directory: true,
-      show_profession_in_directory: true,
-      profession: { $nin: ["", null] }
-    })
+  const [members, filterOptions] = await Promise.all([
+    getPublicDirectoryMembers({ search, city, profession }),
+    getPublicDirectoryFilterOptions()
   ]);
 
   res.render("public/directory", {
@@ -137,8 +113,8 @@ async function renderDirectory(req, res) {
       profession
     },
     filterOptions: {
-      cities: cities.sort((a, b) => a.localeCompare(b)),
-      professions: professions.sort((a, b) => a.localeCompare(b))
+      cities: filterOptions.cities,
+      professions: filterOptions.professions
     }
   });
 }
@@ -255,9 +231,9 @@ async function handleRegistrationRequest(req, res) {
     });
   }
 
-  const existingMember = await Member.findOne({ email: input.email }).lean();
+  const existingMemberId = await findMemberIdByEmail(input.email);
 
-  if (existingMember) {
+  if (existingMemberId) {
     removeUploadedMemberPhoto(photo);
     return res.status(409).render("public/register", {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
@@ -269,7 +245,7 @@ async function handleRegistrationRequest(req, res) {
   const password_hash = await bcrypt.hash(password, 12);
 
   try {
-    await Member.create({
+    await createPendingMemberRegistration({
       ...input,
       photo,
       password_hash,
@@ -280,6 +256,15 @@ async function handleRegistrationRequest(req, res) {
     });
   } catch (error) {
     removeUploadedMemberPhoto(photo);
+
+    if (error.code === "ER_DUP_ENTRY") {
+      return res.status(409).render("public/register", {
+        ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
+        errorMessage: "A member with this email already exists.",
+        formData: sanitizeFormState(req.body)
+      });
+    }
+
     throw error;
   }
 

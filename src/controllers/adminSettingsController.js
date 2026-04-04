@@ -2,7 +2,8 @@ const { buildPage } = require("../utils/page");
 const {
   buildPublicSiteSettings,
   getDefaultSiteSettingsValues,
-  getOrCreateSiteSettings
+  getOrCreateSiteSettings,
+  saveSiteSettings
 } = require("../services/siteSettingsService");
 const {
   getUploadedSiteAssetPath,
@@ -40,7 +41,7 @@ async function renderSettings(req, res) {
   return res.render("admin/settings", {
     page: buildPage("/admin/settings", "Site Settings"),
     settings: {
-      ...buildPublicSiteSettings(settings.toObject()),
+      ...buildPublicSiteSettings(settings),
       ...(res.locals.formState.adminSettings || {})
     }
   });
@@ -84,22 +85,25 @@ async function handleUpdateSettings(req, res) {
     return res.redirect("/admin/settings");
   }
 
-  Object.assign(settings, input);
+  const nextSettings = {
+    ...settings,
+    ...input
+  };
 
   if (nextLogoPath) {
-    settings.logo_path = nextLogoPath;
+    nextSettings.logo_path = nextLogoPath;
   }
 
   if (nextFaviconPath) {
-    settings.favicon_path = nextFaviconPath;
+    nextSettings.favicon_path = nextFaviconPath;
   }
 
-  if (!settings.site_title) {
-    settings.site_title = getDefaultSiteSettingsValues().site_title;
+  if (!nextSettings.site_title) {
+    nextSettings.site_title = getDefaultSiteSettingsValues().site_title;
   }
 
   try {
-    await settings.save();
+    await saveSiteSettings(nextSettings);
   } catch (error) {
     removeUploadedSiteAsset(nextLogoPath);
     removeUploadedSiteAsset(nextFaviconPath);

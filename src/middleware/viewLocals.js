@@ -2,7 +2,7 @@ const site = require("../config/site");
 const { buildAbsoluteUrl, getDefaultSeoImage, getSiteOrigin } = require("../utils/seo");
 
 function attachViewLocals(req, res, next) {
-  res.locals.site = site;
+  res.locals.site = res.locals.site || site;
   res.locals.currentAdmin = req.session ? req.session.admin : null;
   res.locals.currentMember = req.session ? req.session.member : null;
   res.locals.flash = req.session ? req.session.flash : null;

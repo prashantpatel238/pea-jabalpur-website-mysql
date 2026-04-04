@@ -1,6 +1,9 @@
 const bcrypt = require("bcryptjs");
 
-const Admin = require("../models/Admin");
+const {
+  findActiveAdminByEmail,
+  updateAdminLastLoginAt
+} = require("../repositories/adminRepository");
 const { buildPage } = require("../utils/page");
 const { sanitizeFormState } = require("../utils/formState");
 
@@ -45,7 +48,7 @@ async function handleLogin(req, res) {
   const email = (req.body.email || "").trim().toLowerCase();
   const password = req.body.password || "";
 
-  const admin = await Admin.findOne({ email, is_active: true });
+  const admin = await findActiveAdminByEmail(email);
 
   if (!admin) {
     return res.status(401).render("auth/login", {
@@ -65,12 +68,11 @@ async function handleLogin(req, res) {
     });
   }
 
-  admin.last_login_at = new Date();
-  await admin.save();
+  await updateAdminLastLoginAt(admin.id);
 
   await regenerateSession(req);
   req.session.admin = {
-    id: admin._id.toString(),
+    id: String(admin.id),
     email: admin.email,
     display_name: admin.display_name
   };

@@ -1,5 +1,9 @@
 const site = require("../config/site");
-const SiteSetting = require("../models/SiteSetting");
+const {
+  createDefaultSiteSettingsRow,
+  findDefaultSiteSettingsRow,
+  updateSiteSettingsRow
+} = require("../repositories/siteSettingsRepository");
 
 const DEFAULT_MAP_EMBED_URL = "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3667.3947!2d79.9!3d23.1815!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDEwJzUzLjQiTiA3OcKwNTQnMDAuMCJF!5e0!3m2!1sen!2sin!4v1234567890";
 
@@ -33,6 +37,8 @@ function buildPublicSiteSettings(settings = {}) {
 }
 
 function buildTemplateSite(siteSettings) {
+  const normalizedAddress = siteSettings.address || "";
+
   return {
     ...site,
     title: siteSettings.site_title,
@@ -40,7 +46,7 @@ function buildTemplateSite(siteSettings) {
     logoPath: siteSettings.logo_path,
     contact: {
       ...site.contact,
-      addressLines: siteSettings.address
+      addressLines: normalizedAddress
         .split(",")
         .map((line) => line.trim())
         .filter(Boolean),
@@ -56,33 +62,8 @@ function buildTemplateSite(siteSettings) {
   };
 }
 
-function getLegacySettingsFilter() {
-  return {
-    $or: [
-      { _singleton: { $exists: false } },
-      { _singleton: null },
-      { _singleton: "" }
-    ]
-  };
-}
-
 async function findCanonicalSiteSettings() {
-  return SiteSetting.findOne({ _singleton: "default" });
-}
-
-async function migrateLegacySiteSettings() {
-  const legacySettings = await SiteSetting.findOne(getLegacySettingsFilter())
-    .select("+_singleton")
-    .sort({ updatedAt: -1, createdAt: -1 });
-
-  if (!legacySettings) {
-    return null;
-  }
-
-  legacySettings._singleton = "default";
-  await legacySettings.save();
-
-  return legacySettings;
+  return findDefaultSiteSettingsRow();
 }
 
 async function ensureSiteSettings() {
@@ -92,20 +73,11 @@ async function ensureSiteSettings() {
     return canonicalSettings;
   }
 
-  const migratedLegacySettings = await migrateLegacySiteSettings();
-
-  if (migratedLegacySettings) {
-    return migratedLegacySettings;
-  }
-
-  return SiteSetting.create({
-    _singleton: "default",
-    ...getDefaultSiteSettingsValues()
-  });
+  return createDefaultSiteSettingsRow(getDefaultSiteSettingsValues());
 }
 
 async function getSiteSettings() {
-  const settings = await SiteSetting.findOne({ _singleton: "default" }).lean();
+  const settings = await findCanonicalSiteSettings();
 
   if (!settings) {
     return null;
@@ -122,6 +94,12 @@ async function getOrCreateSiteSettings() {
   }
 
   return ensureSiteSettings();
+}
+
+async function saveSiteSettings(values) {
+  const existingSettings = await getOrCreateSiteSettings();
+
+  return updateSiteSettingsRow(existingSettings.id, values);
 }
 
 async function getSiteSettingsLocals() {
@@ -150,5 +128,6 @@ module.exports = {
   getDefaultSiteSettingsValues,
   getOrCreateSiteSettings,
   getSiteSettings,
-  getSiteSettingsLocals
+  getSiteSettingsLocals,
+  saveSiteSettings
 };

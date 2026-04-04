@@ -137,9 +137,8 @@ const memberSchema = new Schema(
       default: null
     },
     approved_by_admin: {
-      type: String,
-      trim: true,
-      default: ""
+      type: Boolean,
+      default: false
     },
     show_in_directory: {
       type: Boolean,
@@ -189,7 +188,8 @@ const memberSchema = new Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    collection: "members"
   }
 );
 
@@ -211,6 +211,14 @@ memberSchema.path("approval_date").validate(function validateApprovalDate(value)
 
   return value === null;
 }, "approval_date must only be set for approved members.");
+
+memberSchema.path("approved_by_admin").validate(function validateApprovedByAdmin(value) {
+  if (this.membership_status === "approved") {
+    return value === true;
+  }
+
+  return value === false;
+}, "approved_by_admin must only be true for approved members.");
 
 memberSchema.index({ membership_status: 1, show_in_directory: 1, full_name: 1 });
 memberSchema.index({ membership_status: 1, show_in_leadership_section: 1, important_member_order: 1 });

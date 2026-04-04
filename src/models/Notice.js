@@ -50,7 +50,8 @@ const noticeSchema = new Schema(
     }
   },
   {
-    timestamps: true
+    timestamps: true,
+    collection: "notices"
   }
 );
 

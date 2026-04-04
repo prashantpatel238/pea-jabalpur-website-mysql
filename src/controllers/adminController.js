@@ -1,120 +1,130 @@
 const bcrypt = require("bcryptjs");
 
-const site = require("../config/site");
 const { Member, MEMBER_ROLES } = require("../models/Member");
 const Notice = require("../models/Notice");
-const { calculateAge } = require("./publicController");
+const { buildPage } = require("../utils/page");
+const { buildAdminMemberPayload, parseCheckbox } = require("../utils/memberData");
+const { approveMember, rejectMember } = require("../services/memberApprovalService");
+const { getPhotoPath, removeUploadedMemberPhoto } = require("../middleware/memberPhotoUpload");
 
-function getPage(path, title) {
-  return { path, title: `${title} - ${site.title}` };
-}
-
-function parseCheckbox(body, fieldName) {
-  return Boolean(body[fieldName]);
-}
-
-function buildMemberPayload(body, existingMember) {
-  return {
-    full_name: (body.full_name ?? existingMember?.full_name ?? "").trim(),
-    email: (body.email ?? existingMember?.email ?? "").trim().toLowerCase(),
-    phone: (body.phone ?? existingMember?.phone ?? "").trim(),
-    profession: (body.profession ?? existingMember?.profession ?? "").trim(),
-    role: body.role || existingMember?.role || "General Member",
-    city: (body.city ?? existingMember?.city ?? "").trim(),
-    address: (body.address ?? existingMember?.address ?? "").trim(),
-    dob: body.dob ?? existingMember?.dob ?? null,
-    gender: (body.gender ?? existingMember?.gender ?? "").toLowerCase(),
-    marital_status: (body.marital_status ?? existingMember?.marital_status ?? "").toLowerCase(),
-    marriage_date: body.marriage_date ?? existingMember?.marriage_date ?? null,
-    spouse_name: (body.spouse_name ?? existingMember?.spouse_name ?? "").trim(),
-    leadership_title: (body.leadership_title ?? existingMember?.leadership_title ?? "").trim(),
-    notes: (body.notes ?? existingMember?.notes ?? "").trim(),
-    admin_notes: (body.admin_notes ?? existingMember?.admin_notes ?? "").trim(),
-    show_in_directory: parseCheckbox(body, "show_in_directory"),
-    show_mobile_in_directory: parseCheckbox(body, "show_mobile_in_directory"),
-    show_email_in_directory: parseCheckbox(body, "show_email_in_directory"),
-    show_city_in_directory: parseCheckbox(body, "show_city_in_directory"),
-    show_profession_in_directory: parseCheckbox(body, "show_profession_in_directory"),
-    show_photo_in_directory: parseCheckbox(body, "show_photo_in_directory"),
-    show_in_leadership_section: parseCheckbox(body, "show_in_leadership_section"),
-    is_important_member: parseCheckbox(body, "is_important_member"),
-    important_member_order: Number(body.important_member_order || 0),
-    registration_source: (body.registration_source || existingMember?.registration_source || "admin").trim(),
-    age: calculateAge(body.dob ?? existingMember?.dob ?? null)
-  };
-}
-
-async function renderAdminLogin(req, res) {
-  if (req.session.admin) {
-    return res.redirect("/admin");
+function getAdminMemberRedirectPath(status) {
+  if (status === "approved") {
+    return "/admin/members/approved";
   }
 
-  return res.render("admin/login", {
-    page: getPage("/admin/login", "Admin Login")
-  });
-}
-
-async function handleAdminLogin(req, res) {
-  const email = (req.body.email || "").trim().toLowerCase();
-  const password = req.body.password || "";
-
-  if (email !== (process.env.ADMIN_EMAIL || "").trim().toLowerCase() || password !== (process.env.ADMIN_PASSWORD || "")) {
-    return res.status(401).render("admin/login", {
-      page: getPage("/admin/login", "Admin Login"),
-      errorMessage: "Invalid admin credentials."
-    });
+  if (status === "pending") {
+    return "/admin/members/pending";
   }
 
-  req.session.admin = { email };
-  req.session.flash = { type: "success", message: "Admin login successful." };
-  return res.redirect("/admin");
-}
-
-function handleAdminLogout(req, res) {
-  req.session.destroy(() => {
-    res.redirect("/admin/login");
-  });
+  return "/admin/dashboard";
 }
 
 async function renderDashboard(req, res) {
-  const [pendingMembers, members, notices] = await Promise.all([
+  const [pendingMembers, members, notices, totalMembers, pendingCount, approvedCount, leadershipCount] = await Promise.all([
     Member.find({ membership_status: "pending" }).sort({ createdAt: -1 }).lean(),
     Member.find().sort({ createdAt: -1 }).lean(),
-    Notice.find().sort({ createdAt: -1 }).lean()
+    Notice.find().sort({ createdAt: -1 }).lean(),
+    Member.countDocuments(),
+    Member.countDocuments({ membership_status: "pending" }),
+    Member.countDocuments({ membership_status: "approved" }),
+    Member.countDocuments({ membership_status: "approved", role: { $ne: "General Member" } })
   ]);
 
   res.render("admin/dashboard", {
-    page: getPage("/admin", "Admin Dashboard"),
+    page: buildPage("/admin/dashboard", "Admin Dashboard"),
     pendingMembers,
     members,
     notices,
-    memberRoles: MEMBER_ROLES
+    memberRoles: MEMBER_ROLES,
+    summary: {
+      totalMembers,
+      pendingMembers: pendingCount,
+      approvedMembers: approvedCount,
+      leadershipMembers: leadershipCount
+    }
+  });
+}
+
+async function renderPendingMembers(req, res) {
+  const members = await Member.find({ membership_status: "pending" })
+    .sort({ createdAt: -1 })
+    .lean();
+
+  res.render("admin/member-list", {
+    page: buildPage("/admin/members/pending", "Pending Members"),
+    heading: "Pending Members",
+    description: "Review submitted registrations and decide whether to approve or reject them.",
+    members,
+    memberStatus: "pending"
+  });
+}
+
+async function renderApprovedMembers(req, res) {
+  const members = await Member.find({ membership_status: "approved" })
+    .sort({ approval_date: -1, full_name: 1 })
+    .lean();
+
+  res.render("admin/member-list", {
+    page: buildPage("/admin/members/approved", "Approved Members"),
+    heading: "Approved Members",
+    description: "Browse approved members and open individual records for updates.",
+    members,
+    memberStatus: "approved"
+  });
+}
+
+async function renderMemberDetail(req, res) {
+  const member = await Member.findById(req.params.id).lean();
+
+  if (!member) {
+    req.session.flash = { type: "error", message: "Member not found." };
+    return res.redirect("/admin/dashboard");
+  }
+
+  return res.render("admin/member-detail", {
+    page: buildPage(`/admin/members/${req.params.id}`, "Member Details"),
+    member
   });
 }
 
 async function handleCreateMember(req, res) {
-  const payload = buildMemberPayload(req.body);
+  const payload = buildAdminMemberPayload(req.body);
   const password = req.body.password || "";
   const membership_status = req.body.membership_status || "approved";
+  const photo = getPhotoPath(req.file);
+
+  if (req.photoUploadError) {
+    req.session.flash = { type: "error", message: req.photoUploadError };
+    return res.redirect("/admin/dashboard");
+  }
 
   if (!payload.full_name || !payload.email || !password) {
+    removeUploadedMemberPhoto(photo);
     req.session.flash = { type: "error", message: "Full name, email, and password are required." };
-    return res.redirect("/admin");
+    return res.redirect("/admin/dashboard");
   }
 
   const password_hash = await bcrypt.hash(password, 12);
   const member = new Member({
     ...payload,
+    photo,
     password_hash,
     membership_status,
-    member_id: membership_status === "approved" ? (req.body.member_id || "").trim().toUpperCase() : null,
-    approval_date: membership_status === "approved" ? new Date() : null,
-    approved_by_admin: membership_status === "approved" ? req.session.admin.email : ""
+    member_id: null,
+    approval_date: null,
+    approved_by_admin: false
   });
 
-  await member.save();
+  if (membership_status === "approved") {
+    await approveMember(member);
+  } else if (membership_status === "rejected") {
+    await rejectMember(member);
+  } else {
+    await member.save();
+  }
+
   req.session.flash = { type: "success", message: "Member created successfully." };
-  return res.redirect("/admin");
+  return res.redirect(getAdminMemberRedirectPath(member.membership_status));
 }
 
 async function renderEditMember(req, res) {
@@ -122,11 +132,11 @@ async function renderEditMember(req, res) {
 
   if (!member) {
     req.session.flash = { type: "error", message: "Member not found." };
-    return res.redirect("/admin");
+    return res.redirect("/admin/dashboard");
   }
 
   return res.render("admin/member-edit", {
-    page: getPage("/admin", "Edit Member"),
+    page: buildPage(`/admin/members/${req.params.id}/edit`, "Edit Member"),
     member,
     memberRoles: MEMBER_ROLES
   });
@@ -136,24 +146,45 @@ async function handleUpdateMember(req, res) {
   const member = await Member.findById(req.params.id);
 
   if (!member) {
+    removeUploadedMemberPhoto(getPhotoPath(req.file));
     req.session.flash = { type: "error", message: "Member not found." };
-    return res.redirect("/admin");
+    return res.redirect("/admin/dashboard");
   }
 
-  Object.assign(member, buildMemberPayload(req.body, member));
+  if (req.photoUploadError) {
+    req.session.flash = { type: "error", message: req.photoUploadError };
+    return res.redirect(`/admin/members/${req.params.id}/edit`);
+  }
+
+  const previousPhoto = member.photo;
+
+  Object.assign(member, buildAdminMemberPayload(req.body, member));
+  member.photo = req.file ? getPhotoPath(req.file) : member.photo;
 
   if (req.body.password) {
     member.password_hash = await bcrypt.hash(req.body.password, 12);
   }
 
-  member.membership_status = req.body.membership_status || member.membership_status;
-  member.member_id = member.membership_status === "approved" ? (req.body.member_id || member.member_id || "").trim().toUpperCase() : null;
-  member.approval_date = member.membership_status === "approved" ? (member.approval_date || new Date()) : null;
-  member.approved_by_admin = member.membership_status === "approved" ? req.session.admin.email : "";
+  const nextStatus = req.body.membership_status || member.membership_status;
 
-  await member.save();
+  if (nextStatus === "approved") {
+    await approveMember(member);
+  } else if (nextStatus === "rejected") {
+    await rejectMember(member);
+  } else {
+    member.membership_status = "pending";
+    member.member_id = null;
+    member.approval_date = null;
+    member.approved_by_admin = false;
+    await member.save();
+  }
+
+  if (req.file && previousPhoto && previousPhoto !== member.photo) {
+    removeUploadedMemberPhoto(previousPhoto);
+  }
+
   req.session.flash = { type: "success", message: "Member updated successfully." };
-  return res.redirect("/admin");
+  return res.redirect(getAdminMemberRedirectPath(member.membership_status));
 }
 
 async function handleApproveMember(req, res) {
@@ -161,43 +192,34 @@ async function handleApproveMember(req, res) {
 
   if (!member) {
     req.session.flash = { type: "error", message: "Member not found." };
-    return res.redirect("/admin");
+    return res.redirect("/admin/dashboard");
   }
 
-  member.membership_status = "approved";
-  member.member_id = (req.body.member_id || "").trim().toUpperCase();
-  member.approval_date = new Date();
-  member.approved_by_admin = req.session.admin.email;
-
-  if (!member.member_id) {
-    req.session.flash = { type: "error", message: "Member ID is required to approve a member." };
-    return res.redirect("/admin");
-  }
-
-  await member.save();
+  await approveMember(member);
   req.session.flash = { type: "success", message: "Member approved successfully." };
-  return res.redirect("/admin");
+  return res.redirect("/admin/members/approved");
 }
 
 async function handleRejectMember(req, res) {
   const member = await Member.findById(req.params.id);
 
   if (member) {
-    member.membership_status = "rejected";
-    member.member_id = null;
-    member.approval_date = null;
-    member.approved_by_admin = "";
-    await member.save();
+    await rejectMember(member);
   }
 
   req.session.flash = { type: "success", message: "Member request rejected." };
-  return res.redirect("/admin");
+  return res.redirect("/admin/members/pending");
 }
 
 async function handleDeleteMember(req, res) {
-  await Member.findByIdAndDelete(req.params.id);
+  const member = await Member.findByIdAndDelete(req.params.id);
+
+  if (member && member.photo) {
+    removeUploadedMemberPhoto(member.photo);
+  }
+
   req.session.flash = { type: "success", message: "Member deleted successfully." };
-  return res.redirect("/admin");
+  return res.redirect("/admin/dashboard");
 }
 
 async function handleCreateNotice(req, res) {
@@ -214,7 +236,7 @@ async function handleCreateNotice(req, res) {
   });
 
   req.session.flash = { type: "success", message: "Notice saved successfully." };
-  return res.redirect("/admin");
+  return res.redirect("/admin/dashboard");
 }
 
 async function renderEditNotice(req, res) {
@@ -222,11 +244,11 @@ async function renderEditNotice(req, res) {
 
   if (!notice) {
     req.session.flash = { type: "error", message: "Notice not found." };
-    return res.redirect("/admin");
+    return res.redirect("/admin/dashboard");
   }
 
   return res.render("admin/notice-edit", {
-    page: getPage("/admin", "Edit Notice"),
+    page: buildPage("/admin/dashboard", "Edit Notice"),
     notice
   });
 }
@@ -244,20 +266,20 @@ async function handleUpdateNotice(req, res) {
   });
 
   req.session.flash = { type: "success", message: "Notice updated successfully." };
-  return res.redirect("/admin");
+  return res.redirect("/admin/dashboard");
 }
 
 async function handleDeleteNotice(req, res) {
   await Notice.findByIdAndDelete(req.params.id);
   req.session.flash = { type: "success", message: "Notice deleted successfully." };
-  return res.redirect("/admin");
+  return res.redirect("/admin/dashboard");
 }
 
 module.exports = {
-  renderAdminLogin,
-  handleAdminLogin,
-  handleAdminLogout,
   renderDashboard,
+  renderPendingMembers,
+  renderApprovedMembers,
+  renderMemberDetail,
   handleCreateMember,
   renderEditMember,
   handleUpdateMember,

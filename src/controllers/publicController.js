@@ -10,46 +10,14 @@ const {
 const { Member } = require("../models/Member");
 const Notice = require("../models/Notice");
 const { buildDirectoryMember, buildImportantMember } = require("../utils/memberView");
+const { calculateAge, normalizePublicMemberInput } = require("../utils/memberData");
 const { buildMemberCelebrationNotices } = require("../utils/noticeFeed");
+const { getPhotoPath, removeUploadedMemberPhoto } = require("../middleware/memberPhotoUpload");
 
 function getBaseViewData(page) {
   return {
     site,
     page
-  };
-}
-
-function calculateAge(dob) {
-  if (!dob) {
-    return null;
-  }
-
-  const birthDate = new Date(dob);
-  const today = new Date();
-  let age = today.getFullYear() - birthDate.getFullYear();
-  const monthDiff = today.getMonth() - birthDate.getMonth();
-
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-    age -= 1;
-  }
-
-  return age >= 0 ? age : null;
-}
-
-function normalizeMemberInput(body) {
-  return {
-    full_name: body.full_name || body.name || "",
-    email: (body.email || "").trim().toLowerCase(),
-    phone: (body.phone || "").trim(),
-    profession: (body.profession || "").trim(),
-    role: body.role || "General Member",
-    city: (body.city || "").trim(),
-    address: (body.address || "").trim(),
-    dob: body.dob || body.date_of_birth || null,
-    gender: (body.gender || "").toLowerCase(),
-    marital_status: (body.marital_status || "").toLowerCase(),
-    spouse_name: (body.spouse_name || "").trim(),
-    marriage_date: body.marriage_date || null
   };
 }
 
@@ -86,28 +54,72 @@ function renderContact(req, res) {
 async function renderLeadership(req, res) {
   const members = await Member.find({
     membership_status: "approved",
-    role: { $ne: "General Member" }
+    show_in_leadership_section: true
   })
-    .sort({ important_member_order: 1, role: 1, full_name: 1 })
+    .select("full_name role leadership_title profession city email phone photo show_city_in_directory show_profession_in_directory show_email_in_directory show_mobile_in_directory show_photo_in_directory")
+    .sort({ important_member_order: 1, full_name: 1 })
     .lean();
 
   res.render("public/leadership", {
-    ...getBaseViewData({ title: `Important Members - ${site.title}`, path: "/important-members" }),
+    ...getBaseViewData({ title: `Leadership - ${site.title}`, path: "/leadership" }),
     members: members.map(buildImportantMember)
   });
 }
 
 async function renderDirectory(req, res) {
-  const members = await Member.find({
+  const search = (req.query.search || "").trim();
+  const city = (req.query.city || "").trim();
+  const profession = (req.query.profession || "").trim();
+
+  const filters = {
     membership_status: "approved",
     show_in_directory: true
-  })
+  };
+
+  if (search) {
+    filters.full_name = { $regex: search, $options: "i" };
+  }
+
+  if (city) {
+    filters.city = { $regex: `^${city.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, $options: "i" };
+  }
+
+  if (profession) {
+    filters.profession = { $regex: `^${profession.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, $options: "i" };
+  }
+
+  const members = await Member.find(filters)
+    .select("full_name role city profession email phone photo member_id join_date show_city_in_directory show_profession_in_directory show_email_in_directory show_mobile_in_directory show_photo_in_directory")
     .sort({ role: 1, full_name: 1 })
     .lean();
 
+  const [cities, professions] = await Promise.all([
+    Member.distinct("city", {
+      membership_status: "approved",
+      show_in_directory: true,
+      show_city_in_directory: true,
+      city: { $nin: ["", null] }
+    }),
+    Member.distinct("profession", {
+      membership_status: "approved",
+      show_in_directory: true,
+      show_profession_in_directory: true,
+      profession: { $nin: ["", null] }
+    })
+  ]);
+
   res.render("public/directory", {
     ...getBaseViewData({ title: `Member Directory - ${site.title}`, path: "/member-directory" }),
-    members: members.map(buildDirectoryMember)
+    members: members.map(buildDirectoryMember),
+    filters: {
+      search,
+      city,
+      profession
+    },
+    filterOptions: {
+      cities: cities.sort((a, b) => a.localeCompare(b)),
+      professions: professions.sort((a, b) => a.localeCompare(b))
+    }
   });
 }
 
@@ -164,11 +176,20 @@ function renderResource(req, res, key) {
 }
 
 async function handleRegistrationRequest(req, res) {
-  const input = normalizeMemberInput(req.body);
+  const input = normalizePublicMemberInput(req.body);
   const password = req.body.password || "";
   const confirmPassword = req.body.confirm_password || "";
+  const photo = getPhotoPath(req.file);
+
+  if (req.photoUploadError) {
+    return res.status(400).render("public/register", {
+      ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
+      errorMessage: req.photoUploadError
+    });
+  }
 
   if (!input.full_name || !input.email || !input.phone || !password) {
+    removeUploadedMemberPhoto(photo);
     return res.status(400).render("public/register", {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
       errorMessage: "Full name, email, phone, and password are required."
@@ -176,6 +197,7 @@ async function handleRegistrationRequest(req, res) {
   }
 
   if (password !== confirmPassword) {
+    removeUploadedMemberPhoto(photo);
     return res.status(400).render("public/register", {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
       errorMessage: "Password and confirm password must match."
@@ -185,6 +207,7 @@ async function handleRegistrationRequest(req, res) {
   const existingMember = await Member.findOne({ email: input.email }).lean();
 
   if (existingMember) {
+    removeUploadedMemberPhoto(photo);
     return res.status(409).render("public/register", {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
       errorMessage: "A member with this email already exists."
@@ -195,6 +218,7 @@ async function handleRegistrationRequest(req, res) {
 
   await Member.create({
     ...input,
+    photo,
     password_hash,
     age: calculateAge(input.dob),
     membership_status: "pending",

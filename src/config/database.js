@@ -1,7 +1,8 @@
 const mongoose = require("mongoose");
+const { getAppConfig } = require("./env");
 
 async function connectToDatabase() {
-  const mongoUri = process.env.MONGODB_URI;
+  const { mongoUri } = getAppConfig();
 
   if (!mongoUri) {
     throw new Error("MONGODB_URI is required to connect to MongoDB.");
@@ -16,7 +17,14 @@ async function connectToDatabase() {
   return mongoose.connection;
 }
 
+async function disconnectFromDatabase() {
+  if (mongoose.connection.readyState !== 0) {
+    await mongoose.disconnect();
+  }
+}
+
 module.exports = {
   connectToDatabase,
+  disconnectFromDatabase,
   mongoose
 };

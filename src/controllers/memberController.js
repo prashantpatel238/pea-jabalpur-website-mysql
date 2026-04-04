@@ -1,16 +1,8 @@
 const bcrypt = require("bcryptjs");
 
-const site = require("../config/site");
 const { Member } = require("../models/Member");
-const { calculateAge } = require("./publicController");
-
-function getPage(path, title) {
-  return { path, title: `${title} - ${site.title}` };
-}
-
-function parseCheckbox(body, fieldName) {
-  return Boolean(body[fieldName]);
-}
+const { buildPage } = require("../utils/page");
+const { calculateAge, parseCheckbox } = require("../utils/memberData");
 
 async function renderMemberLogin(req, res) {
   if (req.session.member) {
@@ -18,7 +10,7 @@ async function renderMemberLogin(req, res) {
   }
 
   return res.render("member/login", {
-    page: getPage("/member/login", "Member Login")
+    page: buildPage("/member/login", "Member Login")
   });
 }
 
@@ -30,7 +22,7 @@ async function handleMemberLogin(req, res) {
 
   if (!member || member.membership_status !== "approved") {
     return res.status(401).render("member/login", {
-      page: getPage("/member/login", "Member Login"),
+      page: buildPage("/member/login", "Member Login"),
       errorMessage: "Only approved members can sign in."
     });
   }
@@ -39,7 +31,7 @@ async function handleMemberLogin(req, res) {
 
   if (!isValid) {
     return res.status(401).render("member/login", {
-      page: getPage("/member/login", "Member Login"),
+      page: buildPage("/member/login", "Member Login"),
       errorMessage: "Invalid member credentials."
     });
   }
@@ -71,7 +63,7 @@ async function renderMemberProfile(req, res) {
   }
 
   return res.render("member/profile", {
-    page: getPage("/member/profile", "Member Profile"),
+    page: buildPage("/member/profile", "Member Profile"),
     member
   });
 }

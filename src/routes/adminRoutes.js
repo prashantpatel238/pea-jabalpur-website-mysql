@@ -1,10 +1,11 @@
 const express = require("express");
+const { uploadMemberPhoto } = require("../middleware/memberPhotoUpload");
 
 const {
-  renderAdminLogin,
-  handleAdminLogin,
-  handleAdminLogout,
   renderDashboard,
+  renderPendingMembers,
+  renderApprovedMembers,
+  renderMemberDetail,
   handleCreateMember,
   renderEditMember,
   handleUpdateMember,
@@ -20,13 +21,14 @@ const { requireAdmin } = require("../middleware/auth");
 
 const router = express.Router();
 
-router.get("/login", renderAdminLogin);
-router.post("/login", handleAdminLogin);
-router.post("/logout", handleAdminLogout);
-router.get("/", requireAdmin, renderDashboard);
-router.post("/members", requireAdmin, handleCreateMember);
+router.get("/", requireAdmin, (req, res) => res.redirect("/admin/dashboard"));
+router.get("/dashboard", requireAdmin, renderDashboard);
+router.get("/members/pending", requireAdmin, renderPendingMembers);
+router.get("/members/approved", requireAdmin, renderApprovedMembers);
+router.get("/members/:id", requireAdmin, renderMemberDetail);
+router.post("/members", requireAdmin, uploadMemberPhoto, handleCreateMember);
 router.get("/members/:id/edit", requireAdmin, renderEditMember);
-router.post("/members/:id/edit", requireAdmin, handleUpdateMember);
+router.post("/members/:id/edit", requireAdmin, uploadMemberPhoto, handleUpdateMember);
 router.post("/members/:id/approve", requireAdmin, handleApproveMember);
 router.post("/members/:id/reject", requireAdmin, handleRejectMember);
 router.post("/members/:id/delete", requireAdmin, handleDeleteMember);

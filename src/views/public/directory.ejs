@@ -11,9 +11,38 @@
       </div>
     </div>
 
+    <form action="/member-directory" method="get" class="mb-10 flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm lg:flex-row lg:items-end">
+      <div class="w-full lg:flex-1">
+        <label for="search" class="mb-2 block text-sm font-semibold text-slate-700">Search by name</label>
+        <input id="search" name="search" value="<%= filters.search %>" placeholder="Search members..." class="w-full rounded-2xl border-slate-200 bg-slate-50 text-slate-900" />
+      </div>
+      <div class="w-full lg:w-64">
+        <label for="city" class="mb-2 block text-sm font-semibold text-slate-700">City</label>
+        <select id="city" name="city" class="w-full rounded-2xl border-slate-200 bg-slate-50 text-slate-900">
+          <option value="">All cities</option>
+          <% filterOptions.cities.forEach((option) => { %>
+            <option value="<%= option %>" <%= filters.city === option ? 'selected' : '' %>><%= option %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="w-full lg:w-64">
+        <label for="profession" class="mb-2 block text-sm font-semibold text-slate-700">Profession</label>
+        <select id="profession" name="profession" class="w-full rounded-2xl border-slate-200 bg-slate-50 text-slate-900">
+          <option value="">All professions</option>
+          <% filterOptions.professions.forEach((option) => { %>
+            <option value="<%= option %>" <%= filters.profession === option ? 'selected' : '' %>><%= option %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="flex gap-3">
+        <button type="submit" class="inline-flex h-12 items-center justify-center rounded-full bg-primary px-6 text-sm font-semibold text-white">Filter</button>
+        <a href="/member-directory" class="inline-flex h-12 items-center justify-center rounded-full border border-slate-300 px-6 text-sm font-semibold text-slate-700">Reset</a>
+      </div>
+    </form>
+
     <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
       <% if (!members.length) { %>
-        <div class="col-span-full rounded-3xl border border-slate-200 bg-white p-8 text-slate-600 shadow-sm">No approved directory members are visible yet.</div>
+        <div class="col-span-full rounded-3xl border border-slate-200 bg-white p-8 text-slate-600 shadow-sm">No approved directory members match the current filters.</div>
       <% } %>
       <% members.forEach((member) => { %>
         <article class="flex flex-col rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">

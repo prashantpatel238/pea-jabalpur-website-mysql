@@ -1,32 +1,37 @@
 const dotenv = require("dotenv");
 const { createApp } = require("./app");
-const { connectToDatabase } = require("./config/database");
+const { connectToDatabase, disconnectFromDatabase } = require("./config/database");
+const { getAppConfig, validateEnvironment } = require("./config/env");
+const { ensureInitialAdmin } = require("./services/adminBootstrap");
 
+require("./models/Admin");
 require("./models/Member");
 require("./models/Notice");
 
 dotenv.config();
 
-function validateEnvironment() {
-  const requiredVariables = ["MONGODB_URI", "SESSION_SECRET", "ADMIN_EMAIL", "ADMIN_PASSWORD"];
-  const missingVariables = requiredVariables.filter((name) => !process.env[name]);
-
-  if (missingVariables.length) {
-    throw new Error(`Missing required environment variables: ${missingVariables.join(", ")}`);
-  }
-}
-
 async function startServer() {
   validateEnvironment();
 
   const app = createApp();
-  const port = process.env.PORT || 3000;
+  const { port } = getAppConfig();
 
   await connectToDatabase();
+  await ensureInitialAdmin();
 
-  app.listen(port, () => {
+  const server = app.listen(port, () => {
     console.log(`PEA Jabalpur site running at http://localhost:${port}`);
   });
+
+  const shutdown = async () => {
+    server.close(async () => {
+      await disconnectFromDatabase();
+      process.exit(0);
+    });
+  };
+
+  process.on("SIGINT", shutdown);
+  process.on("SIGTERM", shutdown);
 }
 
 startServer().catch((error) => {

@@ -4,7 +4,7 @@ function requireAdmin(req, res, next) {
   }
 
   req.session.flash = { type: "error", message: "Please sign in as admin to continue." };
-  return res.redirect("/admin/login");
+  return res.redirect("/auth/login");
 }
 
 function requireMember(req, res, next) {

@@ -4,14 +4,21 @@ const session = require("express-session");
 const connectMongo = require("connect-mongo");
 
 const publicRoutes = require("./routes/publicRoutes");
+const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const memberRoutes = require("./routes/memberRoutes");
 const { notFoundHandler } = require("./middleware/notFound");
 const { attachViewLocals } = require("./middleware/viewLocals");
+const { getAppConfig } = require("./config/env");
 
 function createApp() {
   const app = express();
   const mongoStoreFactory = connectMongo.default || connectMongo.MongoStore || connectMongo;
+  const { isProduction, mongoUri, sessionSecret } = getAppConfig();
+
+  if (isProduction) {
+    app.set("trust proxy", 1);
+  }
 
   app.set("view engine", "ejs");
   app.set("views", path.join(__dirname, "views"));
@@ -20,19 +27,21 @@ function createApp() {
   app.use(express.json());
   app.use(express.static(path.join(__dirname, "..", "public")));
   app.use(session({
-    secret: process.env.SESSION_SECRET || "development-session-secret",
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
-    store: process.env.MONGODB_URI ? mongoStoreFactory.create({ mongoUrl: process.env.MONGODB_URI }) : undefined,
+    store: mongoUri ? mongoStoreFactory.create({ mongoUrl: mongoUri }) : undefined,
     cookie: {
       httpOnly: true,
       sameSite: "lax",
+      secure: isProduction,
       maxAge: 1000 * 60 * 60 * 8
     }
   }));
   app.use(attachViewLocals);
 
   app.use("/", publicRoutes);
+  app.use("/auth", authRoutes);
   app.use("/admin", adminRoutes);
   app.use("/member", memberRoutes);
   app.use(notFoundHandler);

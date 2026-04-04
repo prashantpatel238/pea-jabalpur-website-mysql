@@ -1,3 +1,5 @@
+const { normalizeEmail, normalizeMobileNumber } = require("./validation");
+
 function calculateAge(dob) {
   if (!dob) {
     return null;
@@ -22,8 +24,8 @@ function parseCheckbox(body, fieldName) {
 function normalizePublicMemberInput(body) {
   return {
     full_name: body.full_name || body.name || "",
-    email: (body.email || "").trim().toLowerCase(),
-    phone: (body.phone || "").trim(),
+    email: normalizeEmail(body.email),
+    phone: normalizeMobileNumber(body.phone),
     profession: (body.profession || "").trim(),
     role: body.role || "General Member",
     city: (body.city || "").trim(),
@@ -37,10 +39,12 @@ function normalizePublicMemberInput(body) {
 }
 
 function buildAdminMemberPayload(body, existingMember) {
+  const shouldShowInLeadership = parseCheckbox(body, "show_in_leadership_section") || parseCheckbox(body, "is_important_member");
+
   return {
     full_name: (body.full_name ?? existingMember?.full_name ?? "").trim(),
-    email: (body.email ?? existingMember?.email ?? "").trim().toLowerCase(),
-    phone: (body.phone ?? existingMember?.phone ?? "").trim(),
+    email: normalizeEmail(body.email ?? existingMember?.email),
+    phone: normalizeMobileNumber(body.phone ?? existingMember?.phone),
     profession: (body.profession ?? existingMember?.profession ?? "").trim(),
     role: body.role || existingMember?.role || "General Member",
     city: (body.city ?? existingMember?.city ?? "").trim(),
@@ -59,8 +63,8 @@ function buildAdminMemberPayload(body, existingMember) {
     show_city_in_directory: parseCheckbox(body, "show_city_in_directory"),
     show_profession_in_directory: parseCheckbox(body, "show_profession_in_directory"),
     show_photo_in_directory: parseCheckbox(body, "show_photo_in_directory"),
-    show_in_leadership_section: parseCheckbox(body, "show_in_leadership_section"),
-    is_important_member: parseCheckbox(body, "is_important_member"),
+    show_in_leadership_section: shouldShowInLeadership,
+    is_important_member: shouldShowInLeadership,
     important_member_order: Number(body.important_member_order || 0),
     registration_source: (body.registration_source || existingMember?.registration_source || "admin").trim(),
     age: calculateAge(body.dob ?? existingMember?.dob ?? null)

@@ -1,0 +1,140 @@
+<%- include("../partials/head") %>
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-slate-50 px-4 pt-28">
+  <section class="mx-auto max-w-6xl py-16 sm:px-6 lg:px-8">
+    <% const values = settings; %>
+    <%- include("../partials/flash") %>
+
+    <div class="mb-10 flex flex-col gap-4 rounded-4xl border border-slate-200 bg-white p-8 shadow-sm md:flex-row md:items-center md:justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-slate-900">Site Settings</h1>
+        <p class="mt-2 text-slate-600">Manage branding, contact details, map, social links, and footer content across the public website.</p>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <a href="/admin/dashboard" class="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700">Back to Dashboard</a>
+        <form action="/auth/logout" method="post">
+          <button type="submit" class="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700">Logout</button>
+        </form>
+      </div>
+    </div>
+
+    <form action="/admin/settings" method="post" enctype="multipart/form-data" class="space-y-8" data-validate-popup>
+      <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+        <h2 class="mb-6 text-2xl font-bold text-slate-900">Branding</h2>
+        <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
+          <div class="space-y-5">
+            <div>
+              <label for="site_title" class="mb-2 block text-sm font-semibold text-slate-700">Site Title</label>
+              <input id="site_title" name="site_title" value="<%= values.site_title %>" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+            </div>
+            <div>
+              <label for="site_tagline" class="mb-2 block text-sm font-semibold text-slate-700">Tagline</label>
+              <input id="site_tagline" name="site_tagline" value="<%= values.site_tagline %>" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+            </div>
+            <div>
+              <label for="logo" class="mb-2 block text-sm font-semibold text-slate-700">Logo Upload</label>
+              <input id="logo" name="logo" type="file" accept=".jpg,.jpeg,.png,.webp,.ico,image/jpeg,image/png,image/webp,image/x-icon,image/vnd.microsoft.icon" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white" />
+              <p class="mt-2 text-xs text-slate-500">JPG, PNG, WEBP, or ICO up to 2 MB.</p>
+            </div>
+            <div>
+              <label for="favicon" class="mb-2 block text-sm font-semibold text-slate-700">Favicon Upload</label>
+              <input id="favicon" name="favicon" type="file" accept=".jpg,.jpeg,.png,.webp,.ico,image/jpeg,image/png,image/webp,image/x-icon,image/vnd.microsoft.icon" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white" />
+            </div>
+          </div>
+
+          <div class="grid gap-6 sm:grid-cols-2">
+            <div class="rounded-3xl border border-slate-200 bg-slate-50 p-6">
+              <div class="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">Current Logo</div>
+              <% if (values.logo_path) { %>
+                <img src="<%= values.logo_path %>" alt="Current site logo" class="h-28 w-28 rounded-2xl bg-white object-contain p-3 shadow-sm" />
+                <p class="mt-4 break-all text-xs text-slate-500"><%= values.logo_path %></p>
+              <% } else { %>
+                <div class="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-10 text-center text-sm text-slate-500">No logo uploaded yet.</div>
+              <% } %>
+            </div>
+            <div class="rounded-3xl border border-slate-200 bg-slate-50 p-6">
+              <div class="mb-4 text-sm font-semibold uppercase tracking-wide text-slate-500">Current Favicon</div>
+              <% if (values.favicon_path) { %>
+                <img src="<%= values.favicon_path %>" alt="Current favicon" class="h-20 w-20 rounded-2xl bg-white object-contain p-3 shadow-sm" />
+                <p class="mt-4 break-all text-xs text-slate-500"><%= values.favicon_path %></p>
+              <% } else { %>
+                <div class="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-10 text-center text-sm text-slate-500">No favicon uploaded yet.</div>
+              <% } %>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+        <h2 class="mb-6 text-2xl font-bold text-slate-900">Contact Information</h2>
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div>
+            <label for="contact_phone" class="mb-2 block text-sm font-semibold text-slate-700">Phone Number</label>
+            <input id="contact_phone" name="contact_phone" value="<%= values.contact_phone %>" inputmode="numeric" data-validation-label="contact mobile number" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          </div>
+          <div>
+            <label for="whatsapp_number" class="mb-2 block text-sm font-semibold text-slate-700">WhatsApp Number</label>
+            <input id="whatsapp_number" name="whatsapp_number" value="<%= values.whatsapp_number %>" inputmode="numeric" data-validation-label="WhatsApp mobile number" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          </div>
+          <div class="md:col-span-2">
+            <label for="contact_email" class="mb-2 block text-sm font-semibold text-slate-700">Email</label>
+            <input id="contact_email" name="contact_email" type="email" value="<%= values.contact_email %>" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          </div>
+          <div class="md:col-span-2">
+            <label for="address" class="mb-2 block text-sm font-semibold text-slate-700">Address</label>
+            <textarea id="address" name="address" class="min-h-[120px] w-full rounded-xl border-slate-200 bg-slate-50 p-4 text-slate-900"><%= values.address %></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+        <h2 class="mb-6 text-2xl font-bold text-slate-900">Google Map</h2>
+        <div class="space-y-6">
+          <div>
+            <label for="google_map_embed_url" class="mb-2 block text-sm font-semibold text-slate-700">Map Embed URL</label>
+            <input id="google_map_embed_url" name="google_map_embed_url" value="<%= values.google_map_embed_url %>" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          </div>
+          <% if (values.google_map_embed_url) { %>
+            <div class="overflow-hidden rounded-3xl border border-slate-200">
+              <iframe src="<%= values.google_map_embed_url %>" width="100%" height="320" style="border:0;" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Map Preview"></iframe>
+            </div>
+          <% } %>
+        </div>
+      </section>
+
+      <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+        <h2 class="mb-6 text-2xl font-bold text-slate-900">Social Links</h2>
+        <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div>
+            <label for="facebook_url" class="mb-2 block text-sm font-semibold text-slate-700">Facebook URL</label>
+            <input id="facebook_url" name="facebook_url" value="<%= values.facebook_url %>" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          </div>
+          <div>
+            <label for="instagram_url" class="mb-2 block text-sm font-semibold text-slate-700">Instagram URL</label>
+            <input id="instagram_url" name="instagram_url" value="<%= values.instagram_url %>" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          </div>
+          <div>
+            <label for="youtube_url" class="mb-2 block text-sm font-semibold text-slate-700">YouTube URL</label>
+            <input id="youtube_url" name="youtube_url" value="<%= values.youtube_url %>" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          </div>
+        </div>
+      </section>
+
+      <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+        <h2 class="mb-6 text-2xl font-bold text-slate-900">Footer</h2>
+        <div>
+          <label for="footer_text" class="mb-2 block text-sm font-semibold text-slate-700">Footer Text</label>
+          <input id="footer_text" name="footer_text" value="<%= values.footer_text %>" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        </div>
+      </section>
+
+      <div class="flex justify-end">
+        <button type="submit" class="inline-flex h-14 items-center justify-center rounded-full bg-primary px-8 text-base font-semibold text-white shadow-primary-soft transition hover:-translate-y-0.5 hover:bg-blue-700">Save Settings</button>
+      </div>
+    </form>
+  </section>
+</main>
+
+<%- include("../partials/footer") %>
+<%- include("../partials/scripts") %>

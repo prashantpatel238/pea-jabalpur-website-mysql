@@ -1,4 +1,5 @@
 const { Schema, model } = require("mongoose");
+const { isValidEmail } = require("../utils/validation");
 
 const adminSchema = new Schema(
   {
@@ -8,7 +9,13 @@ const adminSchema = new Schema(
       trim: true,
       lowercase: true,
       unique: true,
-      index: true
+      index: true,
+      validate: {
+        validator(value) {
+          return isValidEmail(value);
+        },
+        message: "Please provide a valid email address."
+      }
     },
     password_hash: {
       type: String,

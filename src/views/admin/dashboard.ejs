@@ -3,6 +3,7 @@
 
 <main class="min-h-screen bg-slate-50 px-4 pt-28">
   <section class="mx-auto max-w-7xl py-16 sm:px-6 lg:px-8">
+    <% const createMemberValues = typeof formData !== "undefined" && formData ? formData : (formState && formState.adminCreateMember) || {}; %>
     <%- include("../partials/flash") %>
 
     <div class="mb-10 flex flex-col gap-4 rounded-4xl border border-slate-200 bg-white p-8 shadow-sm md:flex-row md:items-center md:justify-between">
@@ -10,9 +11,12 @@
         <h1 class="text-3xl font-bold text-slate-900">Admin Dashboard</h1>
         <p class="mt-2 text-slate-600">Approve registrations, manage members, control profile visibility, and publish notices/events.</p>
       </div>
-      <form action="/auth/logout" method="post">
-        <button type="submit" class="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700">Logout</button>
-      </form>
+      <div class="flex flex-wrap gap-3">
+        <a href="/admin/settings" class="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700">Site Settings</a>
+        <form action="/auth/logout" method="post">
+          <button type="submit" class="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700">Logout</button>
+        </form>
+      </div>
     </div>
 
     <div class="mb-12 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -48,32 +52,32 @@
 
       <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
         <h2 class="mb-6 text-2xl font-bold text-slate-900">Add Member</h2>
-        <form action="/admin/members" method="post" enctype="multipart/form-data" class="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <input name="full_name" required placeholder="Full name" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-          <input name="email" required type="email" placeholder="Email" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-          <input name="phone" placeholder="Phone" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-          <input name="profession" placeholder="Profession" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-          <input name="city" placeholder="City" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <form action="/admin/members" method="post" enctype="multipart/form-data" class="grid grid-cols-1 gap-4 md:grid-cols-2" data-validate-popup>
+          <input name="full_name" value="<%= createMemberValues.full_name || '' %>" required placeholder="Full name" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          <input name="email" value="<%= createMemberValues.email || '' %>" required type="email" placeholder="Email" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          <input name="phone" value="<%= createMemberValues.phone || '' %>" placeholder="Phone" inputmode="numeric" data-validation-label="mobile number" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          <input name="profession" value="<%= createMemberValues.profession || '' %>" placeholder="Profession" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          <input name="city" value="<%= createMemberValues.city || '' %>" placeholder="City" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
           <div class="md:col-span-2">
             <label for="dashboard-photo" class="mb-2 block text-sm font-semibold text-slate-700">Member Photo</label>
             <input id="dashboard-photo" name="photo" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white" />
             <p class="mt-2 text-xs text-slate-500">Optional. JPG, PNG, or WEBP up to 2 MB.</p>
           </div>
-          <select name="role" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900"><% memberRoles.forEach((role) => { %><option><%= role %></option><% }) %></select>
+          <select name="role" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900"><% memberRoles.forEach((role) => { %><option <%= (createMemberValues.role || 'General Member') === role ? 'selected' : '' %>><%= role %></option><% }) %></select>
           <select name="membership_status" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900">
-            <option value="approved">Approved</option>
-            <option value="pending">Pending</option>
-            <option value="rejected">Rejected</option>
+            <option value="approved" <%= (createMemberValues.membership_status || 'approved') === 'approved' ? 'selected' : '' %>>Approved</option>
+            <option value="pending" <%= createMemberValues.membership_status === 'pending' ? 'selected' : '' %>>Pending</option>
+            <option value="rejected" <%= createMemberValues.membership_status === 'rejected' ? 'selected' : '' %>>Rejected</option>
           </select>
           <div class="rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-500">Member ID will be generated automatically when a member is approved.</div>
           <input name="password" required type="password" placeholder="Password" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900 md:col-span-2" />
-          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_in_directory" /> Show in directory</label>
-          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="is_important_member" /> Mark important member</label>
-          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_city_in_directory" checked /> Show city</label>
-          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_profession_in_directory" checked /> Show profession</label>
-          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_photo_in_directory" checked /> Show photo</label>
-          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_mobile_in_directory" /> Show mobile</label>
-          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_email_in_directory" /> Show email</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_in_directory" <%= createMemberValues.show_in_directory ? 'checked' : '' %> /> Show in directory</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="is_important_member" <%= createMemberValues.is_important_member ? 'checked' : '' %> /> Mark important member</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_city_in_directory" <%= typeof createMemberValues.show_city_in_directory === 'undefined' || createMemberValues.show_city_in_directory ? 'checked' : '' %> /> Show city</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_profession_in_directory" <%= typeof createMemberValues.show_profession_in_directory === 'undefined' || createMemberValues.show_profession_in_directory ? 'checked' : '' %> /> Show profession</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_photo_in_directory" <%= typeof createMemberValues.show_photo_in_directory === 'undefined' || createMemberValues.show_photo_in_directory ? 'checked' : '' %> /> Show photo</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_mobile_in_directory" <%= createMemberValues.show_mobile_in_directory ? 'checked' : '' %> /> Show mobile</label>
+          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_email_in_directory" <%= createMemberValues.show_email_in_directory ? 'checked' : '' %> /> Show email</label>
           <button type="submit" class="md:col-span-2 rounded-2xl bg-primary px-6 py-4 text-base font-semibold text-white">Create Member</button>
         </form>
       </section>

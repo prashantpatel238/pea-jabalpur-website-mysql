@@ -2,6 +2,33 @@ const bcrypt = require("bcryptjs");
 
 const Admin = require("../models/Admin");
 const { buildPage } = require("../utils/page");
+const { sanitizeFormState } = require("../utils/formState");
+
+function regenerateSession(req) {
+  return new Promise((resolve, reject) => {
+    req.session.regenerate((error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve();
+    });
+  });
+}
+
+function destroySession(req) {
+  return new Promise((resolve, reject) => {
+    req.session.destroy((error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      resolve();
+    });
+  });
+}
 
 async function renderLogin(req, res) {
   if (req.session.admin) {
@@ -9,7 +36,8 @@ async function renderLogin(req, res) {
   }
 
   return res.render("auth/login", {
-    page: buildPage("/auth/login", "Admin Login")
+    page: buildPage("/auth/login", "Admin Login"),
+    formData: res.locals.formState.adminLogin || {}
   });
 }
 
@@ -22,7 +50,8 @@ async function handleLogin(req, res) {
   if (!admin) {
     return res.status(401).render("auth/login", {
       page: buildPage("/auth/login", "Admin Login"),
-      errorMessage: "Invalid admin credentials."
+      errorMessage: "Invalid admin credentials.",
+      formData: sanitizeFormState(req.body)
     });
   }
 
@@ -31,13 +60,15 @@ async function handleLogin(req, res) {
   if (!isValidPassword) {
     return res.status(401).render("auth/login", {
       page: buildPage("/auth/login", "Admin Login"),
-      errorMessage: "Invalid admin credentials."
+      errorMessage: "Invalid admin credentials.",
+      formData: sanitizeFormState(req.body)
     });
   }
 
   admin.last_login_at = new Date();
   await admin.save();
 
+  await regenerateSession(req);
   req.session.admin = {
     id: admin._id.toString(),
     email: admin.email,
@@ -48,10 +79,10 @@ async function handleLogin(req, res) {
   return res.redirect("/admin/dashboard");
 }
 
-function handleLogout(req, res) {
-  req.session.destroy(() => {
-    res.redirect("/auth/login");
-  });
+async function handleLogout(req, res) {
+  await destroySession(req);
+  res.clearCookie("connect.sid");
+  return res.redirect("/auth/login");
 }
 
 module.exports = {

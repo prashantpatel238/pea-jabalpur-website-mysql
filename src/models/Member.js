@@ -1,4 +1,5 @@
 const { Schema, model } = require("mongoose");
+const { isValidEmail, isValidIndianMobileNumber } = require("../utils/validation");
 
 const MEMBER_ROLES = [
   "President",
@@ -95,7 +96,13 @@ const memberSchema = new Schema(
     phone: {
       type: String,
       trim: true,
-      default: ""
+      default: "",
+      validate: {
+        validator(value) {
+          return isValidIndianMobileNumber(value, { allowEmpty: true });
+        },
+        message: "Please provide a valid mobile number."
+      }
     },
     email: {
       type: String,
@@ -103,7 +110,13 @@ const memberSchema = new Schema(
       lowercase: true,
       required: true,
       unique: true,
-      index: true
+      index: true,
+      validate: {
+        validator(value) {
+          return isValidEmail(value);
+        },
+        message: "Please provide a valid email address."
+      }
     },
     password_hash: {
       type: String,

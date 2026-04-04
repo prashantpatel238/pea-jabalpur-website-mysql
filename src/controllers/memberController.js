@@ -3,6 +3,12 @@ const bcrypt = require("bcryptjs");
 const { Member } = require("../models/Member");
 const { buildPage } = require("../utils/page");
 const { calculateAge, parseCheckbox } = require("../utils/memberData");
+const { sanitizeFormState, setFormState } = require("../utils/formState");
+const {
+  getMobileValidationMessage,
+  isValidIndianMobileNumber,
+  normalizeMobileNumber
+} = require("../utils/validation");
 
 async function renderMemberLogin(req, res) {
   if (req.session.member) {
@@ -10,7 +16,8 @@ async function renderMemberLogin(req, res) {
   }
 
   return res.render("member/login", {
-    page: buildPage("/member/login", "Member Login")
+    page: buildPage("/member/login", "Member Login"),
+    formData: res.locals.formState.memberLogin || {}
   });
 }
 
@@ -23,7 +30,8 @@ async function handleMemberLogin(req, res) {
   if (!member || member.membership_status !== "approved") {
     return res.status(401).render("member/login", {
       page: buildPage("/member/login", "Member Login"),
-      errorMessage: "Only approved members can sign in."
+      errorMessage: "Only approved members can sign in.",
+      formData: sanitizeFormState(req.body)
     });
   }
 
@@ -32,7 +40,8 @@ async function handleMemberLogin(req, res) {
   if (!isValid) {
     return res.status(401).render("member/login", {
       page: buildPage("/member/login", "Member Login"),
-      errorMessage: "Invalid member credentials."
+      errorMessage: "Invalid member credentials.",
+      formData: sanitizeFormState(req.body)
     });
   }
 
@@ -64,7 +73,8 @@ async function renderMemberProfile(req, res) {
 
   return res.render("member/profile", {
     page: buildPage("/member/profile", "Member Profile"),
-    member
+    member,
+    formData: res.locals.formState.memberProfile || {}
   });
 }
 
@@ -77,7 +87,15 @@ async function handleUpdateMemberProfile(req, res) {
   }
 
   member.full_name = (req.body.full_name || "").trim();
-  member.phone = (req.body.phone || "").trim();
+  const normalizedPhone = normalizeMobileNumber(req.body.phone);
+
+  if (normalizedPhone && !isValidIndianMobileNumber(normalizedPhone, { allowEmpty: true })) {
+    setFormState(req, "memberProfile", req.body);
+    req.session.flash = { type: "error", message: getMobileValidationMessage("mobile number") };
+    return res.redirect("/member/profile");
+  }
+
+  member.phone = normalizedPhone;
   member.profession = (req.body.profession || "").trim();
   member.city = (req.body.city || "").trim();
   member.address = (req.body.address || "").trim();

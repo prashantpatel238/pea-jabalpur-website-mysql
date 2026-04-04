@@ -6,6 +6,13 @@ const { buildPage } = require("../utils/page");
 const { buildAdminMemberPayload, parseCheckbox } = require("../utils/memberData");
 const { approveMember, rejectMember } = require("../services/memberApprovalService");
 const { getPhotoPath, removeUploadedMemberPhoto } = require("../middleware/memberPhotoUpload");
+const { setFormState } = require("../utils/formState");
+const {
+  getEmailValidationMessage,
+  getMobileValidationMessage,
+  isValidEmail,
+  isValidIndianMobileNumber
+} = require("../utils/validation");
 
 function getAdminMemberRedirectPath(status) {
   if (status === "approved") {
@@ -27,7 +34,14 @@ async function renderDashboard(req, res) {
     Member.countDocuments(),
     Member.countDocuments({ membership_status: "pending" }),
     Member.countDocuments({ membership_status: "approved" }),
-    Member.countDocuments({ membership_status: "approved", role: { $ne: "General Member" } })
+    Member.countDocuments({
+      membership_status: "approved",
+      role: { $ne: "General Member" },
+      $or: [
+        { show_in_leadership_section: true },
+        { is_important_member: true }
+      ]
+    })
   ]);
 
   res.render("admin/dashboard", {
@@ -41,7 +55,8 @@ async function renderDashboard(req, res) {
       pendingMembers: pendingCount,
       approvedMembers: approvedCount,
       leadershipMembers: leadershipCount
-    }
+    },
+    formData: res.locals.formState.adminCreateMember || {}
   });
 }
 
@@ -94,13 +109,29 @@ async function handleCreateMember(req, res) {
   const photo = getPhotoPath(req.file);
 
   if (req.photoUploadError) {
+    setFormState(req, "adminCreateMember", req.body);
     req.session.flash = { type: "error", message: req.photoUploadError };
     return res.redirect("/admin/dashboard");
   }
 
   if (!payload.full_name || !payload.email || !password) {
     removeUploadedMemberPhoto(photo);
+    setFormState(req, "adminCreateMember", req.body);
     req.session.flash = { type: "error", message: "Full name, email, and password are required." };
+    return res.redirect("/admin/dashboard");
+  }
+
+  if (!isValidEmail(payload.email)) {
+    removeUploadedMemberPhoto(photo);
+    setFormState(req, "adminCreateMember", req.body);
+    req.session.flash = { type: "error", message: getEmailValidationMessage("email address") };
+    return res.redirect("/admin/dashboard");
+  }
+
+  if (payload.phone && !isValidIndianMobileNumber(payload.phone, { allowEmpty: true })) {
+    removeUploadedMemberPhoto(photo);
+    setFormState(req, "adminCreateMember", req.body);
+    req.session.flash = { type: "error", message: getMobileValidationMessage("mobile number") };
     return res.redirect("/admin/dashboard");
   }
 
@@ -115,12 +146,17 @@ async function handleCreateMember(req, res) {
     approved_by_admin: false
   });
 
-  if (membership_status === "approved") {
-    await approveMember(member);
-  } else if (membership_status === "rejected") {
-    await rejectMember(member);
-  } else {
-    await member.save();
+  try {
+    if (membership_status === "approved") {
+      await approveMember(member);
+    } else if (membership_status === "rejected") {
+      await rejectMember(member);
+    } else {
+      await member.save();
+    }
+  } catch (error) {
+    removeUploadedMemberPhoto(photo);
+    throw error;
   }
 
   req.session.flash = { type: "success", message: "Member created successfully." };
@@ -138,7 +174,8 @@ async function renderEditMember(req, res) {
   return res.render("admin/member-edit", {
     page: buildPage(`/admin/members/${req.params.id}/edit`, "Edit Member"),
     member,
-    memberRoles: MEMBER_ROLES
+    memberRoles: MEMBER_ROLES,
+    formData: res.locals.formState.adminEditMember || {}
   });
 }
 
@@ -152,6 +189,7 @@ async function handleUpdateMember(req, res) {
   }
 
   if (req.photoUploadError) {
+    setFormState(req, "adminEditMember", req.body);
     req.session.flash = { type: "error", message: req.photoUploadError };
     return res.redirect(`/admin/members/${req.params.id}/edit`);
   }
@@ -161,22 +199,47 @@ async function handleUpdateMember(req, res) {
   Object.assign(member, buildAdminMemberPayload(req.body, member));
   member.photo = req.file ? getPhotoPath(req.file) : member.photo;
 
+  if (!isValidEmail(member.email)) {
+    removeUploadedMemberPhoto(getPhotoPath(req.file));
+    member.photo = previousPhoto;
+    setFormState(req, "adminEditMember", req.body);
+    req.session.flash = { type: "error", message: getEmailValidationMessage("email address") };
+    return res.redirect(`/admin/members/${req.params.id}/edit`);
+  }
+
+  if (member.phone && !isValidIndianMobileNumber(member.phone, { allowEmpty: true })) {
+    removeUploadedMemberPhoto(getPhotoPath(req.file));
+    member.photo = previousPhoto;
+    setFormState(req, "adminEditMember", req.body);
+    req.session.flash = { type: "error", message: getMobileValidationMessage("mobile number") };
+    return res.redirect(`/admin/members/${req.params.id}/edit`);
+  }
+
   if (req.body.password) {
     member.password_hash = await bcrypt.hash(req.body.password, 12);
   }
 
   const nextStatus = req.body.membership_status || member.membership_status;
 
-  if (nextStatus === "approved") {
-    await approveMember(member);
-  } else if (nextStatus === "rejected") {
-    await rejectMember(member);
-  } else {
-    member.membership_status = "pending";
-    member.member_id = null;
-    member.approval_date = null;
-    member.approved_by_admin = false;
-    await member.save();
+  try {
+    if (nextStatus === "approved") {
+      await approveMember(member);
+    } else if (nextStatus === "rejected") {
+      await rejectMember(member);
+    } else {
+      member.membership_status = "pending";
+      member.member_id = null;
+      member.approval_date = null;
+      member.approved_by_admin = false;
+      await member.save();
+    }
+  } catch (error) {
+    if (req.file) {
+      removeUploadedMemberPhoto(member.photo);
+      member.photo = previousPhoto;
+    }
+
+    throw error;
   }
 
   if (req.file && previousPhoto && previousPhoto !== member.photo) {

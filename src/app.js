@@ -7,7 +7,10 @@ const publicRoutes = require("./routes/publicRoutes");
 const authRoutes = require("./routes/authRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const memberRoutes = require("./routes/memberRoutes");
+const { errorHandler } = require("./middleware/errorHandler");
 const { notFoundHandler } = require("./middleware/notFound");
+const { secureHeaders } = require("./middleware/security");
+const { attachSiteSettings } = require("./middleware/siteSettingsLocals");
 const { attachViewLocals } = require("./middleware/viewLocals");
 const { getAppConfig } = require("./config/env");
 
@@ -23,6 +26,7 @@ function createApp() {
   app.set("view engine", "ejs");
   app.set("views", path.join(__dirname, "views"));
 
+  app.use(secureHeaders);
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
   app.use(express.static(path.join(__dirname, "..", "public")));
@@ -39,12 +43,14 @@ function createApp() {
     }
   }));
   app.use(attachViewLocals);
+  app.use(attachSiteSettings);
 
   app.use("/", publicRoutes);
   app.use("/auth", authRoutes);
   app.use("/admin", adminRoutes);
   app.use("/member", memberRoutes);
   app.use(notFoundHandler);
+  app.use(errorHandler);
 
   return app;
 }

@@ -4,10 +4,12 @@
     <div class="mb-16 grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-12 lg:gap-8">
       <div class="lg:col-span-4">
         <a href="/" class="group mb-6 flex items-center gap-3">
-          <img src="<%= site.logoPath %>" alt="<%= site.title %> logo" class="h-11 w-11 rounded-xl object-contain transition group-hover:scale-105" />
-          <span class="text-2xl font-bold tracking-tight text-white"><%= site.title %></span>
+          <span class="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-slate-800 bg-slate-900 p-1.5 transition group-hover:scale-105">
+            <img src="<%= siteSettings.logo_path %>" alt="<%= siteSettings.site_title %> logo" class="h-full w-full object-contain" />
+          </span>
+          <span class="text-2xl font-bold tracking-tight text-white"><%= siteSettings.site_title %></span>
         </a>
-        <p class="mb-8 max-w-sm leading-relaxed text-slate-400"><%= site.tagline %></p>
+        <p class="mb-8 max-w-sm leading-relaxed text-slate-400"><%= siteSettings.site_tagline %></p>
         <div class="flex gap-3">
           <% site.socialLinks.forEach((link) => { %>
             <a href="<%= link.href %>" class="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-800 bg-slate-900 text-slate-400 transition hover:-translate-y-1 hover:border-primary hover:bg-primary hover:text-white" aria-label="<%= link.label %>">
@@ -23,7 +25,6 @@
           <% site.primaryNav.forEach((link) => { %>
             <li><a href="<%= link.href %>" class="inline-flex items-center text-slate-400 transition hover:text-primary"><%= link.label %></a></li>
           <% }) %>
-          <li><a href="/notices" class="inline-flex items-center text-slate-400 transition hover:text-primary">Notice Board</a></li>
         </ul>
       </div>
 
@@ -39,16 +40,16 @@
       <div class="lg:col-span-3">
         <h3 class="mb-6 text-lg font-bold text-white">Contact Us</h3>
         <div class="space-y-5 text-slate-400">
-          <div><%= site.contact.addressLines.join(", ") %></div>
-          <div><a href="tel:<%= site.contact.phone %>" class="hover:text-white"><%= site.contact.phone %></a></div>
-          <div><a href="https://wa.me/<%= site.contact.whatsapp %>" class="text-secondary hover:text-teal-300">Chat on WhatsApp</a></div>
-          <div><a href="mailto:<%= site.contact.email %>" class="hover:text-white"><%= site.contact.email %></a></div>
+          <div><%= siteSettings.address %></div>
+          <div><a href="tel:<%= siteSettings.contact_phone %>" class="hover:text-white"><%= siteSettings.contact_phone %></a></div>
+          <div><a href="https://wa.me/<%= siteSettings.whatsapp_number %>" class="text-secondary hover:text-teal-300">Chat on WhatsApp</a></div>
+          <div><a href="mailto:<%= siteSettings.contact_email %>" class="hover:text-white"><%= siteSettings.contact_email %></a></div>
         </div>
       </div>
     </div>
 
     <div class="flex flex-col items-center justify-between gap-4 border-t border-slate-800/60 pt-8 text-sm text-slate-500 md:flex-row">
-      <p>&copy; <%= new Date().getFullYear() %> <%= site.title %>. All rights reserved.</p>
+      <p>&copy; <%= new Date().getFullYear() %> <%= siteSettings.footer_text %></p>
       <div class="flex gap-6">
         <a href="#" class="hover:text-white">Privacy Policy</a>
         <a href="#" class="hover:text-white">Terms of Service</a>

@@ -3,6 +3,7 @@
 
 <main class="min-h-screen bg-slate-50 px-4 py-12 pt-28 sm:px-6 lg:px-8">
   <div class="mx-auto max-w-3xl">
+    <% const values = typeof formData !== "undefined" && formData ? formData : (formState && formState.register) || {}; %>
     <%- include("../partials/flash") %>
     <% if (typeof formSubmitted !== "undefined" && formSubmitted) { %>
       <div class="mb-8 rounded-3xl border border-emerald-200 bg-emerald-50 px-6 py-4 text-sm text-emerald-800">
@@ -10,7 +11,7 @@
       </div>
     <% } %>
     <% if (typeof errorMessage !== "undefined" && errorMessage) { %>
-      <div class="mb-8 rounded-3xl border border-red-200 bg-red-50 px-6 py-4 text-sm text-red-800">
+      <div class="mb-8 rounded-3xl border border-red-200 bg-red-50 px-6 py-4 text-sm text-red-800" data-popup-message="<%= errorMessage %>">
         <%= errorMessage %>
       </div>
     <% } %>
@@ -20,29 +21,29 @@
         <p class="mt-2 text-white/80">Fill out the form below to apply for membership</p>
       </div>
 
-      <form action="/register" method="post" enctype="multipart/form-data" class="space-y-8 p-8">
+      <form action="/register" method="post" enctype="multipart/form-data" class="space-y-8 p-8" data-validate-popup>
         <div>
           <h2 class="mb-4 border-b border-slate-100 pb-2 text-lg font-semibold text-slate-900">Account Details</h2>
           <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div class="space-y-2">
               <label for="full_name" class="text-sm font-medium text-slate-700">Full Name *</label>
-              <input id="full_name" name="full_name" required class="w-full rounded-xl border-slate-200 text-slate-900" placeholder="John Doe" />
+              <input id="full_name" name="full_name" value="<%= values.full_name || '' %>" required class="w-full rounded-xl border-slate-200 text-slate-900" placeholder="John Doe" />
             </div>
             <div class="space-y-2">
               <label for="email" class="text-sm font-medium text-slate-700">Email Address *</label>
-              <input id="email" name="email" type="email" required class="w-full rounded-xl border-slate-200 text-slate-900" placeholder="john@example.com" />
+              <input id="email" name="email" type="email" value="<%= values.email || '' %>" required class="w-full rounded-xl border-slate-200 text-slate-900" placeholder="john@example.com" />
             </div>
             <div class="space-y-2">
               <label for="phone" class="text-sm font-medium text-slate-700">Phone Number *</label>
-              <input id="phone" name="phone" type="tel" required class="w-full rounded-xl border-slate-200 text-slate-900" placeholder="9876543210" />
+              <input id="phone" name="phone" type="tel" value="<%= values.phone || '' %>" required inputmode="numeric" data-validation-label="mobile number" class="w-full rounded-xl border-slate-200 text-slate-900" placeholder="9876543210" />
             </div>
             <div class="space-y-2">
               <label for="profession" class="text-sm font-medium text-slate-700">Profession</label>
-              <input id="profession" name="profession" class="w-full rounded-xl border-slate-200 text-slate-900" placeholder="Civil Engineer" />
+              <input id="profession" name="profession" value="<%= values.profession || '' %>" class="w-full rounded-xl border-slate-200 text-slate-900" placeholder="Civil Engineer" />
             </div>
             <div class="space-y-2">
               <label for="city" class="text-sm font-medium text-slate-700">City</label>
-              <input id="city" name="city" class="w-full rounded-xl border-slate-200 text-slate-900" placeholder="Jabalpur" />
+              <input id="city" name="city" value="<%= values.city || '' %>" class="w-full rounded-xl border-slate-200 text-slate-900" placeholder="Jabalpur" />
             </div>
             <div class="space-y-2">
               <label for="photo" class="text-sm font-medium text-slate-700">Profile Photo</label>
@@ -52,14 +53,14 @@
             <div class="space-y-2">
               <label for="role" class="text-sm font-medium text-slate-700">Role</label>
               <select id="role" name="role" class="w-full rounded-xl border-slate-200 text-slate-900">
-                <option>General Member</option>
-                <option>Core Committee Member</option>
-                <option>Media Prabhari</option>
-                <option>Treasurer</option>
-                <option>Joint Secretary</option>
-                <option>Secretary</option>
-                <option>Vice President</option>
-                <option>President</option>
+                <option <%= (values.role || 'General Member') === 'General Member' ? 'selected' : '' %>>General Member</option>
+                <option <%= values.role === 'Core Committee Member' ? 'selected' : '' %>>Core Committee Member</option>
+                <option <%= values.role === 'Media Prabhari' ? 'selected' : '' %>>Media Prabhari</option>
+                <option <%= values.role === 'Treasurer' ? 'selected' : '' %>>Treasurer</option>
+                <option <%= values.role === 'Joint Secretary' ? 'selected' : '' %>>Joint Secretary</option>
+                <option <%= values.role === 'Secretary' ? 'selected' : '' %>>Secretary</option>
+                <option <%= values.role === 'Vice President' ? 'selected' : '' %>>Vice President</option>
+                <option <%= values.role === 'President' ? 'selected' : '' %>>President</option>
               </select>
             </div>
             <div class="space-y-2">
@@ -79,39 +80,39 @@
             <div class="space-y-2">
               <label for="gender" class="text-sm font-medium text-slate-700">Gender</label>
               <select id="gender" name="gender" class="w-full rounded-xl border-slate-200 text-slate-900">
-                <option value="">Select gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-                <option value="prefer_not_to_say">Prefer not to say</option>
+                <option value="" <%= !values.gender ? 'selected' : '' %>>Select gender</option>
+                <option value="male" <%= values.gender === 'male' ? 'selected' : '' %>>Male</option>
+                <option value="female" <%= values.gender === 'female' ? 'selected' : '' %>>Female</option>
+                <option value="other" <%= values.gender === 'other' ? 'selected' : '' %>>Other</option>
+                <option value="prefer_not_to_say" <%= values.gender === 'prefer_not_to_say' ? 'selected' : '' %>>Prefer not to say</option>
               </select>
             </div>
             <div class="space-y-2">
               <label for="dob" class="text-sm font-medium text-slate-700">Date of Birth</label>
-              <input id="dob" name="dob" type="date" class="w-full rounded-xl border-slate-200 text-slate-900" />
+              <input id="dob" name="dob" type="date" value="<%= values.dob || '' %>" class="w-full rounded-xl border-slate-200 text-slate-900" />
             </div>
             <div class="space-y-2">
               <label for="marital_status" class="text-sm font-medium text-slate-700">Marital Status</label>
               <select id="marital_status" name="marital_status" class="w-full rounded-xl border-slate-200 text-slate-900">
-                <option value="">Select status</option>
-                <option value="single">Single</option>
-                <option value="married">Married</option>
-                <option value="divorced">Divorced</option>
-                <option value="widowed">Widowed</option>
-                <option value="prefer_not_to_say">Prefer not to say</option>
+                <option value="" <%= !values.marital_status ? 'selected' : '' %>>Select status</option>
+                <option value="single" <%= values.marital_status === 'single' ? 'selected' : '' %>>Single</option>
+                <option value="married" <%= values.marital_status === 'married' ? 'selected' : '' %>>Married</option>
+                <option value="divorced" <%= values.marital_status === 'divorced' ? 'selected' : '' %>>Divorced</option>
+                <option value="widowed" <%= values.marital_status === 'widowed' ? 'selected' : '' %>>Widowed</option>
+                <option value="prefer_not_to_say" <%= values.marital_status === 'prefer_not_to_say' ? 'selected' : '' %>>Prefer not to say</option>
               </select>
             </div>
-            <div class="space-y-2">
+            <div class="space-y-2" data-marriage-field>
               <label for="spouse_name" class="text-sm font-medium text-slate-700">Spouse Name</label>
-              <input id="spouse_name" name="spouse_name" class="w-full rounded-xl border-slate-200 text-slate-900" />
+              <input id="spouse_name" name="spouse_name" value="<%= values.spouse_name || '' %>" class="w-full rounded-xl border-slate-200 text-slate-900" />
             </div>
-            <div class="space-y-2">
+            <div class="space-y-2" data-marriage-field>
               <label for="marriage_date" class="text-sm font-medium text-slate-700">Marriage Date</label>
-              <input id="marriage_date" name="marriage_date" type="date" class="w-full rounded-xl border-slate-200 text-slate-900" />
+              <input id="marriage_date" name="marriage_date" type="date" value="<%= values.marriage_date || '' %>" class="w-full rounded-xl border-slate-200 text-slate-900" />
             </div>
             <div class="space-y-2 md:col-span-2">
               <label for="address" class="text-sm font-medium text-slate-700">Address</label>
-              <textarea id="address" name="address" class="min-h-[120px] w-full rounded-xl border-slate-200 text-slate-900"></textarea>
+              <textarea id="address" name="address" class="min-h-[120px] w-full rounded-xl border-slate-200 text-slate-900"><%= values.address || '' %></textarea>
             </div>
           </div>
         </div>
@@ -130,3 +131,30 @@
 
 <%- include("../partials/footer") %>
 <%- include("../partials/scripts") %>
+<script>
+  (() => {
+    const maritalStatusInput = document.getElementById("marital_status");
+    const marriageFields = Array.from(document.querySelectorAll("[data-marriage-field]"));
+
+    if (!maritalStatusInput || !marriageFields.length) {
+      return;
+    }
+
+    function updateMarriageFields() {
+      const shouldShowMarriageFields = maritalStatusInput.value === "married";
+
+      marriageFields.forEach((field) => {
+        field.classList.toggle("hidden", !shouldShowMarriageFields);
+
+        field.querySelectorAll("input, select, textarea").forEach((input) => {
+          if (!shouldShowMarriageFields) {
+            input.value = "";
+          }
+        });
+      });
+    }
+
+    maritalStatusInput.addEventListener("change", updateMarriageFields);
+    updateMarriageFields();
+  })();
+</script>

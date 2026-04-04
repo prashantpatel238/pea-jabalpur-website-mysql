@@ -1,5 +1,6 @@
 const express = require("express");
 const { uploadMemberPhoto } = require("../middleware/memberPhotoUpload");
+const { uploadSiteAssets } = require("../middleware/siteSettingsUpload");
 
 const {
   renderDashboard,
@@ -17,12 +18,18 @@ const {
   handleUpdateNotice,
   handleDeleteNotice
 } = require("../controllers/adminController");
+const {
+  renderSettings,
+  handleUpdateSettings
+} = require("../controllers/adminSettingsController");
 const { requireAdmin } = require("../middleware/auth");
 
 const router = express.Router();
 
 router.get("/", requireAdmin, (req, res) => res.redirect("/admin/dashboard"));
 router.get("/dashboard", requireAdmin, renderDashboard);
+router.get("/settings", requireAdmin, renderSettings);
+router.post("/settings", requireAdmin, uploadSiteAssets, handleUpdateSettings);
 router.get("/members/pending", requireAdmin, renderPendingMembers);
 router.get("/members/approved", requireAdmin, renderApprovedMembers);
 router.get("/members/:id", requireAdmin, renderMemberDetail);

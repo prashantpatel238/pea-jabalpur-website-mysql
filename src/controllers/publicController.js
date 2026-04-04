@@ -13,22 +13,23 @@ const { buildDirectoryMember, buildImportantMember } = require("../utils/memberV
 const { calculateAge, normalizePublicMemberInput } = require("../utils/memberData");
 const { buildMemberCelebrationNotices } = require("../utils/noticeFeed");
 const { getPhotoPath, removeUploadedMemberPhoto } = require("../middleware/memberPhotoUpload");
+const { getLeadershipMembers } = require("../services/leadershipService");
+const { sanitizeFormState } = require("../utils/formState");
+const {
+  getEmailValidationMessage,
+  getMobileValidationMessage,
+  isValidEmail,
+  isValidIndianMobileNumber
+} = require("../utils/validation");
 
 function getBaseViewData(page) {
   return {
-    site,
     page
   };
 }
 
 async function renderHome(req, res) {
-  const leaders = await Member.find({
-    membership_status: "approved",
-    role: { $ne: "General Member" }
-  })
-    .sort({ important_member_order: 1, full_name: 1 })
-    .limit(6)
-    .lean();
+  const leaders = await getLeadershipMembers({ limit: 6 });
 
   res.render("public/home", {
     ...getBaseViewData({ title: `${site.title} - Connecting Engineering Excellence`, path: "/" }),
@@ -52,13 +53,7 @@ function renderContact(req, res) {
 }
 
 async function renderLeadership(req, res) {
-  const members = await Member.find({
-    membership_status: "approved",
-    show_in_leadership_section: true
-  })
-    .select("full_name role leadership_title profession city email phone photo show_city_in_directory show_profession_in_directory show_email_in_directory show_mobile_in_directory show_photo_in_directory")
-    .sort({ important_member_order: 1, full_name: 1 })
-    .lean();
+  const members = await getLeadershipMembers();
 
   res.render("public/leadership", {
     ...getBaseViewData({ title: `Leadership - ${site.title}`, path: "/leadership" }),
@@ -125,16 +120,16 @@ async function renderDirectory(req, res) {
 
 function renderRegistration(req, res) {
   res.render("public/register", {
-    ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" })
+    ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
+    formData: res.locals.formState.register || {}
   });
 }
 
 async function renderNotices(req, res) {
   const notices = await Notice.find({
-    is_published: true,
-    $or: [{ expiry_date: null }, { expiry_date: { $gte: new Date() } }]
+    is_published: true
   })
-    .sort({ event_date: 1, sort_order: 1, publish_date: -1 })
+    .sort({ event_date: -1, publish_date: -1, sort_order: 1 })
     .lean();
 
   const celebrants = await Member.find({
@@ -152,7 +147,7 @@ async function renderNotices(req, res) {
       sort_order: notice.sort_order || 0
     })),
     ...buildMemberCelebrationNotices(celebrants)
-  ].sort((a, b) => new Date(a.event_date) - new Date(b.event_date) || a.sort_order - b.sort_order);
+  ].sort((a, b) => new Date(b.event_date) - new Date(a.event_date) || a.sort_order - b.sort_order);
 
   res.render("public/notices", {
     ...getBaseViewData({ title: `Notice Board - ${site.title}`, path: "/notices" }),
@@ -184,7 +179,8 @@ async function handleRegistrationRequest(req, res) {
   if (req.photoUploadError) {
     return res.status(400).render("public/register", {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
-      errorMessage: req.photoUploadError
+      errorMessage: req.photoUploadError,
+      formData: sanitizeFormState(req.body)
     });
   }
 
@@ -192,7 +188,8 @@ async function handleRegistrationRequest(req, res) {
     removeUploadedMemberPhoto(photo);
     return res.status(400).render("public/register", {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
-      errorMessage: "Full name, email, phone, and password are required."
+      errorMessage: "Full name, email, phone, and password are required.",
+      formData: sanitizeFormState(req.body)
     });
   }
 
@@ -200,7 +197,26 @@ async function handleRegistrationRequest(req, res) {
     removeUploadedMemberPhoto(photo);
     return res.status(400).render("public/register", {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
-      errorMessage: "Password and confirm password must match."
+      errorMessage: "Password and confirm password must match.",
+      formData: sanitizeFormState(req.body)
+    });
+  }
+
+  if (!isValidEmail(input.email)) {
+    removeUploadedMemberPhoto(photo);
+    return res.status(400).render("public/register", {
+      ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
+      errorMessage: getEmailValidationMessage("email address"),
+      formData: sanitizeFormState(req.body)
+    });
+  }
+
+  if (!isValidIndianMobileNumber(input.phone)) {
+    removeUploadedMemberPhoto(photo);
+    return res.status(400).render("public/register", {
+      ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
+      errorMessage: getMobileValidationMessage("mobile number"),
+      formData: sanitizeFormState(req.body)
     });
   }
 
@@ -210,25 +226,32 @@ async function handleRegistrationRequest(req, res) {
     removeUploadedMemberPhoto(photo);
     return res.status(409).render("public/register", {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
-      errorMessage: "A member with this email already exists."
+      errorMessage: "A member with this email already exists.",
+      formData: sanitizeFormState(req.body)
     });
   }
 
   const password_hash = await bcrypt.hash(password, 12);
 
-  await Member.create({
-    ...input,
-    photo,
-    password_hash,
-    age: calculateAge(input.dob),
-    membership_status: "pending",
-    registration_source: "public_form",
-    show_in_directory: false
-  });
+  try {
+    await Member.create({
+      ...input,
+      photo,
+      password_hash,
+      age: calculateAge(input.dob),
+      membership_status: "pending",
+      registration_source: "public_form",
+      show_in_directory: false
+    });
+  } catch (error) {
+    removeUploadedMemberPhoto(photo);
+    throw error;
+  }
 
   return res.status(201).render("public/register", {
     ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
-    formSubmitted: true
+    formSubmitted: true,
+    formData: {}
   });
 }
 

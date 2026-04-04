@@ -1,5 +1,6 @@
 const express = require("express");
 const { uploadMemberPhoto } = require("../middleware/memberPhotoUpload");
+const { renderRobotsTxt, renderSitemapXml } = require("../controllers/seoController");
 const {
   renderHome,
   renderAbout,
@@ -15,6 +16,8 @@ const {
 
 const router = express.Router();
 
+router.get("/robots.txt", renderRobotsTxt);
+router.get("/sitemap.xml", renderSitemapXml);
 router.get("/", renderHome);
 router.get("/about", renderAbout);
 router.get("/contact", renderContact);

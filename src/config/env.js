@@ -22,7 +22,8 @@ function getAppConfig() {
     isProduction: process.env.NODE_ENV === "production",
     port: Number(process.env.PORT) || 3000,
     mongoUri: process.env.MONGODB_URI,
-    sessionSecret: process.env.SESSION_SECRET
+    sessionSecret: process.env.SESSION_SECRET,
+    siteUrl: process.env.SITE_URL
   };
 }
 

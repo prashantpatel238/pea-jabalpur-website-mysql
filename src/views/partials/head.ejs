@@ -1,11 +1,29 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <% const seoTitle = page.title; %>
+    <% const seoDescription = page.description || siteSettings.site_tagline; %>
+    <% const seoCanonical = page.canonical ? `${siteOrigin}${page.canonical}` : currentUrl; %>
+    <% const seoImage = defaultSeoImage || (siteSettings.logo_path ? `${siteOrigin}${siteSettings.logo_path}` : ""); %>
+    <% const seoRobots = page.robots || defaultRobots || "index, follow"; %>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%= page.title %></title>
-    <meta name="description" content="<%= page.description || siteSettings.site_tagline %>" />
+    <title><%= seoTitle %></title>
+    <meta name="description" content="<%= seoDescription %>" />
+    <meta name="robots" content="<%= seoRobots %>" />
+    <link rel="canonical" href="<%= seoCanonical %>" />
     <% if (siteSettings.favicon_path) { %><link rel="icon" href="<%= siteSettings.favicon_path %>" /><% } %>
+    <meta property="og:type" content="<%= page.ogType || 'website' %>" />
+    <meta property="og:title" content="<%= seoTitle %>" />
+    <meta property="og:description" content="<%= seoDescription %>" />
+    <meta property="og:url" content="<%= seoCanonical %>" />
+    <meta property="og:site_name" content="<%= siteSettings.site_title %>" />
+    <% if (seoImage) { %><meta property="og:image" content="<%= seoImage %>" /><% } %>
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="<%= seoTitle %>" />
+    <meta name="twitter:description" content="<%= seoDescription %>" />
+    <% if (seoImage) { %><meta name="twitter:image" content="<%= seoImage %>" /><% } %>
+    <meta name="theme-color" content="#1E40AF" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -30,5 +48,36 @@
       };
     </script>
     <link rel="stylesheet" href="/css/site.css" />
+    <script type="application/ld+json">
+      <%- JSON.stringify({
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": `${siteOrigin}/#organization`,
+            name: siteSettings.site_title,
+            url: siteOrigin,
+            logo: seoImage || undefined,
+            email: siteSettings.contact_email || undefined,
+            telephone: siteSettings.contact_phone || undefined,
+            address: siteSettings.address ? {
+              "@type": "PostalAddress",
+              streetAddress: siteSettings.address
+            } : undefined,
+            sameAs: site.socialLinks.filter((link) => link.href && link.href !== "#").map((link) => link.href)
+          },
+          {
+            "@type": "WebSite",
+            "@id": `${siteOrigin}/#website`,
+            url: siteOrigin,
+            name: siteSettings.site_title,
+            description: siteSettings.site_tagline,
+            publisher: {
+              "@id": `${siteOrigin}/#organization`
+            }
+          }
+        ]
+      }) %>
+    </script>
   </head>
   <body class="bg-slate-50 text-slate-900 antialiased">

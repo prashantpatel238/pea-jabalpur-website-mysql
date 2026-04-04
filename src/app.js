@@ -42,8 +42,8 @@ function createApp() {
       maxAge: 1000 * 60 * 60 * 8
     }
   }));
-  app.use(attachViewLocals);
   app.use(attachSiteSettings);
+  app.use(attachViewLocals);
 
   app.use("/", publicRoutes);
   app.use("/auth", authRoutes);

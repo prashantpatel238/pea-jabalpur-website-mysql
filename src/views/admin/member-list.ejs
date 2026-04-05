@@ -27,13 +27,13 @@
                 <div class="mt-2 text-sm text-slate-500">Status: <%= member.membership_status %><% if (member.member_id) { %> | Member ID: <%= member.member_id %><% } %></div>
               </div>
               <div class="flex flex-wrap gap-3">
-                <a href="/admin/members/<%= member._id %>" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">View</a>
-                <a href="/admin/members/<%= member._id %>/edit" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Edit</a>
+                <a href="/admin/members/<%= member.id %>" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">View</a>
+                <a href="/admin/members/<%= member.id %>/edit" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Edit</a>
                 <% if (memberStatus === "pending") { %>
-                  <form action="/admin/members/<%= member._id %>/approve" method="post">
+                  <form action="/admin/members/<%= member.id %>/approve" method="post">
                     <button type="submit" class="rounded-xl bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">Approve</button>
                   </form>
-                  <form action="/admin/members/<%= member._id %>/reject" method="post">
+                  <form action="/admin/members/<%= member.id %>/reject" method="post">
                     <button type="submit" class="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white">Reject</button>
                   </form>
                 <% } %>

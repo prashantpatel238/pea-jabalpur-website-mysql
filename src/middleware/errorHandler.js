@@ -21,6 +21,13 @@ function getDuplicateKeyMessage(error) {
 }
 
 function normalizeError(error) {
+  if (error && error.code === "ER_DUP_ENTRY") {
+    return {
+      statusCode: 409,
+      message: "A record with the same unique value already exists."
+    };
+  }
+
   if (error && error.code === 11000) {
     return {
       statusCode: 409,

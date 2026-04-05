@@ -1,17 +1,15 @@
-const Counter = require("../models/Counter");
+const { query } = require("../db/mysql");
 
 async function generateMemberId() {
-  const counter = await Counter.findOneAndUpdate(
-    { key: "member_id" },
-    { $inc: { value: 1 } },
-    {
-      new: true,
-      upsert: true,
-      setDefaultsOnInsert: true
-    }
+  const rows = await query(
+    `SELECT COALESCE(MAX(CAST(SUBSTRING(member_id, 5) AS UNSIGNED)), 0) AS max_sequence
+     FROM members
+     WHERE member_id IS NOT NULL
+       AND member_id LIKE 'PEA-%'`
   );
 
-  return `PEA-${String(counter.value).padStart(4, "0")}`;
+  const nextSequence = Number(rows[0]?.max_sequence || 0) + 1;
+  return `PEA-${String(nextSequence).padStart(4, "0")}`;
 }
 
 module.exports = {

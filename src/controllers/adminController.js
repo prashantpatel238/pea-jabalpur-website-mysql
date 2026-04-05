@@ -1,7 +1,21 @@
 const bcrypt = require("bcryptjs");
 
-const { Member, MEMBER_ROLES } = require("../models/Member");
-const Notice = require("../models/Notice");
+const { MEMBER_ROLES } = require("../constants/memberRoles");
+const {
+  countMembers,
+  createMember,
+  deleteMemberById,
+  findMemberById,
+  listMembers,
+  updateMemberById
+} = require("../repositories/adminMemberRepository");
+const {
+  createNotice,
+  deleteNoticeById,
+  findNoticeById,
+  listNotices,
+  updateNoticeById
+} = require("../repositories/noticeRepository");
 const { buildPage } = require("../utils/page");
 const { buildAdminMemberPayload, parseCheckbox } = require("../utils/memberData");
 const { approveMember, rejectMember } = require("../services/memberApprovalService");
@@ -28,20 +42,13 @@ function getAdminMemberRedirectPath(status) {
 
 async function renderDashboard(req, res) {
   const [pendingMembers, members, notices, totalMembers, pendingCount, approvedCount, leadershipCount] = await Promise.all([
-    Member.find({ membership_status: "pending" }).sort({ createdAt: -1 }).lean(),
-    Member.find().sort({ createdAt: -1 }).lean(),
-    Notice.find().sort({ createdAt: -1 }).lean(),
-    Member.countDocuments(),
-    Member.countDocuments({ membership_status: "pending" }),
-    Member.countDocuments({ membership_status: "approved" }),
-    Member.countDocuments({
-      membership_status: "approved",
-      role: { $ne: "General Member" },
-      $or: [
-        { show_in_leadership_section: true },
-        { is_important_member: true }
-      ]
-    })
+    listMembers({ membershipStatus: "pending" }),
+    listMembers(),
+    listNotices(),
+    countMembers(),
+    countMembers({ membershipStatus: "pending" }),
+    countMembers({ membershipStatus: "approved" }),
+    countMembers({ membershipStatus: "approved", leadershipOnly: true })
   ]);
 
   res.render("admin/dashboard", {
@@ -61,9 +68,7 @@ async function renderDashboard(req, res) {
 }
 
 async function renderPendingMembers(req, res) {
-  const members = await Member.find({ membership_status: "pending" })
-    .sort({ createdAt: -1 })
-    .lean();
+  const members = await listMembers({ membershipStatus: "pending" });
 
   res.render("admin/member-list", {
     page: buildPage("/admin/members/pending", "Pending Members"),
@@ -75,9 +80,7 @@ async function renderPendingMembers(req, res) {
 }
 
 async function renderApprovedMembers(req, res) {
-  const members = await Member.find({ membership_status: "approved" })
-    .sort({ approval_date: -1, full_name: 1 })
-    .lean();
+  const members = await listMembers({ membershipStatus: "approved" });
 
   res.render("admin/member-list", {
     page: buildPage("/admin/members/approved", "Approved Members"),
@@ -89,7 +92,7 @@ async function renderApprovedMembers(req, res) {
 }
 
 async function renderMemberDetail(req, res) {
-  const member = await Member.findById(req.params.id).lean();
+  const member = await findMemberById(req.params.id);
 
   if (!member) {
     req.session.flash = { type: "error", message: "Member not found." };
@@ -136,7 +139,7 @@ async function handleCreateMember(req, res) {
   }
 
   const password_hash = await bcrypt.hash(password, 12);
-  const member = new Member({
+  const member = await createMember({
     ...payload,
     photo,
     password_hash,
@@ -151,8 +154,6 @@ async function handleCreateMember(req, res) {
       await approveMember(member);
     } else if (membership_status === "rejected") {
       await rejectMember(member);
-    } else {
-      await member.save();
     }
   } catch (error) {
     removeUploadedMemberPhoto(photo);
@@ -164,7 +165,7 @@ async function handleCreateMember(req, res) {
 }
 
 async function renderEditMember(req, res) {
-  const member = await Member.findById(req.params.id).lean();
+  const member = await findMemberById(req.params.id);
 
   if (!member) {
     req.session.flash = { type: "error", message: "Member not found." };
@@ -180,7 +181,7 @@ async function renderEditMember(req, res) {
 }
 
 async function handleUpdateMember(req, res) {
-  const member = await Member.findById(req.params.id);
+  const member = await findMemberById(req.params.id);
 
   if (!member) {
     removeUploadedMemberPhoto(getPhotoPath(req.file));
@@ -196,62 +197,71 @@ async function handleUpdateMember(req, res) {
 
   const previousPhoto = member.photo;
 
-  Object.assign(member, buildAdminMemberPayload(req.body, member));
-  member.photo = req.file ? getPhotoPath(req.file) : member.photo;
+  const nextMember = {
+    ...member,
+    ...buildAdminMemberPayload(req.body, member),
+    photo: req.file ? getPhotoPath(req.file) : member.photo
+  };
 
-  if (!isValidEmail(member.email)) {
+  if (!isValidEmail(nextMember.email)) {
     removeUploadedMemberPhoto(getPhotoPath(req.file));
-    member.photo = previousPhoto;
     setFormState(req, "adminEditMember", req.body);
     req.session.flash = { type: "error", message: getEmailValidationMessage("email address") };
     return res.redirect(`/admin/members/${req.params.id}/edit`);
   }
 
-  if (member.phone && !isValidIndianMobileNumber(member.phone, { allowEmpty: true })) {
+  if (nextMember.phone && !isValidIndianMobileNumber(nextMember.phone, { allowEmpty: true })) {
     removeUploadedMemberPhoto(getPhotoPath(req.file));
-    member.photo = previousPhoto;
     setFormState(req, "adminEditMember", req.body);
     req.session.flash = { type: "error", message: getMobileValidationMessage("mobile number") };
     return res.redirect(`/admin/members/${req.params.id}/edit`);
   }
 
   if (req.body.password) {
-    member.password_hash = await bcrypt.hash(req.body.password, 12);
+    nextMember.password_hash = await bcrypt.hash(req.body.password, 12);
   }
 
-  const nextStatus = req.body.membership_status || member.membership_status;
+  const nextStatus = req.body.membership_status || nextMember.membership_status;
+  let updatedMember = null;
 
   try {
     if (nextStatus === "approved") {
-      await approveMember(member);
+      updatedMember = await approveMember({
+        ...nextMember,
+        membership_status: nextStatus
+      });
     } else if (nextStatus === "rejected") {
-      await rejectMember(member);
+      updatedMember = await rejectMember({
+        ...nextMember,
+        membership_status: nextStatus
+      });
     } else {
-      member.membership_status = "pending";
-      member.member_id = null;
-      member.approval_date = null;
-      member.approved_by_admin = false;
-      await member.save();
+      updatedMember = await updateMemberById(member.id, {
+        ...nextMember,
+        membership_status: "pending",
+        member_id: null,
+        approval_date: null,
+        approved_by_admin: false
+      });
     }
   } catch (error) {
     if (req.file) {
-      removeUploadedMemberPhoto(member.photo);
-      member.photo = previousPhoto;
+      removeUploadedMemberPhoto(nextMember.photo);
     }
 
     throw error;
   }
 
-  if (req.file && previousPhoto && previousPhoto !== member.photo) {
+  if (req.file && previousPhoto && previousPhoto !== updatedMember.photo) {
     removeUploadedMemberPhoto(previousPhoto);
   }
 
   req.session.flash = { type: "success", message: "Member updated successfully." };
-  return res.redirect(getAdminMemberRedirectPath(member.membership_status));
+  return res.redirect(getAdminMemberRedirectPath(updatedMember.membership_status));
 }
 
 async function handleApproveMember(req, res) {
-  const member = await Member.findById(req.params.id);
+  const member = await findMemberById(req.params.id);
 
   if (!member) {
     req.session.flash = { type: "error", message: "Member not found." };
@@ -264,7 +274,7 @@ async function handleApproveMember(req, res) {
 }
 
 async function handleRejectMember(req, res) {
-  const member = await Member.findById(req.params.id);
+  const member = await findMemberById(req.params.id);
 
   if (member) {
     await rejectMember(member);
@@ -275,7 +285,7 @@ async function handleRejectMember(req, res) {
 }
 
 async function handleDeleteMember(req, res) {
-  const member = await Member.findByIdAndDelete(req.params.id);
+  const member = await deleteMemberById(req.params.id);
 
   if (member && member.photo) {
     removeUploadedMemberPhoto(member.photo);
@@ -286,7 +296,7 @@ async function handleDeleteMember(req, res) {
 }
 
 async function handleCreateNotice(req, res) {
-  await Notice.create({
+  await createNotice({
     title: (req.body.title || "").trim(),
     content: (req.body.content || "").trim(),
     type: req.body.type || "notice",
@@ -303,7 +313,7 @@ async function handleCreateNotice(req, res) {
 }
 
 async function renderEditNotice(req, res) {
-  const notice = await Notice.findById(req.params.id).lean();
+  const notice = await findNoticeById(req.params.id);
 
   if (!notice) {
     req.session.flash = { type: "error", message: "Notice not found." };
@@ -317,7 +327,7 @@ async function renderEditNotice(req, res) {
 }
 
 async function handleUpdateNotice(req, res) {
-  await Notice.findByIdAndUpdate(req.params.id, {
+  await updateNoticeById(req.params.id, {
     title: (req.body.title || "").trim(),
     content: (req.body.content || "").trim(),
     type: req.body.type || "notice",
@@ -333,7 +343,7 @@ async function handleUpdateNotice(req, res) {
 }
 
 async function handleDeleteNotice(req, res) {
-  await Notice.findByIdAndDelete(req.params.id);
+  await deleteNoticeById(req.params.id);
   req.session.flash = { type: "success", message: "Notice deleted successfully." };
   return res.redirect("/admin/dashboard");
 }

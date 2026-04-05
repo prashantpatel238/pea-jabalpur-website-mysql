@@ -1,10 +1,14 @@
-const requiredEnvironmentVariables = [
+const requiredDatabaseEnvironmentVariables = [
   "DB_HOST",
   "DB_PORT",
   "DB_USER",
   "DB_PASSWORD",
   "DB_NAME",
-  "SESSION_SECRET",
+  "SESSION_SECRET"
+];
+
+const requiredEnvironmentVariables = [
+  ...requiredDatabaseEnvironmentVariables,
   "ADMIN_EMAIL",
   "ADMIN_PASSWORD",
   "ADMIN_NAME"
@@ -16,6 +20,18 @@ function getMissingEnvironmentVariables() {
 
 function validateEnvironment() {
   const missingVariables = getMissingEnvironmentVariables();
+
+  if (missingVariables.length) {
+    throw new Error(`Missing required environment variables: ${missingVariables.join(", ")}`);
+  }
+}
+
+function getMissingDatabaseEnvironmentVariables() {
+  return requiredDatabaseEnvironmentVariables.filter((name) => !process.env[name]);
+}
+
+function validateDatabaseEnvironment() {
+  const missingVariables = getMissingDatabaseEnvironmentVariables();
 
   if (missingVariables.length) {
     throw new Error(`Missing required environment variables: ${missingVariables.join(", ")}`);
@@ -45,6 +61,8 @@ function getAppConfig() {
 
 module.exports = {
   getAppConfig,
+  getMissingDatabaseEnvironmentVariables,
   getMissingEnvironmentVariables,
+  validateDatabaseEnvironment,
   validateEnvironment
 };

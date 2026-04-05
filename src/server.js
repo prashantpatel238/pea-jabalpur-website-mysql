@@ -5,6 +5,7 @@ const { connectToDatabase, disconnectFromDatabase, formatDatabaseConnectionError
 const { getAppConfig, validateEnvironment } = require("./config/env");
 const { ensureInitialAdmin } = require("./services/adminBootstrap");
 const { ensureSiteSettings } = require("./services/siteSettingsService");
+const { bootstrapDatabase } = require("./services/databaseBootstrap");
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ async function startServer() {
 
   try {
     await connectToDatabase();
+    await bootstrapDatabase();
     await ensureInitialAdmin();
     await ensureSiteSettings();
   } catch (error) {

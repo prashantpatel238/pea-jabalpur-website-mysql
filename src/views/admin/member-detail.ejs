@@ -37,16 +37,16 @@
           <h2 class="mb-5 text-xl font-bold text-slate-900">Actions</h2>
           <div class="space-y-3">
             <% if (member.membership_status !== 'approved') { %>
-              <form action="/admin/members/<%= member._id %>/approve" method="post">
+              <form action="/admin/members/<%= member.id %>/approve" method="post">
                 <button type="submit" class="w-full rounded-2xl bg-emerald-600 px-6 py-4 text-base font-semibold text-white">Approve Member</button>
               </form>
             <% } %>
             <% if (member.membership_status !== 'rejected') { %>
-              <form action="/admin/members/<%= member._id %>/reject" method="post">
+              <form action="/admin/members/<%= member.id %>/reject" method="post">
                 <button type="submit" class="w-full rounded-2xl bg-red-600 px-6 py-4 text-base font-semibold text-white">Reject Member</button>
               </form>
             <% } %>
-            <a href="/admin/members/<%= member._id %>/edit" class="block w-full rounded-2xl border border-slate-300 px-6 py-4 text-center text-base font-semibold text-slate-700">Edit Member</a>
+            <a href="/admin/members/<%= member.id %>/edit" class="block w-full rounded-2xl border border-slate-300 px-6 py-4 text-center text-base font-semibold text-slate-700">Edit Member</a>
           </div>
         </section>
 

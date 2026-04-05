@@ -7,16 +7,16 @@ const {
   aboutValues,
   resourcePages
 } = require("../config/publicContent");
-const { Member } = require("../models/Member");
-const Notice = require("../models/Notice");
 const {
   createPendingMemberRegistration,
+  listCelebrationMembers,
   findMemberIdByEmail
 } = require("../repositories/memberRepository");
 const {
   getPublicDirectoryFilterOptions,
   getPublicDirectoryMembers
 } = require("../repositories/publicMemberRepository");
+const { listPublishedNotices } = require("../repositories/noticeRepository");
 const { buildDirectoryMember, buildImportantMember } = require("../utils/memberView");
 const { calculateAge, normalizePublicMemberInput } = require("../utils/memberData");
 const { buildMemberCelebrationNotices } = require("../utils/noticeFeed");
@@ -132,20 +132,14 @@ function renderRegistration(req, res) {
 }
 
 async function renderNotices(req, res) {
-  const notices = await Notice.find({
-    is_published: true
-  })
-    .sort({ event_date: -1, publish_date: -1, sort_order: 1 })
-    .lean();
-
-  const celebrants = await Member.find({
-    membership_status: "approved",
-    $or: [{ dob: { $ne: null } }, { marriage_date: { $ne: null } }]
-  }).lean();
+  const [notices, celebrants] = await Promise.all([
+    listPublishedNotices(),
+    listCelebrationMembers()
+  ]);
 
   const feed = [
     ...notices.map((notice) => ({
-      id: notice._id.toString(),
+      id: String(notice.id),
       title: notice.title,
       content: notice.content,
       type: notice.type,

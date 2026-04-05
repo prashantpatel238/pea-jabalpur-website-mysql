@@ -2,9 +2,14 @@ const site = require("../config/site");
 const { buildAbsoluteUrl, getDefaultSeoImage, getSiteOrigin } = require("../utils/seo");
 
 function attachViewLocals(req, res, next) {
+  const currentUser = req.session ? req.session.user || null : null;
+
   res.locals.site = res.locals.site || site;
-  res.locals.currentAdmin = req.session ? req.session.admin : null;
-  res.locals.currentMember = req.session ? req.session.member : null;
+  res.locals.currentUser = currentUser;
+  res.locals.isAdmin = currentUser?.role === "admin";
+  res.locals.isMember = currentUser?.role === "member";
+  res.locals.currentAdmin = currentUser?.role === "admin" ? currentUser : null;
+  res.locals.currentMember = currentUser?.role === "member" ? currentUser : null;
   res.locals.flash = req.session ? req.session.flash : null;
   res.locals.formState = req.session ? req.session.formState || {} : {};
   res.locals.siteOrigin = getSiteOrigin();

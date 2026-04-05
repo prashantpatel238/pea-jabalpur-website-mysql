@@ -25,13 +25,15 @@ function buildMemberCelebrationNotices(members) {
   const items = [];
 
   members.forEach((member) => {
+    const memberIdentifier = member.id ?? member._id?.toString() ?? member.member_id ?? member.email ?? member.full_name;
+
     if (member.dob) {
       const nextBirthday = getNextOccurrence(member.dob);
       const daysUntil = getDaysUntil(nextBirthday);
 
       if (daysUntil >= 0 && daysUntil <= 30) {
         items.push({
-          id: `birthday-${member._id}`,
+          id: `birthday-${memberIdentifier}`,
           title: `${member.full_name}'s Birthday`,
           content: `Celebrating ${member.full_name} on ${nextBirthday.toLocaleDateString("en-IN", { day: "2-digit", month: "long" })}.`,
           type: "birthday",
@@ -47,7 +49,7 @@ function buildMemberCelebrationNotices(members) {
 
       if (daysUntil >= 0 && daysUntil <= 30) {
         items.push({
-          id: `anniversary-${member._id}`,
+          id: `anniversary-${memberIdentifier}`,
           title: `${member.full_name}'s Anniversary`,
           content: `Wishing ${member.full_name}${member.spouse_name ? ` and ${member.spouse_name}` : ""} a happy anniversary on ${nextAnniversary.toLocaleDateString("en-IN", { day: "2-digit", month: "long" })}.`,
           type: "anniversary",

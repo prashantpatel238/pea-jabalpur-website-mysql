@@ -4,6 +4,10 @@ const {
   findActiveAdminByEmail,
   updateAdminLastLoginAt
 } = require("../repositories/adminRepository");
+const {
+  findApprovedMemberByEmail,
+  updateMemberById
+} = require("../repositories/memberRepository");
 const { buildPage } = require("../utils/page");
 const { sanitizeFormState } = require("../utils/formState");
 
@@ -34,13 +38,17 @@ function destroySession(req) {
 }
 
 async function renderLogin(req, res) {
-  if (req.session.admin) {
+  if (req.session.user?.role === "admin") {
     return res.redirect("/admin/dashboard");
   }
 
+  if (req.session.user?.role === "member") {
+    return res.redirect("/member/dashboard");
+  }
+
   return res.render("auth/login", {
-    page: buildPage("/auth/login", "Admin Login"),
-    formData: res.locals.formState.adminLogin || {}
+    page: buildPage("/auth/login", "Login"),
+    formData: res.locals.formState.authLogin || {}
   });
 }
 
@@ -50,35 +58,66 @@ async function handleLogin(req, res) {
 
   const admin = await findActiveAdminByEmail(email);
 
-  if (!admin) {
+  if (admin) {
+    const isValidAdminPassword = await bcrypt.compare(password, admin.password_hash);
+
+    if (!isValidAdminPassword) {
+      return res.status(401).render("auth/login", {
+        page: buildPage("/auth/login", "Login"),
+        errorMessage: "Invalid email or password.",
+        formData: sanitizeFormState(req.body)
+      });
+    }
+
+    await updateAdminLastLoginAt(admin.id);
+
+    await regenerateSession(req);
+    req.session.user = {
+      id: String(admin.id),
+      email: admin.email,
+      role: "admin",
+      display_name: admin.display_name
+    };
+    req.session.flash = { type: "success", message: "Login successful." };
+
+    return res.redirect("/admin/dashboard");
+  }
+
+  const member = await findApprovedMemberByEmail(email);
+
+  if (!member) {
     return res.status(401).render("auth/login", {
-      page: buildPage("/auth/login", "Admin Login"),
-      errorMessage: "Invalid admin credentials.",
+      page: buildPage("/auth/login", "Login"),
+      errorMessage: "Invalid email or password.",
       formData: sanitizeFormState(req.body)
     });
   }
 
-  const isValidPassword = await bcrypt.compare(password, admin.password_hash);
+  const isValidMemberPassword = await bcrypt.compare(password, member.password_hash);
 
-  if (!isValidPassword) {
+  if (!isValidMemberPassword) {
     return res.status(401).render("auth/login", {
-      page: buildPage("/auth/login", "Admin Login"),
-      errorMessage: "Invalid admin credentials.",
+      page: buildPage("/auth/login", "Login"),
+      errorMessage: "Invalid email or password.",
       formData: sanitizeFormState(req.body)
     });
   }
 
-  await updateAdminLastLoginAt(admin.id);
+  await updateMemberById(member.id, {
+    ...member,
+    last_login_at: new Date()
+  });
 
   await regenerateSession(req);
-  req.session.admin = {
-    id: String(admin.id),
-    email: admin.email,
-    display_name: admin.display_name
+  req.session.user = {
+    id: String(member.id),
+    email: member.email,
+    role: "member",
+    display_name: member.full_name
   };
-  req.session.flash = { type: "success", message: "Admin login successful." };
+  req.session.flash = { type: "success", message: "Login successful." };
 
-  return res.redirect("/admin/dashboard");
+  return res.redirect("/member/dashboard");
 }
 
 async function handleLogout(req, res) {

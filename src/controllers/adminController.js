@@ -108,7 +108,7 @@ async function renderMemberDetail(req, res) {
 async function handleCreateMember(req, res) {
   const payload = buildAdminMemberPayload(req.body);
   const password = req.body.password || "";
-  const membership_status = req.body.membership_status || "approved";
+  const requestedMembershipStatus = req.body.membership_status || "approved";
   const photo = getPhotoPath(req.file);
 
   if (req.photoUploadError) {
@@ -143,17 +143,18 @@ async function handleCreateMember(req, res) {
     ...payload,
     photo,
     password_hash,
-    membership_status,
+    membership_status: "pending",
     member_id: null,
     approval_date: null,
     approved_by_admin: false
   });
+  let finalMember = member;
 
   try {
-    if (membership_status === "approved") {
-      await approveMember(member);
-    } else if (membership_status === "rejected") {
-      await rejectMember(member);
+    if (requestedMembershipStatus === "approved") {
+      finalMember = await approveMember(member);
+    } else if (requestedMembershipStatus === "rejected") {
+      finalMember = await rejectMember(member);
     }
   } catch (error) {
     removeUploadedMemberPhoto(photo);
@@ -161,7 +162,7 @@ async function handleCreateMember(req, res) {
   }
 
   req.session.flash = { type: "success", message: "Member created successfully." };
-  return res.redirect(getAdminMemberRedirectPath(member.membership_status));
+  return res.redirect(getAdminMemberRedirectPath(finalMember.membership_status));
 }
 
 async function renderEditMember(req, res) {
@@ -305,7 +306,7 @@ async function handleCreateNotice(req, res) {
     expiry_date: req.body.expiry_date || null,
     is_published: parseCheckbox(req.body, "is_published"),
     sort_order: Number(req.body.sort_order || 0),
-    created_by_admin: req.session.admin.email
+    created_by_admin: req.session.user.email
   });
 
   req.session.flash = { type: "success", message: "Notice saved successfully." };

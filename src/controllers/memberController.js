@@ -1,74 +1,42 @@
 const bcrypt = require("bcryptjs");
 
-const { Member } = require("../models/Member");
+const {
+  findMemberById,
+  updateMemberById
+} = require("../repositories/memberRepository");
 const { buildPage } = require("../utils/page");
 const { calculateAge, parseCheckbox } = require("../utils/memberData");
-const { sanitizeFormState, setFormState } = require("../utils/formState");
+const { setFormState } = require("../utils/formState");
 const {
   getMobileValidationMessage,
   isValidIndianMobileNumber,
   normalizeMobileNumber
 } = require("../utils/validation");
 
-async function renderMemberLogin(req, res) {
-  if (req.session.member) {
-    return res.redirect("/member/profile");
-  }
-
-  return res.render("member/login", {
-    page: buildPage("/member/login", "Member Login"),
-    formData: res.locals.formState.memberLogin || {}
-  });
+function redirectMemberLogin(req, res) {
+  return res.redirect("/auth/login");
 }
 
-async function handleMemberLogin(req, res) {
-  const email = (req.body.email || "").trim().toLowerCase();
-  const password = req.body.password || "";
+async function renderMemberDashboard(req, res) {
+  const member = await findMemberById(req.session.user.id);
 
-  const member = await Member.findOne({ email });
-
-  if (!member || member.membership_status !== "approved") {
-    return res.status(401).render("member/login", {
-      page: buildPage("/member/login", "Member Login"),
-      errorMessage: "Only approved members can sign in.",
-      formData: sanitizeFormState(req.body)
-    });
+  if (!member) {
+    req.session.flash = { type: "error", message: "Member profile not found." };
+    return res.redirect("/auth/login");
   }
 
-  const isValid = await bcrypt.compare(password, member.password_hash);
-
-  if (!isValid) {
-    return res.status(401).render("member/login", {
-      page: buildPage("/member/login", "Member Login"),
-      errorMessage: "Invalid member credentials.",
-      formData: sanitizeFormState(req.body)
-    });
-  }
-
-  member.last_login_at = new Date();
-  await member.save();
-
-  req.session.member = {
-    id: member._id.toString(),
-    full_name: member.full_name,
-    email: member.email
-  };
-  req.session.flash = { type: "success", message: "Member login successful." };
-  return res.redirect("/member/profile");
-}
-
-function handleMemberLogout(req, res) {
-  req.session.destroy(() => {
-    res.redirect("/member/login");
+  return res.render("member/dashboard", {
+    page: buildPage("/member/dashboard", "Member Dashboard"),
+    member
   });
 }
 
 async function renderMemberProfile(req, res) {
-  const member = await Member.findById(req.session.member.id).lean();
+  const member = await findMemberById(req.session.user.id);
 
   if (!member) {
     req.session.flash = { type: "error", message: "Member profile not found." };
-    return res.redirect("/member/login");
+    return res.redirect("/auth/login");
   }
 
   return res.render("member/profile", {
@@ -79,14 +47,13 @@ async function renderMemberProfile(req, res) {
 }
 
 async function handleUpdateMemberProfile(req, res) {
-  const member = await Member.findById(req.session.member.id);
+  const member = await findMemberById(req.session.user.id);
 
   if (!member) {
     req.session.flash = { type: "error", message: "Member profile not found." };
-    return res.redirect("/member/login");
+    return res.redirect("/auth/login");
   }
 
-  member.full_name = (req.body.full_name || "").trim();
   const normalizedPhone = normalizeMobileNumber(req.body.phone);
 
   if (normalizedPhone && !isValidIndianMobileNumber(normalizedPhone, { allowEmpty: true })) {
@@ -95,38 +62,41 @@ async function handleUpdateMemberProfile(req, res) {
     return res.redirect("/member/profile");
   }
 
-  member.phone = normalizedPhone;
-  member.profession = (req.body.profession || "").trim();
-  member.city = (req.body.city || "").trim();
-  member.address = (req.body.address || "").trim();
-  member.dob = req.body.dob || null;
-  member.gender = (req.body.gender || "").toLowerCase();
-  member.marital_status = (req.body.marital_status || "").toLowerCase();
-  member.marriage_date = req.body.marriage_date || null;
-  member.spouse_name = (req.body.spouse_name || "").trim();
-  member.show_in_directory = parseCheckbox(req.body, "show_in_directory");
-  member.show_mobile_in_directory = parseCheckbox(req.body, "show_mobile_in_directory");
-  member.show_email_in_directory = parseCheckbox(req.body, "show_email_in_directory");
-  member.show_city_in_directory = parseCheckbox(req.body, "show_city_in_directory");
-  member.show_profession_in_directory = parseCheckbox(req.body, "show_profession_in_directory");
-  member.show_photo_in_directory = parseCheckbox(req.body, "show_photo_in_directory");
-  member.age = calculateAge(member.dob);
+  const updatedMember = {
+    ...member,
+    full_name: (req.body.full_name || "").trim(),
+    phone: normalizedPhone,
+    profession: (req.body.profession || "").trim(),
+    city: (req.body.city || "").trim(),
+    address: (req.body.address || "").trim(),
+    dob: req.body.dob || null,
+    gender: (req.body.gender || "").toLowerCase(),
+    marital_status: (req.body.marital_status || "").toLowerCase(),
+    marriage_date: req.body.marriage_date || null,
+    spouse_name: (req.body.spouse_name || "").trim(),
+    show_in_directory: parseCheckbox(req.body, "show_in_directory"),
+    show_mobile_in_directory: parseCheckbox(req.body, "show_mobile_in_directory"),
+    show_email_in_directory: parseCheckbox(req.body, "show_email_in_directory"),
+    show_city_in_directory: parseCheckbox(req.body, "show_city_in_directory"),
+    show_profession_in_directory: parseCheckbox(req.body, "show_profession_in_directory"),
+    show_photo_in_directory: parseCheckbox(req.body, "show_photo_in_directory")
+  };
+  updatedMember.age = calculateAge(updatedMember.dob);
 
   if (req.body.password) {
-    member.password_hash = await bcrypt.hash(req.body.password, 12);
+    updatedMember.password_hash = await bcrypt.hash(req.body.password, 12);
   }
 
-  await member.save();
+  await updateMemberById(member.id, updatedMember);
 
-  req.session.member.full_name = member.full_name;
+  req.session.user.display_name = updatedMember.full_name;
   req.session.flash = { type: "success", message: "Profile updated successfully." };
-  return res.redirect("/member/profile");
+  return res.redirect("/member/dashboard");
 }
 
 module.exports = {
-  renderMemberLogin,
-  handleMemberLogin,
-  handleMemberLogout,
+  redirectMemberLogin,
+  renderMemberDashboard,
   renderMemberProfile,
   handleUpdateMemberProfile
 };

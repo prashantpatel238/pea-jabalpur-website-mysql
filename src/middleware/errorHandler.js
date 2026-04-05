@@ -61,7 +61,7 @@ function getRedirectTarget(req) {
   }
 
   if (req.originalUrl.startsWith("/member")) {
-    return req.get("referer") || "/member/profile";
+    return req.get("referer") || "/member/dashboard";
   }
 
   if (req.originalUrl.startsWith("/auth")) {
@@ -90,12 +90,7 @@ function storeFormStateForRequest(req) {
   }
 
   if (req.originalUrl.startsWith("/auth/login")) {
-    setFormState(req, "adminLogin", req.body);
-    return;
-  }
-
-  if (req.originalUrl.startsWith("/member/login")) {
-    setFormState(req, "memberLogin", req.body);
+    setFormState(req, "authLogin", req.body);
     return;
   }
 
@@ -131,14 +126,7 @@ function errorHandler(error, req, res, next) {
 
   if (req.originalUrl.startsWith("/auth/login")) {
     return res.status(normalized.statusCode).render("auth/login", {
-      page: buildPage("/auth/login", "Admin Login"),
-      errorMessage: normalized.message
-    });
-  }
-
-  if (req.originalUrl.startsWith("/member/login")) {
-    return res.status(normalized.statusCode).render("member/login", {
-      page: buildPage("/member/login", "Member Login"),
+      page: buildPage("/auth/login", "Login"),
       errorMessage: normalized.message
     });
   }

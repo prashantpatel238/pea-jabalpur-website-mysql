@@ -2,7 +2,13 @@
   <% site.primaryNav.forEach((link) => { %>
     <a href="<%= link.href %>" class="rounded-full px-4 py-2 text-sm font-semibold transition <%= page.path === link.href ? 'bg-primary/5 text-primary' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' %>"><%= link.label %></a>
   <% }) %>
-  <a href="/member/login" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">Member Login</a>
-  <a href="/auth/login" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">Admin</a>
+  <% if (!currentUser) { %>
+    <a href="/auth/login" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">Login</a>
+  <% } else { %>
+    <a href="<%= isAdmin ? '/admin/dashboard' : '/member/dashboard' %>" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">Dashboard</a>
+    <form action="/auth/logout" method="post">
+      <button type="submit" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">Logout</button>
+    </form>
+  <% } %>
   <a href="/register" class="ml-2 inline-flex items-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-primary-soft transition hover:-translate-y-0.5 hover:bg-blue-700">Join Now</a>
 </nav>

@@ -1,0 +1,35 @@
+<%- include("../partials/head") %>
+<%- include("../partials/header") %>
+
+<main class="min-h-screen bg-slate-50 px-4 pt-28">
+  <section class="mx-auto max-w-5xl py-16">
+    <%- include("../partials/flash") %>
+
+    <div class="mb-8 flex flex-col gap-4 rounded-4xl border border-slate-200 bg-white p-8 shadow-sm md:flex-row md:items-center md:justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-slate-900">Member Dashboard</h1>
+        <p class="mt-2 text-slate-600">Welcome back. Here is a quick view of your membership details.</p>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <a href="/member/profile" class="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700">Edit Profile</a>
+        <form action="/member/logout" method="post">
+          <button type="submit" class="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700">Logout</button>
+        </form>
+      </div>
+    </div>
+
+    <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+      <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <div><div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Full Name</div><div class="mt-1 text-slate-900"><%= member.full_name || "Not provided" %></div></div>
+        <div><div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Email</div><div class="mt-1 text-slate-900"><%= member.email || "Not provided" %></div></div>
+        <div><div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Member ID</div><div class="mt-1 text-slate-900"><%= member.member_id || "Not assigned yet" %></div></div>
+        <div><div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Profession</div><div class="mt-1 text-slate-900"><%= member.profession || "Not provided" %></div></div>
+        <div><div class="text-xs font-semibold uppercase tracking-wide text-slate-500">City</div><div class="mt-1 text-slate-900"><%= member.city || "Not provided" %></div></div>
+        <div><div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Membership Status</div><div class="mt-1 text-slate-900"><%= member.membership_status || "Unknown" %></div></div>
+      </div>
+    </section>
+  </section>
+</main>
+
+<%- include("../partials/footer") %>
+<%- include("../partials/scripts") %>

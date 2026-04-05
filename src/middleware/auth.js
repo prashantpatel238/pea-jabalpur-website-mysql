@@ -1,5 +1,5 @@
 function requireAdmin(req, res, next) {
-  if (req.session && req.session.admin) {
+  if (req.session && req.session.user?.role === "admin") {
     return next();
   }
 
@@ -8,12 +8,12 @@ function requireAdmin(req, res, next) {
 }
 
 function requireMember(req, res, next) {
-  if (req.session && req.session.member) {
+  if (req.session && req.session.user?.role === "member") {
     return next();
   }
 
   req.session.flash = { type: "error", message: "Please sign in as a member to continue." };
-  return res.redirect("/member/login");
+  return res.redirect("/auth/login");
 }
 
 module.exports = {

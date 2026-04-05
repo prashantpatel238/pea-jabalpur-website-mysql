@@ -13,6 +13,14 @@ async function listNotices() {
   );
 }
 
+async function listPublishedNotices() {
+  return query(
+    `${NOTICE_SELECT}
+     WHERE is_published = 1
+     ORDER BY event_date DESC, publish_date DESC, sort_order ASC`
+  );
+}
+
 async function findNoticeById(id) {
   const rows = await query(
     `${NOTICE_SELECT}
@@ -84,5 +92,6 @@ module.exports = {
   deleteNoticeById,
   findNoticeById,
   listNotices,
+  listPublishedNotices,
   updateNoticeById
 };

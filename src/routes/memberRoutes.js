@@ -1,19 +1,21 @@
 const express = require("express");
 
 const {
-  renderMemberLogin,
-  handleMemberLogin,
-  handleMemberLogout,
+  redirectMemberLogin,
+  renderMemberDashboard,
   renderMemberProfile,
   handleUpdateMemberProfile
 } = require("../controllers/memberController");
+const { handleLogin, handleLogout } = require("../controllers/authController");
 const { requireMember } = require("../middleware/auth");
+const { loginRateLimit } = require("../middleware/loginRateLimit");
 
 const router = express.Router();
 
-router.get("/login", renderMemberLogin);
-router.post("/login", handleMemberLogin);
-router.post("/logout", handleMemberLogout);
+router.get("/login", redirectMemberLogin);
+router.post("/login", loginRateLimit, handleLogin);
+router.post("/logout", handleLogout);
+router.get("/dashboard", requireMember, renderMemberDashboard);
 router.get("/profile", requireMember, renderMemberProfile);
 router.post("/profile", requireMember, handleUpdateMemberProfile);
 

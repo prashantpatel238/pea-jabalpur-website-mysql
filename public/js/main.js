@@ -94,3 +94,26 @@ document.querySelectorAll("form[data-validate-popup]").forEach((form) => {
     field.addEventListener("change", applyCustomValidation);
   });
 });
+
+document.querySelectorAll("form[data-single-submit]").forEach((form) => {
+  form.addEventListener("submit", () => {
+    if (form.dataset.submitting === "true") {
+      return;
+    }
+
+    form.dataset.submitting = "true";
+
+    const submitButtons = form.querySelectorAll('button[type="submit"]');
+
+    submitButtons.forEach((button) => {
+      button.disabled = true;
+      button.classList.add("opacity-70", "cursor-not-allowed");
+
+      if (!button.dataset.originalText) {
+        button.dataset.originalText = button.textContent;
+      }
+
+      button.textContent = "Saving...";
+    });
+  });
+});

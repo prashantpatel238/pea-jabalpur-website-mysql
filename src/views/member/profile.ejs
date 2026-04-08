@@ -14,17 +14,32 @@
     </div>
 
     <div class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
-      <form action="/member/profile" method="post" class="grid grid-cols-1 gap-4 md:grid-cols-2" data-validate-popup>
+      <form action="/member/profile" method="post" enctype="multipart/form-data" class="grid grid-cols-1 gap-4 md:grid-cols-2" data-validate-popup>
         <input name="full_name" value="<%= values.full_name || '' %>" required placeholder="Full name" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
         <input value="<%= member.email %>" disabled class="rounded-xl border-slate-200 bg-slate-100 text-slate-500" />
+        <div class="md:col-span-2">
+          <label for="member-profile-photo" class="mb-2 block text-sm font-semibold text-slate-700">Profile Photo</label>
+          <div class="mb-3 flex items-center gap-4">
+            <img src="<%= member.photo || '/assets/images/default-avatar.svg' %>" alt="<%= member.full_name %>" class="h-20 w-20 rounded-2xl border border-slate-200 object-cover" />
+            <div class="text-sm text-slate-500">Upload a new image to replace your current profile photo.</div>
+          </div>
+          <input id="member-profile-photo" name="photo" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white" />
+          <p class="mt-2 text-xs text-slate-500">Optional. JPG, PNG, or WEBP up to 2 MB.</p>
+        </div>
         <input name="phone" value="<%= values.phone || '' %>" placeholder="Phone" inputmode="numeric" data-validation-label="mobile number" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
         <input name="profession" value="<%= values.profession || '' %>" placeholder="Profession" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
         <input name="city" value="<%= values.city || '' %>" placeholder="City" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
         <input name="dob" type="date" value="<%= values.dob ? new Date(values.dob).toISOString().split('T')[0] : '' %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <select name="blood_group" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900">
+          <% bloodGroupOptions.forEach((option) => { %>
+            <option value="<%= option %>" <%= (values.blood_group || '') === option ? 'selected' : '' %>><%= option || 'Select blood group' %></option>
+          <% }) %>
+        </select>
         <select name="gender" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900"><option value="" <%= !values.gender ? 'selected' : '' %>>Select gender</option><option value="male" <%= values.gender === 'male' ? 'selected' : '' %>>Male</option><option value="female" <%= values.gender === 'female' ? 'selected' : '' %>>Female</option><option value="other" <%= values.gender === 'other' ? 'selected' : '' %>>Other</option><option value="prefer_not_to_say" <%= values.gender === 'prefer_not_to_say' ? 'selected' : '' %>>Prefer not to say</option></select>
         <select name="marital_status" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900"><option value="" <%= !values.marital_status ? 'selected' : '' %>>Select marital status</option><option value="single" <%= values.marital_status === 'single' ? 'selected' : '' %>>Single</option><option value="married" <%= values.marital_status === 'married' ? 'selected' : '' %>>Married</option><option value="divorced" <%= values.marital_status === 'divorced' ? 'selected' : '' %>>Divorced</option><option value="widowed" <%= values.marital_status === 'widowed' ? 'selected' : '' %>>Widowed</option><option value="prefer_not_to_say" <%= values.marital_status === 'prefer_not_to_say' ? 'selected' : '' %>>Prefer not to say</option></select>
-        <input name="marriage_date" type="date" value="<%= values.marriage_date ? new Date(values.marriage_date).toISOString().split('T')[0] : '' %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-        <input name="spouse_name" value="<%= values.spouse_name || '' %>" placeholder="Spouse name" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input name="marriage_date" type="date" value="<%= values.marriage_date ? new Date(values.marriage_date).toISOString().split('T')[0] : '' %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-marriage-field />
+        <input name="spouse_name" value="<%= values.spouse_name || '' %>" placeholder="Spouse name" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-marriage-field />
+        <input name="children_count" type="number" min="0" step="1" value="<%= values.children_count || values.children_count === 0 ? values.children_count : '' %>" placeholder="Children count" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-children-field />
         <input name="password" type="password" placeholder="New password (optional)" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900 md:col-span-2" />
         <textarea name="address" class="min-h-[120px] rounded-xl border-slate-200 bg-slate-50 text-slate-900 md:col-span-2" placeholder="Address"><%= values.address || '' %></textarea>
         <div class="md:col-span-2 grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -43,3 +58,35 @@
 
 <%- include("../partials/footer") %>
 <%- include("../partials/scripts") %>
+<script>
+  (() => {
+    const maritalStatusInput = document.querySelector('select[name="marital_status"]');
+    const marriageFields = Array.from(document.querySelectorAll("[data-marriage-field]"));
+    const childrenFields = Array.from(document.querySelectorAll("[data-children-field]"));
+
+    if (!maritalStatusInput || (!marriageFields.length && !childrenFields.length)) {
+      return;
+    }
+
+    function clearFields(fields) {
+      fields.forEach((field) => {
+        field.value = "";
+      });
+    }
+
+    function updateFamilyFields() {
+      const isMarried = maritalStatusInput.value === "married";
+
+      marriageFields.forEach((field) => field.classList.toggle("hidden", !isMarried));
+      childrenFields.forEach((field) => field.classList.toggle("hidden", !isMarried));
+
+      if (!isMarried) {
+        clearFields(marriageFields);
+        clearFields(childrenFields);
+      }
+    }
+
+    maritalStatusInput.addEventListener("change", updateFamilyFields);
+    updateFamilyFields();
+  })();
+</script>

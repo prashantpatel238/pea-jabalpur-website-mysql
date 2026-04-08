@@ -5,20 +5,53 @@
   <section class="mx-auto max-w-4xl py-16">
     <div class="mb-6"><a href="/admin" class="text-sm font-semibold text-primary">Back to Dashboard</a></div>
     <div class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
-      <h1 class="mb-6 text-3xl font-bold text-slate-900">Edit Notice</h1>
-      <form action="/admin/notices/<%= notice.id %>/edit" method="post" class="grid grid-cols-1 gap-4">
-        <input name="title" value="<%= notice.title %>" required placeholder="Title" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-        <textarea name="content" class="min-h-[140px] rounded-xl border-slate-200 bg-slate-50 text-slate-900" placeholder="Content"><%= notice.content || '' %></textarea>
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <select name="type" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900"><option value="notice" <%= notice.type === 'notice' ? 'selected' : '' %>>Notice</option><option value="event" <%= notice.type === 'event' ? 'selected' : '' %>>Event</option></select>
-          <input name="event_date" type="date" value="<%= notice.event_date ? new Date(notice.event_date).toISOString().split('T')[0] : '' %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-          <input name="expiry_date" type="date" value="<%= notice.expiry_date ? new Date(notice.expiry_date).toISOString().split('T')[0] : '' %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+      <div class="mb-6">
+        <h1 class="text-3xl font-bold text-slate-900">Edit Notice</h1>
+        <p class="mt-2 text-sm text-slate-600">Update the notice content and its timeline so members can clearly understand when it is published, happening, and expiring.</p>
+      </div>
+      <form action="/admin/notices/<%= notice.id %>/edit" method="post" class="grid grid-cols-1 gap-5" data-single-submit>
+        <div class="space-y-2">
+          <label for="edit-notice-title" class="block text-sm font-semibold text-slate-700">Title</label>
+          <input id="edit-notice-title" name="title" value="<%= notice.title %>" required placeholder="Notice or event title" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        </div>
+        <div class="space-y-2">
+          <label for="edit-notice-content" class="block text-sm font-semibold text-slate-700">Description</label>
+          <textarea id="edit-notice-content" name="content" class="min-h-[140px] w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" placeholder="Content"><%= notice.content || '' %></textarea>
         </div>
         <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <input name="publish_date" type="date" value="<%= notice.publish_date ? new Date(notice.publish_date).toISOString().split('T')[0] : '' %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-          <input name="sort_order" type="number" min="0" value="<%= notice.sort_order || 0 %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          <div class="space-y-2">
+            <label for="edit-notice-type" class="block text-sm font-semibold text-slate-700">Type</label>
+            <select id="edit-notice-type" name="type" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900">
+              <option value="notice" <%= notice.type === 'notice' ? 'selected' : '' %>>Notice</option>
+              <option value="event" <%= notice.type === 'event' ? 'selected' : '' %>>Event</option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <label for="edit-notice-sort-order" class="block text-sm font-semibold text-slate-700">Display Priority</label>
+            <input id="edit-notice-sort-order" name="sort_order" type="number" min="0" value="<%= notice.sort_order || 0 %>" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          </div>
         </div>
-        <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="is_published" <%= notice.is_published ? 'checked' : '' %> /> Published</label>
+        <div class="rounded-3xl border border-slate-200 bg-slate-50/80 p-5">
+          <div class="mb-4 text-sm font-semibold text-slate-900">Notice Timeline</div>
+          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div class="space-y-2">
+              <label for="edit-notice-publish-date" class="block text-sm font-semibold text-slate-700">Publish Date</label>
+              <input id="edit-notice-publish-date" name="publish_date" type="date" value="<%= notice.publish_date ? new Date(notice.publish_date).toISOString().split('T')[0] : '' %>" class="w-full rounded-xl border-slate-200 bg-white text-slate-900" />
+              <p class="text-xs text-slate-500">When this notice should appear as active.</p>
+            </div>
+            <div class="space-y-2">
+              <label for="edit-notice-event-date" class="block text-sm font-semibold text-slate-700">Event Date</label>
+              <input id="edit-notice-event-date" name="event_date" type="date" value="<%= notice.event_date ? new Date(notice.event_date).toISOString().split('T')[0] : '' %>" class="w-full rounded-xl border-slate-200 bg-white text-slate-900" />
+              <p class="text-xs text-slate-500">The day the event or key update takes place.</p>
+            </div>
+            <div class="space-y-2">
+              <label for="edit-notice-expiry-date" class="block text-sm font-semibold text-slate-700">Expiry Date</label>
+              <input id="edit-notice-expiry-date" name="expiry_date" type="date" value="<%= notice.expiry_date ? new Date(notice.expiry_date).toISOString().split('T')[0] : '' %>" class="w-full rounded-xl border-slate-200 bg-white text-slate-900" />
+              <p class="text-xs text-slate-500">Optional. Use when the notice should stop being relevant.</p>
+            </div>
+          </div>
+        </div>
+        <label class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"><input type="checkbox" name="is_published" <%= notice.is_published ? 'checked' : '' %> /> Published and visible to users</label>
         <button type="submit" class="rounded-2xl bg-primary px-6 py-4 text-base font-semibold text-white">Save Notice</button>
       </form>
     </div>

@@ -12,6 +12,7 @@
         <p class="mt-2 text-slate-600">Approve registrations, manage members, control profile visibility, and publish notices/events.</p>
       </div>
       <div class="flex flex-wrap gap-3">
+        <a href="/admin/members/export" class="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700">Export Members</a>
         <a href="/admin/settings" class="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700">Site Settings</a>
         <form action="/auth/logout" method="post">
           <button type="submit" class="rounded-full border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700">Logout</button>
@@ -58,6 +59,22 @@
           <input name="phone" value="<%= createMemberValues.phone || '' %>" placeholder="Phone" inputmode="numeric" data-validation-label="mobile number" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
           <input name="profession" value="<%= createMemberValues.profession || '' %>" placeholder="Profession" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
           <input name="city" value="<%= createMemberValues.city || '' %>" placeholder="City" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          <select name="marital_status" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900">
+            <option value="" <%= !createMemberValues.marital_status ? 'selected' : '' %>>Marital status</option>
+            <option value="single" <%= createMemberValues.marital_status === 'single' ? 'selected' : '' %>>Single</option>
+            <option value="married" <%= createMemberValues.marital_status === 'married' ? 'selected' : '' %>>Married</option>
+            <option value="divorced" <%= createMemberValues.marital_status === 'divorced' ? 'selected' : '' %>>Divorced</option>
+            <option value="widowed" <%= createMemberValues.marital_status === 'widowed' ? 'selected' : '' %>>Widowed</option>
+            <option value="prefer_not_to_say" <%= createMemberValues.marital_status === 'prefer_not_to_say' ? 'selected' : '' %>>Prefer not to say</option>
+          </select>
+          <select name="blood_group" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900">
+            <% bloodGroupOptions.forEach((option) => { %>
+              <option value="<%= option %>" <%= (createMemberValues.blood_group || '') === option ? 'selected' : '' %>><%= option || 'Blood group' %></option>
+            <% }) %>
+          </select>
+          <input name="spouse_name" value="<%= createMemberValues.spouse_name || '' %>" placeholder="Spouse name" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-marriage-field />
+          <input name="marriage_date" type="date" value="<%= createMemberValues.marriage_date || '' %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-marriage-field />
+          <input name="children_count" type="number" min="0" step="1" value="<%= createMemberValues.children_count || createMemberValues.children_count === 0 ? createMemberValues.children_count : '' %>" placeholder="Children count" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-children-field />
           <div class="md:col-span-2">
             <label for="dashboard-photo" class="mb-2 block text-sm font-semibold text-slate-700">Member Photo</label>
             <input id="dashboard-photo" name="photo" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white" />
@@ -85,32 +102,84 @@
 
     <div class="mb-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
       <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h2 class="mb-6 text-2xl font-bold text-slate-900">Notice & Event Manager</h2>
-        <form action="/admin/notices" method="post" class="grid grid-cols-1 gap-4">
-          <input name="title" required placeholder="Title" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-          <textarea name="content" placeholder="Notice content" class="min-h-[120px] rounded-xl border-slate-200 bg-slate-50 text-slate-900"></textarea>
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <select name="type" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900"><option value="notice">Notice</option><option value="event">Event</option></select>
-            <input name="event_date" type="date" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-            <input name="expiry_date" type="date" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold text-slate-900">Notice & Event Manager</h2>
+          <p class="mt-2 text-sm text-slate-600">Create polished updates with clearly defined publish, event, and expiry dates so admins and visitors know exactly what each notice means.</p>
+        </div>
+        <form action="/admin/notices" method="post" class="grid grid-cols-1 gap-5" data-single-submit>
+          <div class="space-y-2">
+            <label for="notice-title" class="block text-sm font-semibold text-slate-700">Title</label>
+            <input id="notice-title" name="title" required placeholder="Enter notice or event title" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+          </div>
+          <div class="space-y-2">
+            <label for="notice-content" class="block text-sm font-semibold text-slate-700">Description</label>
+            <textarea id="notice-content" name="content" placeholder="Write the message members should see" class="min-h-[140px] w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900"></textarea>
           </div>
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <input name="publish_date" type="date" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-            <input name="sort_order" type="number" min="0" value="0" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+            <div class="space-y-2">
+              <label for="notice-type" class="block text-sm font-semibold text-slate-700">Type</label>
+              <select id="notice-type" name="type" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900">
+                <option value="notice">Notice</option>
+                <option value="event">Event</option>
+              </select>
+            </div>
+            <div class="space-y-2">
+              <label for="notice-sort-order" class="block text-sm font-semibold text-slate-700">Display Priority</label>
+              <input id="notice-sort-order" name="sort_order" type="number" min="0" value="0" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+              <p class="text-xs text-slate-500">Lower numbers appear first when dates are the same.</p>
+            </div>
           </div>
-          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="is_published" checked /> Publish immediately</label>
+          <div class="rounded-3xl border border-slate-200 bg-slate-50/80 p-5">
+            <div class="mb-4 text-sm font-semibold text-slate-900">Notice Timeline</div>
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div class="space-y-2">
+                <label for="notice-publish-date" class="block text-sm font-semibold text-slate-700">Publish Date</label>
+                <input id="notice-publish-date" name="publish_date" type="date" class="w-full rounded-xl border-slate-200 bg-white text-slate-900" />
+                <p class="text-xs text-slate-500">When this notice becomes officially active.</p>
+              </div>
+              <div class="space-y-2">
+                <label for="notice-event-date" class="block text-sm font-semibold text-slate-700">Event Date</label>
+                <input id="notice-event-date" name="event_date" type="date" class="w-full rounded-xl border-slate-200 bg-white text-slate-900" />
+                <p class="text-xs text-slate-500">Use this for the actual event day or key notice date.</p>
+              </div>
+              <div class="space-y-2">
+                <label for="notice-expiry-date" class="block text-sm font-semibold text-slate-700">Expiry Date</label>
+                <input id="notice-expiry-date" name="expiry_date" type="date" class="w-full rounded-xl border-slate-200 bg-white text-slate-900" />
+                <p class="text-xs text-slate-500">Optional. After this date, the notice is no longer relevant.</p>
+              </div>
+            </div>
+          </div>
+          <label class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"><input type="checkbox" name="is_published" checked /> Publish immediately</label>
           <button type="submit" class="rounded-2xl bg-primary px-6 py-4 text-base font-semibold text-white">Save Notice</button>
         </form>
       </section>
 
       <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
-        <h2 class="mb-6 text-2xl font-bold text-slate-900">Current Notices</h2>
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold text-slate-900">Current Notices</h2>
+          <p class="mt-2 text-sm text-slate-600">A quick admin view of each notice’s type, publishing state, and important dates.</p>
+        </div>
         <div class="space-y-4">
           <% if (!notices.length) { %><div class="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-600">No notices or events have been added yet.</div><% } %>
           <% notices.forEach((notice) => { %>
             <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-              <div class="mb-2 text-lg font-bold text-slate-900"><%= notice.title %></div>
-              <div class="mb-4 text-sm text-slate-500"><%= notice.type %></div>
+              <div class="mb-4 flex flex-wrap items-start justify-between gap-4">
+                <div>
+                  <div class="mb-2 text-lg font-bold text-slate-900"><%= notice.title %></div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary"><%= notice.type %></span>
+                    <span class="rounded-full px-3 py-1 text-xs font-semibold <%= notice.is_published ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' %>"><%= notice.is_published ? 'Published' : 'Draft' %></span>
+                  </div>
+                </div>
+                <div class="grid grid-cols-1 gap-2 text-sm text-slate-500 sm:text-right">
+                  <div><span class="font-semibold text-slate-700">Publish:</span> <%= notice.publish_date ? new Date(notice.publish_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Not set' %></div>
+                  <div><span class="font-semibold text-slate-700">Event:</span> <%= notice.event_date ? new Date(notice.event_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Not set' %></div>
+                  <div><span class="font-semibold text-slate-700">Expiry:</span> <%= notice.expiry_date ? new Date(notice.expiry_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Not set' %></div>
+                </div>
+              </div>
+              <% if (notice.content) { %>
+                <p class="mb-4 line-clamp-3 text-sm leading-6 text-slate-600"><%= notice.content %></p>
+              <% } %>
               <div class="flex gap-3">
                 <a href="/admin/notices/<%= notice.id %>/edit" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Edit</a>
                 <form action="/admin/notices/<%= notice.id %>/delete" method="post"><button type="submit" class="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white">Delete</button></form>
@@ -150,3 +219,35 @@
 
 <%- include("../partials/footer") %>
 <%- include("../partials/scripts") %>
+<script>
+  (() => {
+    const maritalStatusInput = document.querySelector('form[action="/admin/members"] select[name="marital_status"]');
+    const marriageFields = Array.from(document.querySelectorAll('form[action="/admin/members"] [data-marriage-field]'));
+    const childrenFields = Array.from(document.querySelectorAll('form[action="/admin/members"] [data-children-field]'));
+
+    if (!maritalStatusInput || (!marriageFields.length && !childrenFields.length)) {
+      return;
+    }
+
+    function clearFields(fields) {
+      fields.forEach((field) => {
+        field.value = "";
+      });
+    }
+
+    function updateFamilyFields() {
+      const isMarried = maritalStatusInput.value === "married";
+
+      marriageFields.forEach((field) => field.classList.toggle("hidden", !isMarried));
+      childrenFields.forEach((field) => field.classList.toggle("hidden", !isMarried));
+
+      if (!isMarried) {
+        clearFields(marriageFields);
+        clearFields(childrenFields);
+      }
+    }
+
+    maritalStatusInput.addEventListener("change", updateFamilyFields);
+    updateFamilyFields();
+  })();
+</script>

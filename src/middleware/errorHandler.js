@@ -127,7 +127,9 @@ function errorHandler(error, req, res, next) {
   if (req.originalUrl.startsWith("/auth/login")) {
     return res.status(normalized.statusCode).render("auth/login", {
       page: buildPage("/auth/login", "Login"),
-      errorMessage: normalized.message
+      errorMessage: normalized.message,
+      formData: req.body || {},
+      otpState: req.session?.authOtp || null
     });
   }
 

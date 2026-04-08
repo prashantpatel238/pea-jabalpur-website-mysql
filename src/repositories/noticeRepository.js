@@ -32,6 +32,40 @@ async function findNoticeById(id) {
   return rows[0] || null;
 }
 
+async function findRecentMatchingNotice(notice) {
+  const rows = await query(
+    `${NOTICE_SELECT}
+     WHERE created_by_admin = ?
+       AND title = ?
+       AND content = ?
+       AND type = ?
+       AND ((event_date IS NULL AND ? IS NULL) OR event_date = ?)
+       AND ((publish_date IS NULL AND ? IS NULL) OR publish_date = ?)
+       AND ((expiry_date IS NULL AND ? IS NULL) OR expiry_date = ?)
+       AND is_published = ?
+       AND sort_order = ?
+       AND created_at >= DATE_SUB(UTC_TIMESTAMP(), INTERVAL 5 MINUTE)
+     ORDER BY id DESC
+     LIMIT 1`,
+    [
+      notice.created_by_admin || "",
+      notice.title,
+      notice.content || "",
+      notice.type || "notice",
+      notice.event_date || null,
+      notice.event_date || null,
+      notice.publish_date || null,
+      notice.publish_date || null,
+      notice.expiry_date || null,
+      notice.expiry_date || null,
+      notice.is_published ? 1 : 0,
+      Number(notice.sort_order || 0)
+    ]
+  );
+
+  return rows[0] || null;
+}
+
 async function createNotice(notice) {
   const result = await query(
     `INSERT INTO notices (
@@ -91,6 +125,7 @@ module.exports = {
   createNotice,
   deleteNoticeById,
   findNoticeById,
+  findRecentMatchingNotice,
   listNotices,
   listPublishedNotices,
   updateNoticeById

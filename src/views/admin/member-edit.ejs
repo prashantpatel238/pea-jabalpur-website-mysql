@@ -13,6 +13,20 @@
         <input name="phone" value="<%= values.phone || '' %>" placeholder="Phone" inputmode="numeric" data-validation-label="mobile number" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
         <input name="profession" value="<%= values.profession || '' %>" placeholder="Profession" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
         <input name="city" value="<%= values.city || '' %>" placeholder="City" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <select name="marital_status" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900">
+          <option value="" <%= !values.marital_status ? 'selected' : '' %>>Marital status</option>
+          <option value="single" <%= values.marital_status === 'single' ? 'selected' : '' %>>Single</option>
+          <option value="married" <%= values.marital_status === 'married' ? 'selected' : '' %>>Married</option>
+          <option value="divorced" <%= values.marital_status === 'divorced' ? 'selected' : '' %>>Divorced</option>
+          <option value="widowed" <%= values.marital_status === 'widowed' ? 'selected' : '' %>>Widowed</option>
+          <option value="prefer_not_to_say" <%= values.marital_status === 'prefer_not_to_say' ? 'selected' : '' %>>Prefer not to say</option>
+        </select>
+        <select name="blood_group" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900">
+          <% bloodGroupOptions.forEach((option) => { %>
+            <option value="<%= option %>" <%= (values.blood_group || '') === option ? 'selected' : '' %>><%= option || 'Blood group' %></option>
+          <% }) %>
+        </select>
+        <input name="children_count" type="number" min="0" step="1" value="<%= values.children_count || values.children_count === 0 ? values.children_count : '' %>" placeholder="Children count" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-children-field />
         <div class="md:col-span-2">
           <label for="member-photo" class="mb-2 block text-sm font-semibold text-slate-700">Member Photo</label>
           <% if (member.photo) { %>
@@ -27,8 +41,8 @@
         <input name="leadership_title" value="<%= values.leadership_title || '' %>" placeholder="Leadership title" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
         <input name="important_member_order" type="number" min="0" value="<%= values.important_member_order || 0 %>" placeholder="Important member order" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
         <input name="dob" type="date" value="<%= values.dob ? new Date(values.dob).toISOString().split('T')[0] : '' %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-        <input name="marriage_date" type="date" value="<%= values.marriage_date ? new Date(values.marriage_date).toISOString().split('T')[0] : '' %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-        <input name="spouse_name" value="<%= values.spouse_name || '' %>" placeholder="Spouse name" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+        <input name="marriage_date" type="date" value="<%= values.marriage_date ? new Date(values.marriage_date).toISOString().split('T')[0] : '' %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-marriage-field />
+        <input name="spouse_name" value="<%= values.spouse_name || '' %>" placeholder="Spouse name" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-marriage-field />
         <input name="password" type="password" placeholder="New password (optional)" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
         <textarea name="address" placeholder="Address" class="min-h-[100px] rounded-xl border-slate-200 bg-slate-50 text-slate-900 md:col-span-2"><%= values.address || '' %></textarea>
         <textarea name="notes" placeholder="Member notes" class="min-h-[100px] rounded-xl border-slate-200 bg-slate-50 text-slate-900"><%= values.notes || '' %></textarea>
@@ -51,3 +65,35 @@
 
 <%- include("../partials/footer") %>
 <%- include("../partials/scripts") %>
+<script>
+  (() => {
+    const maritalStatusInput = document.querySelector('select[name="marital_status"]');
+    const marriageFields = Array.from(document.querySelectorAll("[data-marriage-field]"));
+    const childrenFields = Array.from(document.querySelectorAll("[data-children-field]"));
+
+    if (!maritalStatusInput || (!marriageFields.length && !childrenFields.length)) {
+      return;
+    }
+
+    function clearFields(fields) {
+      fields.forEach((field) => {
+        field.value = "";
+      });
+    }
+
+    function updateFamilyFields() {
+      const isMarried = maritalStatusInput.value === "married";
+
+      marriageFields.forEach((field) => field.classList.toggle("hidden", !isMarried));
+      childrenFields.forEach((field) => field.classList.toggle("hidden", !isMarried));
+
+      if (!isMarried) {
+        clearFields(marriageFields);
+        clearFields(childrenFields);
+      }
+    }
+
+    maritalStatusInput.addEventListener("change", updateFamilyFields);
+    updateFamilyFields();
+  })();
+</script>

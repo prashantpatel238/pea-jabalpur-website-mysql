@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 
+const { BLOOD_GROUP_OPTIONS } = require("../constants/memberFields");
 const { MEMBER_ROLES } = require("../constants/memberRoles");
 const {
   countMembers,
@@ -13,12 +14,18 @@ const {
   createNotice,
   deleteNoticeById,
   findNoticeById,
+  findRecentMatchingNotice,
   listNotices,
   updateNoticeById
 } = require("../repositories/noticeRepository");
 const { buildPage } = require("../utils/page");
-const { buildAdminMemberPayload, parseCheckbox } = require("../utils/memberData");
+const {
+  buildAdminMemberPayload,
+  isValidChildrenCount,
+  parseCheckbox
+} = require("../utils/memberData");
 const { approveMember, rejectMember } = require("../services/memberApprovalService");
+const { exportMembersWorkbook } = require("../services/memberExportService");
 const { getPhotoPath, removeUploadedMemberPhoto } = require("../middleware/memberPhotoUpload");
 const { setFormState } = require("../utils/formState");
 const {
@@ -57,6 +64,7 @@ async function renderDashboard(req, res) {
     members,
     notices,
     memberRoles: MEMBER_ROLES,
+    bloodGroupOptions: BLOOD_GROUP_OPTIONS,
     summary: {
       totalMembers,
       pendingMembers: pendingCount,
@@ -138,6 +146,13 @@ async function handleCreateMember(req, res) {
     return res.redirect("/admin/dashboard");
   }
 
+  if (!isValidChildrenCount(req.body.children_count)) {
+    removeUploadedMemberPhoto(photo);
+    setFormState(req, "adminCreateMember", req.body);
+    req.session.flash = { type: "error", message: "Children count must be a non-negative whole number." };
+    return res.redirect("/admin/dashboard");
+  }
+
   const password_hash = await bcrypt.hash(password, 12);
   const member = await createMember({
     ...payload,
@@ -177,6 +192,7 @@ async function renderEditMember(req, res) {
     page: buildPage(`/admin/members/${req.params.id}/edit`, "Edit Member"),
     member,
     memberRoles: MEMBER_ROLES,
+    bloodGroupOptions: BLOOD_GROUP_OPTIONS,
     formData: res.locals.formState.adminEditMember || {}
   });
 }
@@ -215,6 +231,13 @@ async function handleUpdateMember(req, res) {
     removeUploadedMemberPhoto(getPhotoPath(req.file));
     setFormState(req, "adminEditMember", req.body);
     req.session.flash = { type: "error", message: getMobileValidationMessage("mobile number") };
+    return res.redirect(`/admin/members/${req.params.id}/edit`);
+  }
+
+  if (!isValidChildrenCount(req.body.children_count)) {
+    removeUploadedMemberPhoto(getPhotoPath(req.file));
+    setFormState(req, "adminEditMember", req.body);
+    req.session.flash = { type: "error", message: "Children count must be a non-negative whole number." };
     return res.redirect(`/admin/members/${req.params.id}/edit`);
   }
 
@@ -296,8 +319,20 @@ async function handleDeleteMember(req, res) {
   return res.redirect("/admin/dashboard");
 }
 
+async function handleExportMembers(req, res) {
+  const members = await listMembers();
+  const workbook = await exportMembersWorkbook(members);
+  const fileName = `members-export-${new Date().toISOString().slice(0, 10)}.xlsx`;
+  const buffer = await workbook.xlsx.writeBuffer();
+
+  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+  res.setHeader("Content-Disposition", `attachment; filename="${fileName}"`);
+  res.setHeader("Content-Length", buffer.byteLength);
+  res.send(Buffer.from(buffer));
+}
+
 async function handleCreateNotice(req, res) {
-  await createNotice({
+  const noticePayload = {
     title: (req.body.title || "").trim(),
     content: (req.body.content || "").trim(),
     type: req.body.type || "notice",
@@ -307,7 +342,16 @@ async function handleCreateNotice(req, res) {
     is_published: parseCheckbox(req.body, "is_published"),
     sort_order: Number(req.body.sort_order || 0),
     created_by_admin: req.session.user.email
-  });
+  };
+
+  const existingNotice = await findRecentMatchingNotice(noticePayload);
+
+  if (existingNotice) {
+    req.session.flash = { type: "success", message: "A matching notice was already saved recently, so a duplicate entry was skipped." };
+    return res.redirect("/admin/dashboard");
+  }
+
+  await createNotice(noticePayload);
 
   req.session.flash = { type: "success", message: "Notice saved successfully." };
   return res.redirect("/admin/dashboard");
@@ -360,6 +404,7 @@ module.exports = {
   handleApproveMember,
   handleRejectMember,
   handleDeleteMember,
+  handleExportMembers,
   handleCreateNotice,
   renderEditNotice,
   handleUpdateNotice,

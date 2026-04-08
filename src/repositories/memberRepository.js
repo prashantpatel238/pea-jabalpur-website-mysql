@@ -2,12 +2,13 @@ const { query } = require("../db/mysql");
 
 const MEMBER_SELECT = `
   SELECT id, full_name, photo, member_id, profession, role, city, join_date, age,
-         leadership_title, dob, gender, marital_status, marriage_date, spouse_name,
-         phone, email, password_hash, address, notes, admin_notes, membership_status,
-         approval_date, approved_by_admin, show_in_directory, show_mobile_in_directory,
-         show_email_in_directory, show_city_in_directory, show_profession_in_directory,
-         show_photo_in_directory, show_in_leadership_section, is_important_member,
-         important_member_order, registration_source, last_login_at, created_at, updated_at
+         leadership_title, dob, gender, blood_group, marital_status, marriage_date,
+         spouse_name, children_count, phone, email, password_hash, address, notes,
+         admin_notes, membership_status, approval_date, approved_by_admin,
+         show_in_directory, show_mobile_in_directory, show_email_in_directory,
+         show_city_in_directory, show_profession_in_directory, show_photo_in_directory,
+         show_in_leadership_section, is_important_member, important_member_order,
+         registration_source, last_login_at, created_at, updated_at
   FROM members
 `;
 
@@ -27,9 +28,11 @@ function mapMemberPayload(member) {
     member.leadership_title || "",
     member.dob || null,
     member.gender || "",
+    member.blood_group || "",
     member.marital_status || "",
     member.marriage_date || null,
     member.spouse_name || "",
+    member.children_count ?? null,
     member.phone || "",
     member.email,
     member.password_hash,
@@ -78,9 +81,11 @@ async function createPendingMemberRegistration(member) {
       leadership_title,
       dob,
       gender,
+      blood_group,
       marital_status,
       marriage_date,
       spouse_name,
+      children_count,
       phone,
       email,
       password_hash,
@@ -102,7 +107,7 @@ async function createPendingMemberRegistration(member) {
       registration_source,
       last_login_at
     ) VALUES (
-      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+      ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
     )`,
     [
       member.full_name,
@@ -115,9 +120,11 @@ async function createPendingMemberRegistration(member) {
       member.leadership_title || "",
       member.dob || null,
       member.gender || "",
+      member.blood_group || "",
       member.marital_status || "",
       member.marriage_date || null,
       member.spouse_name || "",
+      member.children_count ?? null,
       member.phone || "",
       member.email,
       member.password_hash,
@@ -180,9 +187,11 @@ async function updateMemberById(id, member) {
          leadership_title = ?,
          dob = ?,
          gender = ?,
+         blood_group = ?,
          marital_status = ?,
          marriage_date = ?,
          spouse_name = ?,
+         children_count = ?,
          phone = ?,
          email = ?,
          password_hash = ?,

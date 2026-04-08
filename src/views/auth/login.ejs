@@ -2,21 +2,129 @@
 <%- include("../partials/header") %>
 
 <main class="min-h-screen bg-slate-50 px-4 pt-28">
-  <section class="mx-auto max-w-md py-20">
+  <section class="mx-auto max-w-5xl py-20">
     <% const values = typeof formData !== "undefined" && formData ? formData : (formState && formState.authLogin) || {}; %>
-    <div class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
-      <h1 class="mb-3 text-3xl font-bold text-slate-900">Login</h1>
-      <p class="mb-8 text-slate-600">Sign in with your email and password. Admins and approved members use the same login form.</p>
-      <%- include("../partials/flash") %>
-      <% if (typeof errorMessage !== "undefined" && errorMessage) { %><div class="mb-6 rounded-3xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-800" data-popup-message="<%= errorMessage %>"><%= errorMessage %></div><% } %>
-      <form action="/auth/login" method="post" class="space-y-5" data-validate-popup>
-        <input name="email" type="email" value="<%= values.email || '' %>" required placeholder="Email" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-        <input name="password" type="password" required placeholder="Password" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-        <button type="submit" class="w-full rounded-2xl bg-primary px-6 py-4 text-base font-semibold text-white">Sign In</button>
-      </form>
+    <%- include("../partials/flash") %>
+    <% if (typeof errorMessage !== "undefined" && errorMessage) { %><div class="mb-6 rounded-3xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-800" data-popup-message="<%= errorMessage %>"><%= errorMessage %></div><% } %>
+    <% if (typeof otpRequested !== "undefined" && otpRequested) { %><div class="mb-6 rounded-3xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-800">An OTP has been sent to <strong><%= values.email %></strong>. Check your inbox and enter the code below.</div><% } %>
+    <% const defaultMode = otpState ? 'otp' : 'password'; %>
+    <div class="grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+      <div class="rounded-[2rem] bg-primary px-8 py-10 text-white shadow-sm">
+        <div class="max-w-md">
+          <div class="mb-4 inline-flex rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/90">Secure Access</div>
+          <h1 class="text-4xl font-bold tracking-tight">Welcome Back</h1>
+          <p class="mt-4 text-base leading-7 text-white/85">Sign in to manage your member profile, access admin tools, and stay connected with association updates in one place.</p>
+          <div class="mt-8 grid gap-4 text-sm text-white/90">
+            <div class="rounded-3xl border border-white/15 bg-white/10 px-5 py-4">Use your password for the fastest sign-in experience.</div>
+            <div class="rounded-3xl border border-white/15 bg-white/10 px-5 py-4">Use OTP when you want a quick code on your registered email.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+        <div class="mb-6">
+          <h2 class="text-2xl font-bold text-slate-900">Sign In</h2>
+          <p class="mt-2 text-sm leading-6 text-slate-600">Choose one secure login method. Only the selected option is shown to keep the experience simple.</p>
+        </div>
+
+        <div class="mb-8 grid grid-cols-2 rounded-2xl bg-slate-100 p-1.5">
+          <button
+            type="button"
+            data-login-tab="password"
+            class="<%= defaultMode === 'password' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500' %> rounded-xl px-4 py-3 text-sm font-semibold transition"
+          >
+            Password
+          </button>
+          <button
+            type="button"
+            data-login-tab="otp"
+            class="<%= defaultMode === 'otp' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500' %> rounded-xl px-4 py-3 text-sm font-semibold transition"
+          >
+            OTP
+          </button>
+        </div>
+
+        <div data-login-panel="password" class="<%= defaultMode === 'password' ? '' : 'hidden' %>">
+          <div class="mb-5">
+            <h3 class="text-lg font-semibold text-slate-900">Password Login</h3>
+            <p class="mt-1 text-sm text-slate-500">Use your registered email address and password.</p>
+          </div>
+          <form action="/auth/login" method="post" class="space-y-5" data-validate-popup data-single-submit>
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-700">Email Address</label>
+              <input name="email" type="email" value="<%= values.email || '' %>" required placeholder="Enter your email" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+            </div>
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-700">Password</label>
+              <input name="password" type="password" required placeholder="Enter your password" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+            </div>
+            <button type="submit" class="w-full rounded-2xl bg-primary px-6 py-4 text-base font-semibold text-white">Sign In With Password</button>
+          </form>
+        </div>
+
+        <div data-login-panel="otp" class="<%= defaultMode === 'otp' ? '' : 'hidden' %>">
+          <div class="mb-5">
+            <h3 class="text-lg font-semibold text-slate-900">OTP Login</h3>
+            <p class="mt-1 text-sm text-slate-500">Request a one-time code on your registered email, then verify it below.</p>
+          </div>
+
+          <form action="/auth/login/otp/request" method="post" class="space-y-4" data-validate-popup data-single-submit>
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-700">Email Address</label>
+              <input name="email" type="email" value="<%= (otpState && otpState.user && otpState.user.email) || values.email || '' %>" required placeholder="Enter your email" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+            </div>
+            <button type="submit" class="w-full rounded-2xl border border-primary bg-white px-6 py-4 text-base font-semibold text-primary">Send OTP</button>
+          </form>
+
+          <div class="my-6 border-t border-slate-200"></div>
+
+          <form action="/auth/login/otp/verify" method="post" class="space-y-4" data-single-submit>
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-700">Email Address</label>
+              <input name="email" type="email" value="<%= (otpState && otpState.user && otpState.user.email) || values.email || '' %>" required placeholder="Enter your email" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+            </div>
+            <div class="space-y-2">
+              <label class="block text-sm font-semibold text-slate-700">OTP Code</label>
+              <input name="otp" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" required placeholder="Enter 6-digit OTP" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
+            </div>
+            <% if (otpState && otpState.expiresAt) { %>
+              <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-xs text-slate-600">OTP pending for <strong><%= otpState.user.email %></strong>. Expires at <%= new Date(otpState.expiresAt).toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) %>.</div>
+            <% } %>
+            <button type="submit" class="w-full rounded-2xl bg-slate-900 px-6 py-4 text-base font-semibold text-white">Verify OTP And Login</button>
+          </form>
+        </div>
+      </div>
     </div>
   </section>
 </main>
 
 <%- include("../partials/footer") %>
 <%- include("../partials/scripts") %>
+<script>
+  (() => {
+    const tabs = Array.from(document.querySelectorAll("[data-login-tab]"));
+    const panels = Array.from(document.querySelectorAll("[data-login-panel]"));
+
+    if (!tabs.length || !panels.length) {
+      return;
+    }
+
+    function activateTab(mode) {
+      tabs.forEach((tab) => {
+        const isActive = tab.getAttribute("data-login-tab") === mode;
+        tab.classList.toggle("bg-white", isActive);
+        tab.classList.toggle("text-slate-900", isActive);
+        tab.classList.toggle("shadow-sm", isActive);
+        tab.classList.toggle("text-slate-500", !isActive);
+      });
+
+      panels.forEach((panel) => {
+        panel.classList.toggle("hidden", panel.getAttribute("data-login-panel") !== mode);
+      });
+    }
+
+    tabs.forEach((tab) => {
+      tab.addEventListener("click", () => activateTab(tab.getAttribute("data-login-tab")));
+    });
+  })();
+</script>

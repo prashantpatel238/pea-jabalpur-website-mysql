@@ -36,9 +36,11 @@ const createTableStatements = [
     leadership_title VARCHAR(150) NOT NULL DEFAULT '',
     dob DATE NULL DEFAULT NULL,
     gender ENUM('male', 'female', 'other', 'prefer_not_to_say', '') NOT NULL DEFAULT '',
+    blood_group ENUM('A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-', 'Prefer not to say', '') NOT NULL DEFAULT '',
     marital_status ENUM('single', 'married', 'divorced', 'widowed', 'prefer_not_to_say', '') NOT NULL DEFAULT '',
     marriage_date DATE NULL DEFAULT NULL,
     spouse_name VARCHAR(150) NOT NULL DEFAULT '',
+    children_count INT UNSIGNED NULL DEFAULT NULL,
     phone VARCHAR(20) NOT NULL DEFAULT '',
     email VARCHAR(255) NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
@@ -73,6 +75,7 @@ const createTableStatements = [
     KEY idx_members_profession (profession),
     KEY idx_members_join_date (join_date),
     CONSTRAINT chk_members_age CHECK (age IS NULL OR (age >= 0 AND age <= 130)),
+    CONSTRAINT chk_members_children_count CHECK (children_count IS NULL OR children_count >= 0),
     CONSTRAINT chk_members_important_member_order CHECK (important_member_order >= 0),
     CONSTRAINT chk_members_approval_workflow CHECK (
       (

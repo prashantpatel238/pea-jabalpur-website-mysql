@@ -51,6 +51,18 @@ function getAppConfig() {
     },
     sessionSecret: process.env.SESSION_SECRET,
     siteUrl: process.env.SITE_URL,
+    auth: {
+      otpExpiresMinutes: Number(process.env.OTP_EXPIRES_MINUTES) || 10
+    },
+    smtp: {
+      host: process.env.SMTP_HOST || "",
+      port: Number(process.env.SMTP_PORT) || 587,
+      secure: String(process.env.SMTP_SECURE || "").toLowerCase() === "true",
+      user: process.env.SMTP_USER || "",
+      password: process.env.SMTP_PASS || "",
+      fromEmail: process.env.SMTP_FROM_EMAIL || "",
+      fromName: process.env.SMTP_FROM_NAME || "PEA Jabalpur"
+    },
     admin: {
       email: process.env.ADMIN_EMAIL,
       password: process.env.ADMIN_PASSWORD,

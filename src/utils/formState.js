@@ -3,6 +3,7 @@ function sanitizeFormState(data = {}) {
 
   delete nextData.password;
   delete nextData.confirm_password;
+  delete nextData.otp;
 
   return nextData;
 }

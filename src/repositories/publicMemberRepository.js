@@ -1,3 +1,4 @@
+const { DIRECTORY_SORT_OPTIONS } = require("../constants/memberFields");
 const { query } = require("../db/mysql");
 
 const DIRECTORY_MEMBER_SELECT = `
@@ -59,10 +60,12 @@ async function getPublicDirectoryMembers(filters = {}) {
     params.push(filters.profession);
   }
 
+  const sort = DIRECTORY_SORT_OPTIONS[filters.sort] || DIRECTORY_SORT_OPTIONS.name_asc;
+
   return query(
     `${DIRECTORY_MEMBER_SELECT}
      WHERE ${whereClauses.join(" AND ")}
-     ORDER BY role ASC, full_name ASC`,
+     ORDER BY ${sort}, role ASC`,
     params
   );
 }

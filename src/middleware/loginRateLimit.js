@@ -11,7 +11,9 @@ const loginRateLimit = rateLimit({
   handler(req, res) {
     return res.status(429).render("auth/login", {
       page: buildPage("/auth/login", "Login"),
-      errorMessage: "Too many login attempts. Please wait a few minutes and try again."
+      errorMessage: "Too many login attempts. Please wait a few minutes and try again.",
+      formData: { email: req.body?.email || "" },
+      otpState: req.session?.authOtp || null
     });
   }
 });

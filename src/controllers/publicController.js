@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 
 const site = require("../config/site");
+const { BLOOD_GROUP_OPTIONS, DIRECTORY_SORT_OPTIONS } = require("../constants/memberFields");
 const {
   homeStats,
   homeFeatures,
@@ -18,7 +19,11 @@ const {
 } = require("../repositories/publicMemberRepository");
 const { listPublishedNotices } = require("../repositories/noticeRepository");
 const { buildDirectoryMember, buildImportantMember } = require("../utils/memberView");
-const { calculateAge, normalizePublicMemberInput } = require("../utils/memberData");
+const {
+  calculateAge,
+  isValidChildrenCount,
+  normalizePublicMemberInput
+} = require("../utils/memberData");
 const { buildMemberCelebrationNotices } = require("../utils/noticeFeed");
 const { getPhotoPath, removeUploadedMemberPhoto } = require("../middleware/memberPhotoUpload");
 const { getLeadershipMembers } = require("../services/leadershipService");
@@ -34,6 +39,34 @@ function getBaseViewData(page) {
   return {
     page
   };
+}
+
+function getNoticeCategory(type) {
+  if (type === "event") {
+    return "events";
+  }
+
+  if (type === "birthday" || type === "anniversary") {
+    return "special-days";
+  }
+
+  return "notices";
+}
+
+function getNoticeTypeLabel(type) {
+  if (type === "birthday") {
+    return "Birthday";
+  }
+
+  if (type === "anniversary") {
+    return "Anniversary";
+  }
+
+  if (type === "event") {
+    return "Event";
+  }
+
+  return "Notice";
 }
 
 async function renderHome(req, res) {
@@ -93,9 +126,11 @@ async function renderDirectory(req, res) {
   const search = (req.query.search || "").trim();
   const city = (req.query.city || "").trim();
   const profession = (req.query.profession || "").trim();
+  const requestedSort = (req.query.sort || "").trim();
+  const sort = Object.hasOwn(DIRECTORY_SORT_OPTIONS, requestedSort) ? requestedSort : "name_asc";
 
   const [members, filterOptions] = await Promise.all([
-    getPublicDirectoryMembers({ search, city, profession }),
+    getPublicDirectoryMembers({ search, city, profession, sort }),
     getPublicDirectoryFilterOptions()
   ]);
 
@@ -110,12 +145,17 @@ async function renderDirectory(req, res) {
     filters: {
       search,
       city,
-      profession
+      profession,
+      sort
     },
     filterOptions: {
       cities: filterOptions.cities,
       professions: filterOptions.professions
-    }
+    },
+    sortOptions: [
+      { value: "name_asc", label: "Name (A-Z)" },
+      { value: "name_desc", label: "Name (Z-A)" }
+    ]
   });
 }
 
@@ -127,11 +167,17 @@ function renderRegistration(req, res) {
       description: "Apply for membership in the Professional Engineers Association Jabalpur through the online registration form.",
       canonical: "/register"
     }),
-    formData: res.locals.formState.register || {}
+    formData: res.locals.formState.register || {},
+    bloodGroupOptions: BLOOD_GROUP_OPTIONS
   });
 }
 
 async function renderNotices(req, res) {
+  const requestedCategory = (req.query.category || "").trim();
+  const activeCategory = ["special-days", "events", "notices"].includes(requestedCategory)
+    ? requestedCategory
+    : "special-days";
+
   const [notices, celebrants] = await Promise.all([
     listPublishedNotices(),
     listCelebrationMembers()
@@ -143,11 +189,39 @@ async function renderNotices(req, res) {
       title: notice.title,
       content: notice.content,
       type: notice.type,
+      type_label: getNoticeTypeLabel(notice.type),
+      category: getNoticeCategory(notice.type),
       event_date: notice.event_date || notice.publish_date,
+      publish_date: notice.publish_date || null,
+      expiry_date: notice.expiry_date || null,
       sort_order: notice.sort_order || 0
     })),
-    ...buildMemberCelebrationNotices(celebrants)
-  ].sort((a, b) => new Date(b.event_date) - new Date(a.event_date) || a.sort_order - b.sort_order);
+    ...buildMemberCelebrationNotices(celebrants).map((notice) => ({
+      ...notice,
+      type_label: getNoticeTypeLabel(notice.type),
+      category: getNoticeCategory(notice.type),
+      publish_date: null,
+      expiry_date: null
+    }))
+  ].sort((a, b) => new Date(a.event_date) - new Date(b.event_date) || a.sort_order - b.sort_order);
+
+  const filteredNotices = feed
+    .filter((notice) => notice.category === activeCategory)
+    .sort((a, b) => {
+      if (activeCategory === "notices") {
+        return new Date(b.event_date) - new Date(a.event_date) || a.sort_order - b.sort_order;
+      }
+
+      return new Date(a.event_date) - new Date(b.event_date) || a.sort_order - b.sort_order;
+    });
+  const categoryCounts = feed.reduce((counts, notice) => {
+    counts[notice.category] += 1;
+    return counts;
+  }, {
+    "special-days": 0,
+    events: 0,
+    notices: 0
+  });
 
   res.render("public/notices", {
     ...getBaseViewData({
@@ -156,7 +230,13 @@ async function renderNotices(req, res) {
       description: "Read the latest and previous notices, events, birthdays, and anniversaries from Professional Engineers Association Jabalpur.",
       canonical: "/notices"
     }),
-    notices: feed
+    notices: filteredNotices,
+    activeCategory,
+    noticeCategories: [
+      { value: "special-days", label: "Special Days", count: categoryCounts["special-days"] },
+      { value: "events", label: "Events", count: categoryCounts.events },
+      { value: "notices", label: "Notices", count: categoryCounts.notices }
+    ]
   });
 }
 
@@ -185,7 +265,8 @@ async function handleRegistrationRequest(req, res) {
     return res.status(400).render("public/register", {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
       errorMessage: req.photoUploadError,
-      formData: sanitizeFormState(req.body)
+      formData: sanitizeFormState(req.body),
+      bloodGroupOptions: BLOOD_GROUP_OPTIONS
     });
   }
 
@@ -194,7 +275,8 @@ async function handleRegistrationRequest(req, res) {
     return res.status(400).render("public/register", {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
       errorMessage: "Full name, email, phone, and password are required.",
-      formData: sanitizeFormState(req.body)
+      formData: sanitizeFormState(req.body),
+      bloodGroupOptions: BLOOD_GROUP_OPTIONS
     });
   }
 
@@ -203,7 +285,8 @@ async function handleRegistrationRequest(req, res) {
     return res.status(400).render("public/register", {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
       errorMessage: "Password and confirm password must match.",
-      formData: sanitizeFormState(req.body)
+      formData: sanitizeFormState(req.body),
+      bloodGroupOptions: BLOOD_GROUP_OPTIONS
     });
   }
 
@@ -212,7 +295,8 @@ async function handleRegistrationRequest(req, res) {
     return res.status(400).render("public/register", {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
       errorMessage: getEmailValidationMessage("email address"),
-      formData: sanitizeFormState(req.body)
+      formData: sanitizeFormState(req.body),
+      bloodGroupOptions: BLOOD_GROUP_OPTIONS
     });
   }
 
@@ -221,7 +305,18 @@ async function handleRegistrationRequest(req, res) {
     return res.status(400).render("public/register", {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
       errorMessage: getMobileValidationMessage("mobile number"),
-      formData: sanitizeFormState(req.body)
+      formData: sanitizeFormState(req.body),
+      bloodGroupOptions: BLOOD_GROUP_OPTIONS
+    });
+  }
+
+  if (!isValidChildrenCount(req.body.children_count)) {
+    removeUploadedMemberPhoto(photo);
+    return res.status(400).render("public/register", {
+      ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
+      errorMessage: "Children count must be a non-negative whole number.",
+      formData: sanitizeFormState(req.body),
+      bloodGroupOptions: BLOOD_GROUP_OPTIONS
     });
   }
 
@@ -232,7 +327,8 @@ async function handleRegistrationRequest(req, res) {
     return res.status(409).render("public/register", {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
       errorMessage: "A member with this email already exists.",
-      formData: sanitizeFormState(req.body)
+      formData: sanitizeFormState(req.body),
+      bloodGroupOptions: BLOOD_GROUP_OPTIONS
     });
   }
 
@@ -255,7 +351,8 @@ async function handleRegistrationRequest(req, res) {
       return res.status(409).render("public/register", {
         ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
         errorMessage: "A member with this email already exists.",
-        formData: sanitizeFormState(req.body)
+        formData: sanitizeFormState(req.body),
+        bloodGroupOptions: BLOOD_GROUP_OPTIONS
       });
     }
 
@@ -265,7 +362,8 @@ async function handleRegistrationRequest(req, res) {
   return res.status(201).render("public/register", {
     ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
     formSubmitted: true,
-    formData: {}
+    formData: {},
+    bloodGroupOptions: BLOOD_GROUP_OPTIONS
   });
 }
 

@@ -23,6 +23,8 @@
           <div><div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Phone</div><div class="mt-1 text-slate-900"><%= member.phone || 'Not provided' %></div></div>
           <div><div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Profession</div><div class="mt-1 text-slate-900"><%= member.profession || 'Not provided' %></div></div>
           <div><div class="text-xs font-semibold uppercase tracking-wide text-slate-500">City</div><div class="mt-1 text-slate-900"><%= member.city || 'Not provided' %></div></div>
+          <div><div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Blood Group</div><div class="mt-1 text-slate-900"><%= member.blood_group || 'Not provided' %></div></div>
+          <div><div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Children Count</div><div class="mt-1 text-slate-900"><%= member.children_count ?? 'Not provided' %></div></div>
           <div><div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Status</div><div class="mt-1 text-slate-900"><%= member.membership_status %></div></div>
           <div><div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Member ID</div><div class="mt-1 text-slate-900"><%= member.member_id || 'Not assigned yet' %></div></div>
           <div><div class="text-xs font-semibold uppercase tracking-wide text-slate-500">Approval Date</div><div class="mt-1 text-slate-900"><%= member.approval_date ? new Date(member.approval_date).toLocaleDateString('en-IN') : 'Not approved yet' %></div></div>

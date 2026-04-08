@@ -1,4 +1,5 @@
 const express = require("express");
+const { uploadMemberPhoto } = require("../middleware/memberPhotoUpload");
 
 const {
   redirectMemberLogin,
@@ -17,6 +18,6 @@ router.post("/login", loginRateLimit, handleLogin);
 router.post("/logout", handleLogout);
 router.get("/dashboard", requireMember, renderMemberDashboard);
 router.get("/profile", requireMember, renderMemberProfile);
-router.post("/profile", requireMember, handleUpdateMemberProfile);
+router.post("/profile", requireMember, uploadMemberPhoto, handleUpdateMemberProfile);
 
 module.exports = router;

@@ -9,9 +9,29 @@ if (siteHeader) {
 }
 
 if (menuToggle && mobileMenu) {
+  const closeMobileMenu = () => {
+    mobileMenu.classList.add("hidden");
+    menuToggle.setAttribute("aria-expanded", "false");
+  };
+
   menuToggle.addEventListener("click", () => {
     mobileMenu.classList.toggle("hidden");
     menuToggle.setAttribute("aria-expanded", String(!mobileMenu.classList.contains("hidden")));
+  });
+
+  mobileMenu.querySelectorAll("a").forEach((link) => link.addEventListener("click", closeMobileMenu));
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeMobileMenu();
+      menuToggle.focus();
+    }
+  });
+
+  window.addEventListener("resize", () => {
+    if (window.innerWidth >= 768) {
+      closeMobileMenu();
+    }
   });
 }
 

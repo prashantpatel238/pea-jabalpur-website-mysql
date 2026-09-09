@@ -226,3 +226,62 @@ main article[class*="rounded-3xl"], main form[class*="rounded-3xl"], main div[cl
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
+
+/* Final association presentation system */
+.home-hero {
+  min-height: clamp(34rem, 42vw, 38rem);
+  max-height: 40rem;
+}
+.home-hero__image { object-position: 60% center; }
+
+.page-hero.page-hero--compact {
+  min-height: clamp(18.5rem, 27vw, 22rem);
+  max-height: 23rem;
+}
+.page-hero__image { position: absolute; inset: 0; object-position: center 42%; }
+.page-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(4, 15, 40, .86), rgba(8, 31, 68, .64), rgba(5, 25, 53, .52));
+}
+.page-hero__content { padding-top: 3.25rem; padding-bottom: 3.25rem; }
+.page-hero--leadership .page-hero__image { object-position: center 34%; }
+.page-hero--contact .page-hero__image { object-position: center 48%; }
+.page-hero--directory .page-hero__image { object-position: center 55%; }
+.page-hero--notices .page-hero__image { object-position: center 38%; }
+
+.directory-filters input,
+.directory-filters select { min-width: 0; }
+.login-visual img { object-position: 62% center; }
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .home-hero { min-height: 35rem; max-height: 37.5rem; }
+  .home-hero__image { object-position: 64% center; }
+  .page-hero.page-hero--compact { min-height: 20rem; max-height: 21rem; }
+}
+
+@media (min-width: 1024px) and (max-width: 1535px) {
+  .home-hero { min-height: 35rem; max-height: 36.5rem; }
+}
+
+@media (max-width: 767px) {
+  .home-hero { min-height: clamp(32.5rem, 142vw, 36rem); max-height: 36rem; }
+  .home-hero__image { object-position: 69% center; }
+  .home-hero h1 { font-size: clamp(2.15rem, 10.5vw, 2.65rem); }
+  .home-hero .hero-content { text-align: left; }
+  .home-hero .hero-content .eyebrow,
+  .home-hero .hero-content p { margin-left: 0; margin-right: 0; }
+  .home-hero .eyebrow { line-height: 1.35; }
+  .page-hero.page-hero--compact { min-height: clamp(15rem, 68vw, 18rem); max-height: 18rem; }
+  .page-hero__content { padding-top: 2.25rem; padding-bottom: 2.25rem; }
+  .page-hero h1 { font-size: clamp(1.9rem, 9vw, 2.25rem); }
+  .page-hero__content p { font-size: .95rem; line-height: 1.65; }
+  .page-hero--directory .page-hero__image { object-position: 68% center; }
+  .page-hero--notices .page-hero__image { object-position: 58% center; }
+  .login-visual { min-height: 13rem; padding: 1.5rem; }
+  .login-visual h1 { font-size: 2rem; }
+  .login-visual img { object-position: 68% center; }
+  .directory-filters .flex > * { flex: 1; padding-inline: 1rem; }
+  main iframe { height: 19rem; }
+  .footer-grid { padding-top: 2.5rem; }
+}

@@ -1,27 +1,24 @@
 <%- include("../partials/head") %>
 <%- include("../partials/header") %>
 
-<main class="min-h-screen bg-slate-50 px-4 pt-28">
-  <section class="mx-auto max-w-5xl py-20">
+<main class="login-page min-h-screen bg-slate-50 px-4 pt-24 sm:px-6">
+  <section class="mx-auto max-w-5xl py-10 sm:py-14">
     <% const values = typeof formData !== "undefined" && formData ? formData : (formState && formState.authLogin) || {}; %>
     <%- include("../partials/flash") %>
     <% if (typeof errorMessage !== "undefined" && errorMessage) { %><div class="mb-6 rounded-3xl border border-red-200 bg-red-50 px-5 py-4 text-sm text-red-800" data-popup-message="<%= errorMessage %>"><%= errorMessage %></div><% } %>
     <% if (typeof otpRequested !== "undefined" && otpRequested) { %><div class="mb-6 rounded-3xl border border-emerald-200 bg-emerald-50 px-5 py-4 text-sm text-emerald-800">An OTP has been sent to <strong><%= values.email %></strong>. Check your inbox and enter the code below.</div><% } %>
     <% const defaultMode = otpState ? 'otp' : 'password'; %>
     <div class="grid grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr]">
-      <div class="rounded-[2rem] bg-primary px-8 py-10 text-white shadow-sm">
-        <div class="max-w-md">
+      <div class="login-visual relative min-h-[380px] overflow-hidden rounded-2xl px-8 py-10 text-white shadow-sm">
+        <div class="absolute inset-0"><img src="/assets/images/home-hero.png" alt="Engineering community" class="h-full w-full object-cover" /><div class="absolute inset-0 bg-slate-950/80"></div></div>
+        <div class="relative max-w-md">
           <div class="mb-4 inline-flex rounded-full bg-white/15 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-white/90">Secure Access</div>
           <h1 class="text-4xl font-bold tracking-tight">Welcome Back</h1>
-          <p class="mt-4 text-base leading-7 text-white/85">Sign in to manage your member profile, access admin tools, and stay connected with association updates in one place.</p>
-          <div class="mt-8 grid gap-4 text-sm text-white/90">
-            <div class="rounded-3xl border border-white/15 bg-white/10 px-5 py-4">Use your password for the fastest sign-in experience.</div>
-            <div class="rounded-3xl border border-white/15 bg-white/10 px-5 py-4">Use OTP when you want a quick code on your registered email.</div>
-          </div>
+          <p class="mt-4 text-base leading-7 text-white/85">Secure member and administration access for Professional Engineers Association Jabalpur.</p>
         </div>
       </div>
 
-      <div class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm">
+      <div class="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm">
         <div class="mb-6">
           <h2 class="text-2xl font-bold text-slate-900">Sign In</h2>
           <p class="mt-2 text-sm leading-6 text-slate-600">Choose one secure login method. Only the selected option is shown to keep the experience simple.</p>

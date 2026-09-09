@@ -7,40 +7,28 @@ const homeStats = [
 
 const homeFeatures = [
   {
-    title: "Professional Network",
-    description: "Build meaningful professional relationships with engineers across disciplines, industries, and career stages.",
+    title: "Professional Networking",
+    description: "Build trusted relationships with engineers across disciplines and career stages.",
     image: "https://images.unsplash.com/photo-1470781125250-124de17ebdea?q=80&w=1600&auto=format&fit=crop",
     icon: "users"
   },
   {
-    title: "Events & Workshops",
-    description: "Take part in technical sessions, workshops, and community gatherings designed for practical learning.",
-    image: "https://images.unsplash.com/photo-1560849144-739435323954?q=80&w=1600&auto=format&fit=crop",
-    icon: "calendar-days"
-  },
-  {
-    title: "Industry Advocacy",
-    description: "Strengthen the collective voice of engineering professionals and encourage responsible industry practice.",
-    image: "https://images.unsplash.com/photo-1683199804561-ce75c2c7bf61?q=80&w=1600&auto=format&fit=crop",
-    icon: "shield"
-  },
-  {
-    title: "Career Growth",
-    description: "Exchange experience, discover mentorship opportunities, and gain insights that support long-term growth.",
-    image: "https://images.unsplash.com/photo-1580894736036-7a68513983ec?q=80&w=1600&auto=format&fit=crop",
-    icon: "award"
-  },
-  {
     title: "Knowledge Sharing",
-    description: "Share field experience, technical perspectives, and proven approaches with a trusted peer community.",
+    description: "Exchange field experience, technical perspectives, and practical approaches with peers.",
     image: "https://images.unsplash.com/photo-1674403867232-9a278b2889ca?q=80&w=1600&auto=format&fit=crop",
-    icon: "zap"
+    icon: "book-open"
   },
   {
     title: "Professional Development",
-    description: "Keep pace with evolving technology and professional standards through continuous, collaborative learning.",
-    image: "https://images.unsplash.com/photo-1699271772975-a4cf35547d37?q=80&w=1600&auto=format&fit=crop",
+    description: "Learn through association activities and keep pace with engineering practice and standards.",
+    image: "https://images.unsplash.com/photo-1580894736036-7a68513983ec?q=80&w=1600&auto=format&fit=crop",
     icon: "trending-up"
+  },
+  {
+    title: "Community Contribution",
+    description: "Contribute engineering knowledge to constructive initiatives for Jabalpur and the region.",
+    image: "https://images.unsplash.com/photo-1683199804561-ce75c2c7bf61?q=80&w=1600&auto=format&fit=crop",
+    icon: "landmark"
   }
 ];
 

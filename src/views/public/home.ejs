@@ -2,23 +2,23 @@
 <%- include("../partials/header") %>
 
 <main>
-  <section class="home-hero relative flex min-h-[680px] lg:min-h-[720px] items-center overflow-hidden pt-20">
+  <section class="home-hero relative flex items-center overflow-hidden pt-20">
     <div class="absolute inset-0 z-0">
-      <img src="/assets/images/home-hero.png" alt="Engineers collaborating" class="h-full w-full object-cover object-center" />
+      <img src="/assets/images/home-hero.png" alt="Engineers collaborating" class="home-hero__image h-full w-full object-cover" />
       <div class="hero-overlay"></div>
       <div class="hero-gradient"></div>
     </div>
-    <div class="relative z-10 mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
+    <div class="relative z-10 mx-auto w-full max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8">
       <div class="hero-content max-w-3xl">
-        <div class="eyebrow mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-md">
+        <div class="eyebrow mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-md">
           <span class="h-2 w-2 rounded-full bg-secondary"></span>
           <span class="text-sm font-medium tracking-wide text-white">Professional Engineers Association · Jabalpur</span>
         </div>
-        <h1 class="mb-6 text-white">Engineering progress, powered by a <span class="text-blue-200">stronger community.</span></h1>
-        <p class="mb-10 max-w-2xl text-lg text-slate-200 md:text-xl">Connect with Jabalpur's engineering community to exchange knowledge, strengthen professional relationships, and contribute to meaningful regional progress.</p>
+        <h1 class="mb-4 text-white">Engineering progress, powered by a <span class="text-blue-200">stronger community.</span></h1>
+        <p class="mb-7 max-w-2xl text-lg text-slate-200 md:text-xl">Connect with Jabalpur's engineering community to exchange knowledge, strengthen professional relationships, and contribute to meaningful regional progress.</p>
         <div class="flex flex-col gap-4 sm:flex-row">
-          <a href="/register" class="inline-flex h-14 items-center justify-center rounded-xl bg-primary px-8 text-base font-semibold text-white shadow-primary-soft transition hover:-translate-y-1 hover:bg-blue-700">Become a Member</a>
-          <a href="/about" class="inline-flex h-14 items-center justify-center rounded-xl border border-white/30 bg-white/10 px-8 text-base font-semibold text-white backdrop-blur-md transition hover:-translate-y-1 hover:bg-white/20">Explore Our Purpose</a>
+          <a href="/register" class="inline-flex h-12 items-center justify-center rounded-xl bg-primary px-8 text-base font-semibold text-white shadow-primary-soft transition hover:-translate-y-1 hover:bg-blue-700">Become a Member</a>
+          <a href="/about" class="inline-flex h-12 items-center justify-center rounded-xl border border-white/30 bg-white/10 px-8 text-base font-semibold text-white backdrop-blur-md transition hover:-translate-y-1 hover:bg-white/20">Explore Our Purpose</a>
         </div>
       </div>
     </div>
@@ -43,11 +43,11 @@
         <h2 class="mb-4 text-slate-900">A professional community built for engineers</h2>
         <p class="mx-auto max-w-2xl text-lg text-slate-600">A trusted platform for exchanging expertise, building connections, and contributing to the engineering profession in Jabalpur.</p>
       </div>
-      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
         <% features.forEach((feature) => { %>
           <article class="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/50">
-            <div class="h-48 overflow-hidden">
-              <img src="<%= feature.image %>" alt="<%= feature.title %>" class="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
+            <div class="h-40 overflow-hidden">
+              <img src="<%= feature.image %>" alt="<%= feature.title %>" class="h-full w-full object-cover transition duration-300" />
             </div>
             <div class="flex flex-1 flex-col p-6">
               <div class="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-primary">
@@ -94,8 +94,8 @@
       <h2 class="mb-6 text-white">Be part of Jabalpur's engineering community</h2>
       <p class="mx-auto mb-10 max-w-2xl text-xl leading-relaxed text-slate-300">Share knowledge, build lasting professional connections, and help advance responsible engineering practice across our region.</p>
       <div class="flex flex-col justify-center gap-4 sm:flex-row">
-        <a href="/register" class="inline-flex h-14 items-center justify-center rounded-full bg-white px-8 text-base font-semibold text-slate-900 transition hover:-translate-y-1 hover:bg-slate-100">Apply for Membership</a>
-        <a href="/contact" class="inline-flex h-14 items-center justify-center rounded-full border border-slate-700 px-8 text-base font-semibold text-white transition hover:-translate-y-1 hover:bg-slate-800">Contact Us</a>
+        <a href="/register" class="inline-flex h-12 items-center justify-center rounded-full bg-white px-8 text-base font-semibold text-slate-900 transition hover:-translate-y-1 hover:bg-slate-100">Apply for Membership</a>
+        <a href="/contact" class="inline-flex h-12 items-center justify-center rounded-full border border-slate-700 px-8 text-base font-semibold text-white transition hover:-translate-y-1 hover:bg-slate-800">Contact Us</a>
       </div>
     </div>
   </section>

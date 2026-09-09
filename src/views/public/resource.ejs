@@ -2,17 +2,7 @@
 <%- include("../partials/header") %>
 
 <main>
-  <section class="page-hero relative flex items-center overflow-hidden pt-20">
-    <div class="absolute inset-0 z-0">
-      <img src="<%= resource.image %>" alt="<%= resource.title %>" class="h-full w-full object-cover object-center" />
-      <div class="hero-overlay"></div>
-      <div class="hero-gradient"></div>
-    </div>
-    <div class="relative z-10 mx-auto w-full max-w-5xl px-4 py-20 text-center sm:px-6 lg:px-8">
-      <h1 class="mb-6 text-white"><%= resource.title %></h1>
-      <p class="mx-auto text-lg text-slate-300 md:text-xl"><%= resource.description %></p>
-    </div>
-  </section>
+  <%- include("../partials/page-hero", { heroTitle: resource.title, heroSubtitle: resource.description, heroAlt: resource.title }) %>
 
   <section class="bg-slate-50 py-20">
     <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">

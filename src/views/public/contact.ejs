@@ -2,19 +2,7 @@
 <%- include("../partials/header") %>
 
 <main>
-  <section class="page-hero page-hero--compact page-hero--contact relative flex items-center overflow-hidden pt-20">
-    <div class="absolute inset-0 z-0">
-      <img src="/assets/images/home-hero.png" alt="Engineering community and Jabalpur landscape" class="page-hero__image h-full w-full object-cover" />
-      <div class="page-hero__overlay"></div>
-      <div class="hero-gradient"></div>
-    </div>
-    <div class="page-hero__content relative z-10 mx-auto w-full max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-3xl">
-        <h1 class="mb-4 text-white">Contact Us</h1>
-        <p class="text-lg leading-relaxed text-slate-300 md:text-xl">Contact the association about membership, events, notices, or general enquiries.</p>
-      </div>
-    </div>
-  </section>
+  <%- include("../partials/page-hero", { heroTitle: "Contact Us", heroSubtitle: "Contact the association about membership, events, notices, or general enquiries.", heroAlt: "Engineering community and Jabalpur landscape" }) %>
 
   <section class="bg-slate-50 py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

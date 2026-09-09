@@ -1,44 +1,44 @@
 const homeStats = [
-  { label: "Active Members", value: "500+", icon: "users" },
-  { label: "Events Hosted", value: "150+", icon: "calendar-days" },
-  { label: "Years of Excellence", value: "25+", icon: "award" },
-  { label: "Success Rate", value: "98%", icon: "trending-up" }
+  { label: "Engineering Disciplines", value: "Multi", icon: "drafting-compass" },
+  { label: "Professional Community", value: "Member-led", icon: "users" },
+  { label: "Regional Commitment", value: "Jabalpur", icon: "map-pin" },
+  { label: "Shared Progress", value: "Together", icon: "trending-up" }
 ];
 
 const homeFeatures = [
   {
     title: "Professional Network",
-    description: "Connect with experienced engineers across various disciplines and expand your professional circle.",
+    description: "Build meaningful professional relationships with engineers across disciplines, industries, and career stages.",
     image: "https://images.unsplash.com/photo-1470781125250-124de17ebdea?q=80&w=1600&auto=format&fit=crop",
     icon: "users"
   },
   {
     title: "Events & Workshops",
-    description: "Participate in technical seminars, workshops, and networking events throughout the year.",
+    description: "Take part in technical sessions, workshops, and community gatherings designed for practical learning.",
     image: "https://images.unsplash.com/photo-1560849144-739435323954?q=80&w=1600&auto=format&fit=crop",
     icon: "calendar-days"
   },
   {
     title: "Industry Advocacy",
-    description: "We represent the interests of engineering professionals at local and state levels.",
+    description: "Strengthen the collective voice of engineering professionals and encourage responsible industry practice.",
     image: "https://images.unsplash.com/photo-1683199804561-ce75c2c7bf61?q=80&w=1600&auto=format&fit=crop",
     icon: "shield"
   },
   {
     title: "Career Growth",
-    description: "Access exclusive resources, mentorship opportunities, and industry insights to advance your career.",
+    description: "Exchange experience, discover mentorship opportunities, and gain insights that support long-term growth.",
     image: "https://images.unsplash.com/photo-1580894736036-7a68513983ec?q=80&w=1600&auto=format&fit=crop",
     icon: "award"
   },
   {
     title: "Knowledge Sharing",
-    description: "Learn from industry experts through our comprehensive knowledge sharing programs.",
+    description: "Share field experience, technical perspectives, and proven approaches with a trusted peer community.",
     image: "https://images.unsplash.com/photo-1674403867232-9a278b2889ca?q=80&w=1600&auto=format&fit=crop",
     icon: "zap"
   },
   {
     title: "Professional Development",
-    description: "Continuous learning opportunities to stay ahead in the rapidly evolving engineering field.",
+    description: "Keep pace with evolving technology and professional standards through continuous, collaborative learning.",
     image: "https://images.unsplash.com/photo-1699271772975-a4cf35547d37?q=80&w=1600&auto=format&fit=crop",
     icon: "trending-up"
   }

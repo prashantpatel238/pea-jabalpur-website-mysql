@@ -9,8 +9,8 @@
       <div class="hero-gradient"></div>
     </div>
     <div class="relative z-10 mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
-      <div class="max-w-3xl">
-        <div class="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 backdrop-blur-md">
+      <div class="hero-content max-w-3xl">
+        <div class="eyebrow mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-md">
           <span class="h-2 w-2 animate-pulse rounded-full bg-secondary"></span>
           <span class="text-sm font-medium tracking-wide text-white">Empowering Engineering Excellence</span>
         </div>
@@ -26,7 +26,7 @@
 
   <section class="relative z-20 -mt-12 mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
     <% stats.forEach((stat) => { %>
-      <div class="rounded-3xl border border-slate-100 bg-white p-8 text-center shadow-xl shadow-slate-200/50">
+      <div class="premium-card rounded-3xl border border-slate-100 bg-white p-8 text-center shadow-xl shadow-slate-200/50">
         <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/5 text-primary">
           <i data-lucide="<%= stat.icon %>" class="h-7 w-7"></i>
         </div>
@@ -39,6 +39,7 @@
   <section class="bg-slate-50 py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mb-16 text-center">
+        <div class="section-label">Member advantages</div>
         <h2 class="mb-4 text-slate-900">Why Join Our Association?</h2>
         <p class="mx-auto max-w-2xl text-lg text-slate-600">We provide the platform, resources, and network you need to accelerate your engineering career and make a lasting impact.</p>
       </div>
@@ -65,6 +66,7 @@
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="mb-16 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div class="max-w-2xl">
+          <div class="section-label">Our leadership</div>
           <h2 class="mb-4 text-slate-900">Guided by Experience</h2>
           <p class="text-lg text-slate-600">Meet the dedicated professionals and industry veterans guiding our association towards excellence.</p>
         </div>

@@ -184,10 +184,6 @@ main article[class*="rounded-3xl"], main form[class*="rounded-3xl"], main div[cl
 }
 
 @media (max-width: 767px) {
-  h1 { font-size: clamp(2.35rem, 12vw, 3.5rem); line-height: 1.04; }
-  h2 { font-size: clamp(1.85rem, 9vw, 2.5rem); }
-  h3 { line-height: 1.25; }
-
   .site-header > div:first-child { min-height: 4.5rem; padding-top: .65rem; padding-bottom: .65rem; }
   .brand-mark { width: 3rem; height: 3rem; border-radius: .9rem; }
   .brand-link { gap: .7rem; max-width: calc(100% - 3.5rem); }
@@ -230,7 +226,7 @@ main article[class*="rounded-3xl"], main form[class*="rounded-3xl"], main div[cl
 .home-hero h1 { font-size: clamp(3rem, 5vw, 4rem); }
 .home-stats { margin-top: -1.75rem; }
 
-.page-hero { height: 15rem; }
+.page-hero { height: 16.875rem; }
 .page-hero h1 { margin-bottom: .75rem; font-size: clamp(2.5rem, 3.25vw, 2.875rem); }
 .page-hero__image { position: absolute; inset: 0; object-position: center 48%; }
 .page-hero__overlay {
@@ -240,16 +236,17 @@ main article[class*="rounded-3xl"], main form[class*="rounded-3xl"], main div[cl
 }
 .page-hero__content { padding-top: 1rem; padding-bottom: 1rem; }
 .page-hero__content p { font-size: 1.125rem; line-height: 1.55; }
+.login-page .page-hero { height: 12.5rem; }
 
 .directory-filters input,
 .directory-filters select { min-width: 0; }
-@media (min-width: 768px) and (max-width: 1023px) {
+@media (min-width: 768px) and (max-width: 1024px) {
   .home-hero { height: 35rem; min-height: 35rem; max-height: 35rem; }
   .home-hero__content { padding-top: 2.5rem; padding-bottom: 4.75rem; }
   .home-hero__image { object-position: 64% center; }
   .home-stats { margin-top: -1.5rem; }
-  .page-hero { height: 13.75rem; }
-  .page-hero__image { object-position: center 50%; }
+  .page-hero { height: 15.3125rem; }
+  .login-page .page-hero { height: 11.25rem; }
 }
 
 @media (min-width: 1024px) and (max-width: 1535px) {
@@ -258,13 +255,14 @@ main article[class*="rounded-3xl"], main form[class*="rounded-3xl"], main div[cl
 }
 
 @media (max-width: 767px) {
-  body { font-size: 1rem; }
+  body { font-size: 1rem; line-height: 1.7; }
   h1 { font-size: clamp(2.25rem, 10vw, 2.625rem); }
   h2 { font-size: clamp(1.625rem, 7.5vw, 1.875rem); }
-  h3 { font-size: clamp(1.2rem, 5.5vw, 1.375rem); }
-  main p:not([class*="text-xs"]):not([class*="text-sm"]) { font-size: 1rem; }
+  h3 { font-size: clamp(1.25rem, 5.5vw, 1.375rem); line-height: 1.25; }
+  main p:not([class*="text-xs"]) { font-size: 1rem; line-height: 1.7; }
   main label { font-size: .9375rem; }
-  main button, main a[class*="inline-flex"] { font-size: .9375rem; }
+  main input:not([type="checkbox"]):not([type="radio"]), main select, main textarea { font-size: 1rem; }
+  main button, main a[class*="inline-flex"], [data-mobile-menu] a { font-size: .9375rem; font-weight: 600; }
 
   .home-hero { height: clamp(35rem, 145vw, 35.625rem); min-height: 35rem; max-height: 35.625rem; }
   .home-hero__content { padding-top: 1.5rem; padding-bottom: 3.5rem; }
@@ -274,14 +272,16 @@ main article[class*="rounded-3xl"], main form[class*="rounded-3xl"], main div[cl
   .home-hero .hero-content p { margin-left: 0; margin-right: 0; }
   .home-hero .hero-content > p { font-size: 1rem; line-height: 1.7; }
   .home-stats { margin-top: -1.25rem; }
-  .page-hero { height: 12.5rem; }
+  .page-hero { height: 13.125rem; }
   .page-hero__image { object-position: 60% center; }
   .page-hero__content { padding-top: .75rem; padding-bottom: .75rem; }
-  .page-hero h1 { margin-bottom: .5rem; font-size: clamp(1.75rem, 8vw, 2rem); }
-  .page-hero__content p { font-size: 1rem; line-height: 1.4; }
+  .page-hero h1 { margin-bottom: .5rem; font-size: clamp(1.875rem, 8vw, 2.125rem); }
+  .page-hero__content p { font-size: 1rem; line-height: 1.6; }
+  .login-page .page-hero { height: 10.625rem; }
   .directory-filters .flex > * { flex: 1; padding-inline: 1rem; }
   main iframe { height: 19rem; }
   .site-footer p, .site-footer li, .site-footer a { font-size: .875rem; }
+  .site-footer > div > div:last-child p { font-size: .8125rem; }
 }
 
 /* Switch to the roomy menu before desktop navigation becomes cramped. */

@@ -1,9 +1,17 @@
 const menuToggle = document.querySelector("[data-mobile-menu-toggle]");
 const mobileMenu = document.querySelector("[data-mobile-menu]");
+const siteHeader = document.querySelector("[data-site-header]");
+
+if (siteHeader) {
+  const updateHeader = () => siteHeader.classList.toggle("is-scrolled", window.scrollY > 12);
+  updateHeader();
+  window.addEventListener("scroll", updateHeader, { passive: true });
+}
 
 if (menuToggle && mobileMenu) {
   menuToggle.addEventListener("click", () => {
     mobileMenu.classList.toggle("hidden");
+    menuToggle.setAttribute("aria-expanded", String(!mobileMenu.classList.contains("hidden")));
   });
 }
 

@@ -1,6 +1,7 @@
 :root {
   --primary: 30 64 175;
-  --secondary: 13 148 136;
+  --secondary: 201 151 43;
+  --navy: 11 31 58;
   --ink: 15 23 42;
   --surface: 248 250 252;
   --border: 226 232 240;
@@ -30,8 +31,9 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.15;
 }
 
-h1 { font-size: clamp(2.75rem, 7vw, 5.75rem); line-height: .98; font-weight: 800; }
-h2 { font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.08; font-weight: 800; }
+h1 { font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.05; font-weight: 800; }
+h2 { font-size: clamp(2rem, 3.5vw, 2.5rem); line-height: 1.12; font-weight: 800; }
+h3 { font-size: clamp(1.2rem, 2vw, 1.5rem); }
 p { max-width: 65ch; }
 a, button { -webkit-tap-highlight-color: transparent; }
 a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
@@ -43,13 +45,13 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .site-header {
   transition: background-color .3s ease, box-shadow .3s ease, border-color .3s ease;
 }
-.site-header > div:first-child { min-height: 5.5rem; }
+.site-header > div:first-child { min-height: 4.75rem; }
 .brand-link { min-width: 0; }
 .brand-title { line-height: 1.25; text-wrap: balance; }
 .site-header.is-scrolled {
   background: rgba(255, 255, 255, .96);
   border-color: rgba(203, 213, 225, .75);
-  box-shadow: 0 12px 40px rgba(15, 23, 42, .08);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, .07);
 }
 .brand-mark { position: relative; isolation: isolate; }
 .brand-mark::before {
@@ -58,7 +60,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   inset: -5px;
   z-index: -1;
   border-radius: 1.2rem;
-  background: linear-gradient(145deg, rgba(var(--primary), .18), rgba(var(--secondary), .14));
+  background: rgba(var(--primary), .12);
   opacity: 0;
   transition: opacity .25s ease;
 }
@@ -72,7 +74,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   left: 1rem;
   height: 2px;
   border-radius: 99px;
-  background: linear-gradient(90deg, rgb(var(--primary)), rgb(var(--secondary)));
+  background: rgb(var(--primary));
   transform: scaleX(0);
   transition: transform .2s ease;
 }
@@ -82,7 +84,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(90deg, rgba(4, 15, 40, .94) 0%, rgba(8, 31, 68, .77) 52%, rgba(5, 25, 53, .38) 100%);
+  background: linear-gradient(90deg, rgba(4, 15, 40, .9) 0%, rgba(8, 31, 68, .7) 55%, rgba(5, 25, 53, .3) 100%);
 }
 .hero-gradient {
   position: absolute;
@@ -101,7 +103,7 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .premium-card {
   position: relative;
   overflow: hidden;
-  box-shadow: 0 16px 50px rgba(15, 23, 42, .08);
+  box-shadow: 0 4px 16px rgba(15, 23, 42, .06);
   transition: transform .3s ease, box-shadow .3s ease, border-color .3s ease;
 }
 .premium-card::before {
@@ -109,10 +111,17 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   position: absolute;
   inset: 0 0 auto;
   height: 3px;
-  background: linear-gradient(90deg, rgb(var(--primary)), rgb(var(--secondary)));
+  background: rgb(var(--primary));
   opacity: .85;
 }
-.premium-card:hover { transform: translateY(-6px); border-color: rgba(var(--primary), .18); box-shadow: 0 24px 65px rgba(15,23,42,.13); }
+.premium-card:hover { transform: translateY(-2px); border-color: rgba(var(--primary), .18); box-shadow: 0 10px 28px rgba(15,23,42,.1); }
+
+/* Reusable presentation primitives */
+.page-hero { min-height: clamp(20rem, 36vw, 28rem); }
+.page-hero h1 { font-size: clamp(2.5rem, 5vw, 3.25rem); }
+.section-shell { width: 100%; max-width: 80rem; margin-inline: auto; padding-inline: clamp(1rem, 3vw, 2rem); }
+.surface-card { border: 1px solid rgb(var(--border)); border-radius: 1rem; box-shadow: 0 3px 14px rgba(15, 23, 42, .05); }
+.home-hero h1 { font-size: clamp(3rem, 5vw, 4rem); }
 
 /* Shared layout rhythm and image treatment */
 main section { isolation: isolate; }
@@ -153,6 +162,10 @@ main input:not([type="checkbox"]):not([type="radio"]):focus, main select:focus, 
 main button, main a[class*="bg-primary"] { transition: transform .2s ease, box-shadow .2s ease, background-color .2s ease; }
 main button:hover, main a[class*="bg-primary"]:hover { box-shadow: 0 14px 30px rgba(var(--primary), .2); }
 
+/* Keep account and administration surfaces efficient and consistent. */
+main [class*="rounded-4xl"] { border-radius: 1.25rem; }
+main article[class*="rounded-3xl"], main form[class*="rounded-3xl"], main div[class*="rounded-3xl"] { border-radius: 1rem; }
+
 .section-label {
   display: inline-flex;
   align-items: center;
@@ -164,7 +177,7 @@ main button:hover, main a[class*="bg-primary"]:hover { box-shadow: 0 14px 30px r
   letter-spacing: .16em;
   text-transform: uppercase;
 }
-.section-label::before { content: ""; width: 1.75rem; height: 2px; background: rgb(var(--secondary)); }
+.section-label::before { content: ""; width: 1.75rem; height: 2px; background: rgb(var(--primary)); }
 
 .footer-grid {
   background-image: linear-gradient(rgba(148,163,184,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(148,163,184,.035) 1px, transparent 1px);
@@ -182,9 +195,9 @@ main button:hover, main a[class*="bg-primary"]:hover { box-shadow: 0 14px 30px r
   .brand-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   [data-mobile-menu] { max-height: calc(100dvh - 4.5rem); overflow-y: auto; box-shadow: 0 18px 35px rgba(15, 23, 42, .12); }
 
-  .home-hero { min-height: 46rem; }
+  .home-hero { min-height: 40rem; }
   .home-hero img { object-position: 66% center; }
-  .hero-overlay { background: linear-gradient(180deg, rgba(4, 15, 40, .84), rgba(4, 15, 40, .96)); }
+  .hero-overlay { background: linear-gradient(180deg, rgba(4, 15, 40, .76), rgba(4, 15, 40, .92)); }
   .hero-gradient { background-size: auto, 32px 32px, 32px 32px; }
   .hero-content { text-align: center; }
   .hero-content .eyebrow { margin-left: auto; margin-right: auto; }

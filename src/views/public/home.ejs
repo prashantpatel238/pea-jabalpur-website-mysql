@@ -2,7 +2,7 @@
 <%- include("../partials/header") %>
 
 <main>
-  <section class="home-hero relative flex min-h-[90vh] items-center overflow-hidden pt-20">
+  <section class="home-hero relative flex min-h-[680px] lg:min-h-[720px] items-center overflow-hidden pt-20">
     <div class="absolute inset-0 z-0">
       <img src="/assets/images/home-hero.png" alt="Engineers collaborating" class="h-full w-full object-cover object-center" />
       <div class="hero-overlay"></div>
@@ -11,14 +11,14 @@
     <div class="relative z-10 mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 lg:px-8">
       <div class="hero-content max-w-3xl">
         <div class="eyebrow mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-md">
-          <span class="h-2 w-2 animate-pulse rounded-full bg-secondary"></span>
+          <span class="h-2 w-2 rounded-full bg-secondary"></span>
           <span class="text-sm font-medium tracking-wide text-white">Professional Engineers Association · Jabalpur</span>
         </div>
-        <h1 class="mb-6 text-white">Engineering progress, powered by a <span class="bg-gradient-to-r from-blue-300 to-teal-300 bg-clip-text text-transparent">stronger community.</span></h1>
+        <h1 class="mb-6 text-white">Engineering progress, powered by a <span class="text-blue-200">stronger community.</span></h1>
         <p class="mb-10 max-w-2xl text-lg text-slate-200 md:text-xl">Connect with Jabalpur's engineering community to exchange knowledge, strengthen professional relationships, and contribute to meaningful regional progress.</p>
         <div class="flex flex-col gap-4 sm:flex-row">
-          <a href="/register" class="inline-flex h-14 items-center justify-center rounded-full bg-primary px-8 text-base font-semibold text-white shadow-primary-soft transition hover:-translate-y-1 hover:bg-blue-700">Become a Member</a>
-          <a href="/about" class="inline-flex h-14 items-center justify-center rounded-full border border-white/30 bg-white/10 px-8 text-base font-semibold text-white backdrop-blur-md transition hover:-translate-y-1 hover:bg-white/20">Explore Our Purpose</a>
+          <a href="/register" class="inline-flex h-14 items-center justify-center rounded-xl bg-primary px-8 text-base font-semibold text-white shadow-primary-soft transition hover:-translate-y-1 hover:bg-blue-700">Become a Member</a>
+          <a href="/about" class="inline-flex h-14 items-center justify-center rounded-xl border border-white/30 bg-white/10 px-8 text-base font-semibold text-white backdrop-blur-md transition hover:-translate-y-1 hover:bg-white/20">Explore Our Purpose</a>
         </div>
       </div>
     </div>
@@ -26,11 +26,11 @@
 
   <section class="relative z-20 -mt-12 mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
     <% stats.forEach((stat) => { %>
-      <div class="premium-card rounded-3xl border border-slate-100 bg-white p-8 text-center shadow-xl shadow-slate-200/50">
-        <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/5 text-primary">
+      <div class="premium-card rounded-2xl border border-slate-200 bg-white p-5 text-center shadow-sm">
+        <div class="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/5 text-primary">
           <i data-lucide="<%= stat.icon %>" class="h-7 w-7"></i>
         </div>
-        <div class="mb-2 text-4xl font-extrabold text-slate-900"><%= stat.value %></div>
+        <div class="mb-1 text-2xl font-extrabold text-slate-900"><%= stat.value %></div>
         <div class="text-sm font-semibold uppercase tracking-wider text-slate-500"><%= stat.label %></div>
       </div>
     <% }) %>
@@ -45,11 +45,11 @@
       </div>
       <div class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
         <% features.forEach((feature) => { %>
-          <article class="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/50">
+          <article class="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/50">
             <div class="h-48 overflow-hidden">
               <img src="<%= feature.image %>" alt="<%= feature.title %>" class="h-full w-full object-cover transition duration-500 group-hover:scale-110" />
             </div>
-            <div class="p-8">
+            <div class="flex flex-1 flex-col p-6">
               <div class="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-primary">
                 <i data-lucide="<%= feature.icon %>" class="h-6 w-6"></i>
               </div>
@@ -70,13 +70,13 @@
           <h2 class="mb-4 text-slate-900">Leadership with professional purpose</h2>
           <p class="text-lg text-slate-600">Meet the experienced members who guide the association with integrity, collaboration, and a commitment to public value.</p>
         </div>
-        <a href="/important-members" class="hidden text-sm font-semibold text-primary md:inline-flex">View Important Members</a>
+        <a href="/important-members" class="hidden text-sm font-semibold text-primary md:inline-flex">View Leadership</a>
       </div>
       <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
         <% leaders.forEach((leader) => { %>
           <article class="rounded-3xl border border-slate-100 bg-slate-50 p-6 text-center transition duration-300 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50">
             <div class="mx-auto mb-6 flex h-32 w-32 items-center justify-center rounded-3xl border-4 border-white bg-white shadow-md">
-              <img src="<%= leader.photo %>" alt="<%= leader.full_name %>" class="h-24 w-24 rounded-3xl object-cover" />
+              <img src="<%= leader.photo %>" alt="Portrait of <%= leader.full_name %>" class="h-24 w-24 rounded-3xl object-cover" />
             </div>
             <div class="mb-4 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary"><%= leader.leadership_title %></div>
             <h3 class="mb-2 text-xl font-bold text-slate-900"><%= leader.full_name %></h3>

@@ -1,7 +1,7 @@
 <%- include("../partials/head") %>
 <%- include("../partials/header") %>
 
-<main class="min-h-screen bg-slate-50 px-4 py-12 pt-28 sm:px-6 lg:px-8">
+<main class="min-h-screen bg-slate-50 px-4 py-8 pt-24 sm:px-6 lg:px-8">
   <div class="mx-auto max-w-3xl">
     <% const values = typeof formData !== "undefined" && formData ? formData : (formState && formState.register) || {}; %>
     <%- include("../partials/flash") %>
@@ -16,18 +16,12 @@
       </div>
     <% } %>
     <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-      <div class="bg-primary px-8 py-10 text-center">
+      <div class="bg-primary px-6 py-7 sm:px-8 text-center">
         <div class="mx-auto inline-flex rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.18em] text-white/90">
           Membership Application
         </div>
         <h1 class="mt-4 text-3xl font-bold tracking-tight text-white sm:text-4xl">Join the Association</h1>
         <p class="mx-auto mt-3 max-w-2xl text-base leading-7 text-white/80">Become part of a professional engineering community focused on collaboration, leadership, and meaningful local impact.</p>
-        <div class="mx-auto mt-6 inline-flex items-center rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-left shadow-[0_16px_36px_rgba(15,23,42,0.16)] backdrop-blur-sm">
-          <div>
-            <div class="text-lg font-semibold text-white">Join Now</div>
-            <div class="text-sm text-white/75">Complete the form below to request membership approval</div>
-          </div>
-        </div>
       </div>
 
       <form action="/register" method="post" enctype="multipart/form-data" class="space-y-8 p-8" data-validate-popup>

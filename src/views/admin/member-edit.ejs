@@ -26,7 +26,7 @@
             <option value="<%= option %>" <%= (values.blood_group || '') === option ? 'selected' : '' %>><%= option || 'Blood group' %></option>
           <% }) %>
         </select>
-        <input name="children_count" type="number" min="0" step="1" value="<%= values.children_count || values.children_count === 0 ? values.children_count : '' %>" placeholder="Children count" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-children-field />
+        <div class="space-y-2" data-family-field><label for="edit-children-count" class="block text-sm font-semibold text-slate-700">Number of Children</label><input id="edit-children-count" name="children_count" type="number" min="0" step="1" value="<%= values.children_count || values.children_count === 0 ? values.children_count : '' %>" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-family-input /></div>
         <div class="md:col-span-2">
           <label for="member-photo" class="mb-2 block text-sm font-semibold text-slate-700">Member Photo</label>
           <% if (member.photo) { %>
@@ -41,8 +41,8 @@
         <input name="leadership_title" value="<%= values.leadership_title || '' %>" placeholder="Leadership title" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
         <input name="important_member_order" type="number" min="0" value="<%= values.important_member_order || 0 %>" placeholder="Important member order" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
         <input name="dob" type="date" value="<%= values.dob ? new Date(values.dob).toISOString().split('T')[0] : '' %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-        <input name="marriage_date" type="date" value="<%= values.marriage_date ? new Date(values.marriage_date).toISOString().split('T')[0] : '' %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-marriage-field />
-        <input name="spouse_name" value="<%= values.spouse_name || '' %>" placeholder="Spouse name" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-marriage-field />
+        <div class="space-y-2" data-family-field><label for="edit-marriage-date" class="block text-sm font-semibold text-slate-700">Marriage Date</label><input id="edit-marriage-date" name="marriage_date" type="date" value="<%= values.marriage_date ? new Date(values.marriage_date).toISOString().split('T')[0] : '' %>" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-family-input /></div>
+        <div class="space-y-2" data-family-field><label for="edit-spouse-name" class="block text-sm font-semibold text-slate-700">Spouse Name</label><input id="edit-spouse-name" name="spouse_name" value="<%= values.spouse_name || '' %>" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-family-input /></div>
         <input name="password" type="password" placeholder="New password (optional)" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
         <textarea name="address" placeholder="Address" class="min-h-[100px] rounded-xl border-slate-200 bg-slate-50 text-slate-900 md:col-span-2"><%= values.address || '' %></textarea>
         <textarea name="notes" placeholder="Member notes" class="min-h-[100px] rounded-xl border-slate-200 bg-slate-50 text-slate-900"><%= values.notes || '' %></textarea>
@@ -54,8 +54,6 @@
           <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_city_in_directory" <%= values.show_city_in_directory ? 'checked' : '' %> /> Show city</label>
           <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_profession_in_directory" <%= values.show_profession_in_directory ? 'checked' : '' %> /> Show profession</label>
           <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_photo_in_directory" <%= values.show_photo_in_directory ? 'checked' : '' %> /> Show photo</label>
-          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_in_leadership_section" <%= values.show_in_leadership_section ? 'checked' : '' %> /> Show in leadership section</label>
-          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="is_important_member" <%= values.is_important_member ? 'checked' : '' %> /> Important member</label>
         </div>
         <button type="submit" class="md:col-span-2 rounded-2xl bg-primary px-6 py-4 text-base font-semibold text-white">Save Changes</button>
       </form>
@@ -68,10 +66,10 @@
 <script>
   (() => {
     const maritalStatusInput = document.querySelector('select[name="marital_status"]');
-    const marriageFields = Array.from(document.querySelectorAll("[data-marriage-field]"));
-    const childrenFields = Array.from(document.querySelectorAll("[data-children-field]"));
+    const familyFields = Array.from(document.querySelectorAll("[data-family-field]"));
+    const familyInputs = Array.from(document.querySelectorAll("[data-family-input]"));
 
-    if (!maritalStatusInput || (!marriageFields.length && !childrenFields.length)) {
+    if (!maritalStatusInput || !familyFields.length) {
       return;
     }
 
@@ -84,12 +82,10 @@
     function updateFamilyFields() {
       const isMarried = maritalStatusInput.value === "married";
 
-      marriageFields.forEach((field) => field.classList.toggle("hidden", !isMarried));
-      childrenFields.forEach((field) => field.classList.toggle("hidden", !isMarried));
+      familyFields.forEach((field) => field.classList.toggle("hidden", !isMarried));
 
       if (!isMarried) {
-        clearFields(marriageFields);
-        clearFields(childrenFields);
+        clearFields(familyInputs);
       }
     }
 

@@ -39,6 +39,11 @@ function validateDatabaseEnvironment() {
 }
 
 function getAppConfig() {
+  const smtpPort = Number(process.env.SMTP_PORT) || 587;
+  const smtpSecure = process.env.SMTP_SECURE === undefined || process.env.SMTP_SECURE === ""
+    ? smtpPort === 465
+    : String(process.env.SMTP_SECURE).toLowerCase() === "true";
+
   return {
     isProduction: process.env.NODE_ENV === "production",
     port: Number(process.env.PORT) || 3000,
@@ -56,8 +61,8 @@ function getAppConfig() {
     },
     smtp: {
       host: process.env.SMTP_HOST || "",
-      port: Number(process.env.SMTP_PORT) || 587,
-      secure: String(process.env.SMTP_SECURE || "").toLowerCase() === "true",
+      port: smtpPort,
+      secure: smtpSecure,
       user: process.env.SMTP_USER || "",
       password: process.env.SMTP_PASS || "",
       fromEmail: process.env.SMTP_FROM_EMAIL || "",

@@ -72,9 +72,9 @@
               <option value="<%= option %>" <%= (createMemberValues.blood_group || '') === option ? 'selected' : '' %>><%= option || 'Blood group' %></option>
             <% }) %>
           </select>
-          <input name="spouse_name" value="<%= createMemberValues.spouse_name || '' %>" placeholder="Spouse name" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-marriage-field />
-          <input name="marriage_date" type="date" value="<%= createMemberValues.marriage_date || '' %>" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-marriage-field />
-          <input name="children_count" type="number" min="0" step="1" value="<%= createMemberValues.children_count || createMemberValues.children_count === 0 ? createMemberValues.children_count : '' %>" placeholder="Children count" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-children-field />
+          <div class="space-y-2" data-family-field><label for="dashboard-spouse-name" class="block text-sm font-semibold text-slate-700">Spouse Name</label><input id="dashboard-spouse-name" name="spouse_name" value="<%= createMemberValues.spouse_name || '' %>" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-family-input /></div>
+          <div class="space-y-2" data-family-field><label for="dashboard-marriage-date" class="block text-sm font-semibold text-slate-700">Marriage Date</label><input id="dashboard-marriage-date" name="marriage_date" type="date" value="<%= createMemberValues.marriage_date || '' %>" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-family-input /></div>
+          <div class="space-y-2" data-family-field><label for="dashboard-children-count" class="block text-sm font-semibold text-slate-700">Number of Children</label><input id="dashboard-children-count" name="children_count" type="number" min="0" step="1" value="<%= createMemberValues.children_count || createMemberValues.children_count === 0 ? createMemberValues.children_count : '' %>" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" data-family-input /></div>
           <div class="md:col-span-2">
             <label for="dashboard-photo" class="mb-2 block text-sm font-semibold text-slate-700">Member Photo</label>
             <input id="dashboard-photo" name="photo" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 file:mr-4 file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white" />
@@ -89,7 +89,6 @@
           <div class="rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-500">Member ID will be generated automatically when a member is approved.</div>
           <input name="password" required type="password" placeholder="Password" class="rounded-xl border-slate-200 bg-slate-50 text-slate-900 md:col-span-2" />
           <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_in_directory" <%= createMemberValues.show_in_directory ? 'checked' : '' %> /> Show in directory</label>
-          <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="is_important_member" <%= createMemberValues.is_important_member ? 'checked' : '' %> /> Mark important member</label>
           <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_city_in_directory" <%= typeof createMemberValues.show_city_in_directory === 'undefined' || createMemberValues.show_city_in_directory ? 'checked' : '' %> /> Show city</label>
           <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_profession_in_directory" <%= typeof createMemberValues.show_profession_in_directory === 'undefined' || createMemberValues.show_profession_in_directory ? 'checked' : '' %> /> Show profession</label>
           <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="show_photo_in_directory" <%= typeof createMemberValues.show_photo_in_directory === 'undefined' || createMemberValues.show_photo_in_directory ? 'checked' : '' %> /> Show photo</label>
@@ -205,7 +204,7 @@
                 <td class="px-3 py-3">
                   <div class="flex flex-wrap gap-2">
                     <a href="/admin/members/<%= member.id %>/edit" class="rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700">Edit</a>
-                    <form action="/admin/members/<%= member.id %>/delete" method="post"><button type="submit" class="rounded-xl bg-red-600 px-3 py-2 text-xs font-semibold text-white">Delete</button></form>
+                    <form action="/admin/members/<%= member.id %>/delete" method="post" data-confirm-message="Are you sure you want to permanently delete <%= member.full_name %>? This action cannot be undone."><button type="submit" class="rounded-xl bg-red-600 px-3 py-2 text-xs font-semibold text-white">Delete</button></form>
                   </div>
                 </td>
               </tr>
@@ -222,10 +221,10 @@
 <script>
   (() => {
     const maritalStatusInput = document.querySelector('form[action="/admin/members"] select[name="marital_status"]');
-    const marriageFields = Array.from(document.querySelectorAll('form[action="/admin/members"] [data-marriage-field]'));
-    const childrenFields = Array.from(document.querySelectorAll('form[action="/admin/members"] [data-children-field]'));
+    const familyFields = Array.from(document.querySelectorAll('form[action="/admin/members"] [data-family-field]'));
+    const familyInputs = Array.from(document.querySelectorAll('form[action="/admin/members"] [data-family-input]'));
 
-    if (!maritalStatusInput || (!marriageFields.length && !childrenFields.length)) {
+    if (!maritalStatusInput || !familyFields.length) {
       return;
     }
 
@@ -238,12 +237,10 @@
     function updateFamilyFields() {
       const isMarried = maritalStatusInput.value === "married";
 
-      marriageFields.forEach((field) => field.classList.toggle("hidden", !isMarried));
-      childrenFields.forEach((field) => field.classList.toggle("hidden", !isMarried));
+      familyFields.forEach((field) => field.classList.toggle("hidden", !isMarried));
 
       if (!isMarried) {
-        clearFields(marriageFields);
-        clearFields(childrenFields);
+        clearFields(familyInputs);
       }
     }
 

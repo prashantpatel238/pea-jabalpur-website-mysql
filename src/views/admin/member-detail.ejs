@@ -49,6 +49,7 @@
               </form>
             <% } %>
             <a href="/admin/members/<%= member.id %>/edit" class="block w-full rounded-2xl border border-slate-300 px-6 py-4 text-center text-base font-semibold text-slate-700">Edit Member</a>
+            <form action="/admin/members/<%= member.id %>/delete" method="post" data-confirm-message="Are you sure you want to permanently delete <%= member.full_name %>? This action cannot be undone."><button type="submit" class="w-full rounded-2xl bg-red-700 px-6 py-4 text-base font-semibold text-white">Delete Member</button></form>
           </div>
         </section>
 

@@ -1,4 +1,5 @@
 const { query } = require("../db/mysql");
+const { getMemberRoleOrderSql } = require("../utils/memberRoleOrder");
 
 const ADMIN_MEMBER_SELECT = `
   SELECT id, full_name, photo, member_id, profession, role, city, join_date, age,
@@ -66,11 +67,7 @@ async function listMembers(options = {}) {
     params.push(membershipStatus);
   }
 
-  let orderBy = "created_at DESC";
-
-  if (membershipStatus === "approved") {
-    orderBy = "approval_date DESC, full_name ASC";
-  }
+  const orderBy = `${getMemberRoleOrderSql()}, important_member_order ASC, full_name ASC, id ASC`;
 
   return query(
     `${ADMIN_MEMBER_SELECT}
@@ -91,7 +88,6 @@ async function countMembers(filters = {}) {
 
   if (filters.leadershipOnly) {
     whereClauses.push("role <> 'General Member'");
-    whereClauses.push("(show_in_leadership_section = 1 OR is_important_member = 1)");
   }
 
   const rows = await query(

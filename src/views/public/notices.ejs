@@ -26,7 +26,7 @@
               <div class="flex flex-wrap items-center gap-3">
                 <span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary"><%= notice.type_label %></span>
                 <% if (notice.type === 'event' && notice.event_date) { %>
-                  <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">Upcoming Event</span>
+                  <span class="rounded-full px-3 py-1 text-xs font-semibold <%= notice.event_status === 'upcoming' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-700' %>"><%= notice.event_status === 'upcoming' ? 'Upcoming Event' : 'Past Event' %></span>
                 <% } %>
                 <% if ((notice.type === 'birthday' || notice.type === 'anniversary') && notice.event_date) { %>
                   <span class="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">Special Day</span>

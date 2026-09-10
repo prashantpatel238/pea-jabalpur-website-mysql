@@ -4,7 +4,10 @@ const path = require("path");
 
 const multer = require("multer");
 
-const uploadDirectory = path.join(__dirname, "..", "..", "public", "uploads", "site");
+const { getStoredFilePath, getUploadStorageConfig } = require("../config/uploads");
+
+const uploadStorage = getUploadStorageConfig().site;
+const uploadDirectory = uploadStorage.directory;
 const allowedExtensions = new Set([".jpg", ".jpeg", ".png", ".webp", ".ico"]);
 const allowedMimeTypes = new Set([
   "image/jpeg",
@@ -68,21 +71,17 @@ function getUploadedSiteAssetPath(files, fieldName) {
     return "";
   }
 
-  return `/uploads/site/${file.filename}`;
+  return `${uploadStorage.publicPath}/${file.filename}`;
 }
 
 function removeUploadedSiteAsset(assetPath) {
-  if (!assetPath || !assetPath.startsWith("/uploads/site/")) {
+  const resolvedPath = getStoredFilePath(assetPath, uploadStorage);
+
+  if (!resolvedPath) {
     return;
   }
 
-  const resolvedPath = path.resolve(path.join(__dirname, "..", "..", "public", assetPath.replace(/^\//, "")));
-
-  if (!resolvedPath.startsWith(path.resolve(uploadDirectory))) {
-    return;
-  }
-
-  if (fs.existsSync(resolvedPath)) {
+  if (fs.existsSync(resolvedPath) && fs.lstatSync(resolvedPath).isFile()) {
     fs.unlinkSync(resolvedPath);
   }
 }

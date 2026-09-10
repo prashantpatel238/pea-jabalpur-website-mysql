@@ -1,5 +1,6 @@
 const { BLOOD_GROUP_OPTIONS } = require("../constants/memberFields");
 const { normalizeEmail, normalizeMobileNumber } = require("./validation");
+const { MEMBER_ROLES } = require("../constants/memberRoles");
 
 function calculateAge(dob) {
   if (!dob) {
@@ -82,14 +83,15 @@ function normalizePublicMemberInput(body) {
 }
 
 function buildAdminMemberPayload(body, existingMember) {
-  const shouldShowInLeadership = parseCheckbox(body, "show_in_leadership_section") || parseCheckbox(body, "is_important_member");
+  const role = body.role || existingMember?.role || "General Member";
+  const isLeadershipRole = MEMBER_ROLES.slice(0, -1).includes(role);
 
   return normalizeFamilyFields({
     full_name: (body.full_name ?? existingMember?.full_name ?? "").trim(),
     email: normalizeEmail(body.email ?? existingMember?.email),
     phone: normalizeMobileNumber(body.phone ?? existingMember?.phone),
     profession: (body.profession ?? existingMember?.profession ?? "").trim(),
-    role: body.role || existingMember?.role || "General Member",
+    role,
     city: (body.city ?? existingMember?.city ?? "").trim(),
     address: (body.address ?? existingMember?.address ?? "").trim(),
     dob: body.dob ?? existingMember?.dob ?? null,
@@ -110,8 +112,8 @@ function buildAdminMemberPayload(body, existingMember) {
     show_city_in_directory: parseCheckbox(body, "show_city_in_directory"),
     show_profession_in_directory: parseCheckbox(body, "show_profession_in_directory"),
     show_photo_in_directory: parseCheckbox(body, "show_photo_in_directory"),
-    show_in_leadership_section: shouldShowInLeadership,
-    is_important_member: shouldShowInLeadership,
+    show_in_leadership_section: existingMember?.show_in_leadership_section ?? isLeadershipRole,
+    is_important_member: existingMember?.is_important_member ?? isLeadershipRole,
     important_member_order: Number(body.important_member_order || 0),
     registration_source: (body.registration_source || existingMember?.registration_source || "admin").trim(),
     age: calculateAge(body.dob ?? existingMember?.dob ?? null)

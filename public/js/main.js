@@ -145,3 +145,11 @@ document.querySelectorAll("form[data-single-submit]").forEach((form) => {
     });
   });
 });
+
+document.querySelectorAll("form[data-confirm-message]").forEach((form) => {
+  form.addEventListener("submit", (event) => {
+    if (!window.confirm(form.dataset.confirmMessage)) {
+      event.preventDefault();
+    }
+  });
+});

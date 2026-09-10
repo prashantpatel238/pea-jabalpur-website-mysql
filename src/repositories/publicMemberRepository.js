@@ -1,5 +1,6 @@
 const { DIRECTORY_SORT_OPTIONS } = require("../constants/memberFields");
 const { query } = require("../db/mysql");
+const { getMemberRoleOrderSql } = require("../utils/memberRoleOrder");
 
 const DIRECTORY_MEMBER_SELECT = `
   SELECT id, full_name, role, city, profession, email, phone, photo, member_id, join_date,
@@ -15,10 +16,6 @@ const LEADERSHIP_MEMBER_SELECT = `
   FROM members
 `;
 
-function escapeLikePattern(value) {
-  return value.replace(/[\\%_]/g, "\\$&");
-}
-
 async function getLeadershipMembers(options = {}) {
   const { limit } = options;
   const params = [];
@@ -26,8 +23,7 @@ async function getLeadershipMembers(options = {}) {
     ${LEADERSHIP_MEMBER_SELECT}
     WHERE membership_status = 'approved'
       AND role <> 'General Member'
-      AND (show_in_leadership_section = 1 OR is_important_member = 1)
-    ORDER BY important_member_order ASC, full_name ASC
+    ORDER BY ${getMemberRoleOrderSql()}, important_member_order ASC, full_name ASC
   `;
 
   if (limit) {
@@ -46,8 +42,8 @@ async function getPublicDirectoryMembers(filters = {}) {
   const params = [];
 
   if (filters.search) {
-    whereClauses.push("full_name LIKE ? ESCAPE '\\'");
-    params.push(`%${escapeLikePattern(filters.search)}%`);
+    whereClauses.push("LOCATE(LOWER(?), LOWER(full_name)) > 0");
+    params.push(filters.search.trim());
   }
 
   if (filters.city) {
@@ -65,7 +61,7 @@ async function getPublicDirectoryMembers(filters = {}) {
   return query(
     `${DIRECTORY_MEMBER_SELECT}
      WHERE ${whereClauses.join(" AND ")}
-     ORDER BY ${sort}, role ASC`,
+     ORDER BY ${getMemberRoleOrderSql()}, ${sort}`,
     params
   );
 }

@@ -146,7 +146,18 @@ async function handleRequestOtpLogin(req, res) {
   }
 
   const code = generateOtpCode();
-  await sendLoginOtp(user, code);
+  try {
+    await sendLoginOtp(user, code);
+  } catch (error) {
+    delete req.session.authOtp;
+    console.error("OTP email delivery failed:", error?.message || "Unknown SMTP error");
+    return res.status(503).render("auth/login", {
+      page: buildPage("/auth/login", "Login"),
+      errorMessage: "We could not send the OTP right now. Please try again or use password login.",
+      formData: { email: user.email },
+      otpState: null
+    });
+  }
 
   req.session.authOtp = buildOtpSessionRecord(user, code);
 

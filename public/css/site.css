@@ -190,7 +190,7 @@ main article[class*="rounded-3xl"], main form[class*="rounded-3xl"], main div[cl
 
 .site-footer {
   background-image:
-    linear-gradient(rgba(4, 15, 40, .78), rgba(4, 15, 40, .84)),
+    linear-gradient(rgba(4, 15, 40, .84), rgba(4, 15, 40, .92)),
     url('/assets/images/footer.png');
   background-position: center bottom;
   background-repeat: no-repeat;

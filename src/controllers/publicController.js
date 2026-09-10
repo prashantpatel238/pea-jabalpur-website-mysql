@@ -28,6 +28,7 @@ const { buildMemberCelebrationNotices } = require("../utils/noticeFeed");
 const { getPhotoPath, removeUploadedMemberPhoto } = require("../middleware/memberPhotoUpload");
 const { getLeadershipMembers } = require("../services/leadershipService");
 const { sanitizeFormState } = require("../utils/formState");
+const { getEventStatus, toDateKey } = require("../utils/eventDate");
 const {
   getEmailValidationMessage,
   getMobileValidationMessage,
@@ -194,7 +195,8 @@ async function renderNotices(req, res) {
       event_date: notice.event_date || notice.publish_date,
       publish_date: notice.publish_date || null,
       expiry_date: notice.expiry_date || null,
-      sort_order: notice.sort_order || 0
+      sort_order: notice.sort_order || 0,
+      event_status: notice.type === "event" ? getEventStatus(notice.event_date) : ""
     })),
     ...buildMemberCelebrationNotices(celebrants).map((notice) => ({
       ...notice,
@@ -210,6 +212,12 @@ async function renderNotices(req, res) {
     .sort((a, b) => {
       if (activeCategory === "notices") {
         return new Date(b.event_date) - new Date(a.event_date) || a.sort_order - b.sort_order;
+      }
+
+      if (activeCategory === "events") {
+        if (a.event_status !== b.event_status) return a.event_status === "upcoming" ? -1 : 1;
+        const direction = a.event_status === "upcoming" ? 1 : -1;
+        return toDateKey(a.event_date).localeCompare(toDateKey(b.event_date)) * direction || a.sort_order - b.sort_order;
       }
 
       return new Date(a.event_date) - new Date(b.event_date) || a.sort_order - b.sort_order;

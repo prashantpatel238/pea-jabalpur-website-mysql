@@ -1,3 +1,5 @@
+const { getUploadStorageConfig } = require("./uploads");
+
 const requiredDatabaseEnvironmentVariables = [
   "DB_HOST",
   "DB_PORT",
@@ -72,7 +74,8 @@ function getAppConfig() {
       email: process.env.ADMIN_EMAIL,
       password: process.env.ADMIN_PASSWORD,
       name: process.env.ADMIN_NAME
-    }
+    },
+    uploads: getUploadStorageConfig()
   };
 }
 

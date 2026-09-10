@@ -45,15 +45,24 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
 .site-header {
   transition: background-color .3s ease, box-shadow .3s ease, border-color .3s ease;
 }
-.site-header > div:first-child { min-height: 4.75rem; }
-.brand-link { min-width: 0; }
-.brand-title { line-height: 1.25; text-wrap: balance; }
+.header-inner { min-height: 4.75rem; gap: 1.25rem; }
+.brand-link { min-width: 0; flex: 1 1 auto; }
+.brand-mark {
+  position: relative;
+  isolation: isolate;
+  width: 3.75rem;
+  height: 3.75rem;
+  padding: .1875rem;
+}
+.brand-mark img { width: 100%; height: 100%; object-fit: contain; }
+.brand-copy { max-width: 23rem; }
+.brand-title { font-size: 1rem; line-height: 1.3; white-space: nowrap; }
+.brand-tagline { margin-top: .125rem; font-size: .75rem; line-height: 1.4; }
 .site-header.is-scrolled {
   background: rgba(255, 255, 255, .96);
   border-color: rgba(203, 213, 225, .75);
   box-shadow: 0 8px 24px rgba(15, 23, 42, .07);
 }
-.brand-mark { position: relative; isolation: isolate; }
 .brand-mark::before {
   content: "";
   position: absolute;
@@ -79,6 +88,9 @@ a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible
   transition: transform .2s ease;
 }
 .nav-link:hover::after, .nav-link[aria-current="page"]::after { transform: scaleX(1); }
+.desktop-navigation { flex: 0 0 auto; gap: .125rem; }
+.desktop-navigation .nav-link { display: flex; align-items: center; min-height: 2.5rem; padding: .5rem .625rem; line-height: 1.2; text-align: center; }
+.desktop-navigation form { display: flex; }
 
 /* Hero depth and subtle engineering-grid detail */
 .hero-overlay {
@@ -184,10 +196,11 @@ main article[class*="rounded-3xl"], main form[class*="rounded-3xl"], main div[cl
 }
 
 @media (max-width: 767px) {
-  .site-header > div:first-child { min-height: 4.5rem; padding-top: .65rem; padding-bottom: .65rem; }
-  .brand-mark { width: 3rem; height: 3rem; border-radius: .9rem; }
+  .header-inner { min-height: 4.5rem; gap: .75rem; padding-top: .625rem; padding-bottom: .625rem; }
+  .brand-mark { width: 3.125rem; height: 3.125rem; padding: .125rem; border-radius: .9rem; }
   .brand-link { gap: .7rem; max-width: calc(100% - 3.5rem); }
-  .brand-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .brand-title { font-size: clamp(.75rem, 3.4vw, .9375rem); line-height: 1.25; white-space: normal; }
+  .brand-tagline { display: none; }
   [data-mobile-menu] { max-height: calc(100dvh - 4.5rem); overflow-y: auto; box-shadow: 0 18px 35px rgba(15, 23, 42, .12); }
 
   .hero-overlay { background: linear-gradient(180deg, rgba(4, 15, 40, .76), rgba(4, 15, 40, .92)); }
@@ -199,12 +212,22 @@ main article[class*="rounded-3xl"], main form[class*="rounded-3xl"], main div[cl
 }
 
 @media (min-width: 768px) and (max-width: 1100px) {
-  .site-header > div:first-child { padding-left: 1.25rem; padding-right: 1.25rem; }
+  .header-inner { padding-left: 1.25rem; padding-right: 1.25rem; }
   .brand-mark { width: 3.25rem; height: 3.25rem; }
-  .brand-title { max-width: 15rem; font-size: .9rem; }
-  nav[class*="md:flex"] { gap: 0; }
-  nav[class*="md:flex"] .nav-link { padding-left: .65rem; padding-right: .65rem; font-size: .76rem; }
-  nav[class*="md:flex"] a[href="/register"] { min-width: auto; margin-left: .25rem; padding-left: 1rem; padding-right: 1rem; }
+  .brand-copy { max-width: min(32rem, calc(100vw - 8rem)); }
+  .brand-title { font-size: .9375rem; }
+  .brand-tagline { font-size: .71875rem; }
+}
+
+@media (min-width: 1101px) and (max-width: 1279px) {
+  .header-inner { gap: .75rem; padding-left: 1.25rem; padding-right: 1.25rem; }
+  .brand-link { gap: .625rem; }
+  .brand-copy { max-width: 17.5rem; }
+  .brand-title { font-size: .9375rem; white-space: normal; }
+  .brand-tagline { font-size: .71875rem; }
+  .desktop-navigation .nav-link { padding-left: .5rem; padding-right: .5rem; }
+  .desktop-navigation a[href="/register"] { min-width: auto; margin-left: .25rem; padding-left: .875rem; padding-right: .875rem; }
+  .desktop-navigation > a:not(.nav-link), .desktop-navigation button { padding-left: .625rem; padding-right: .625rem; }
 }
 
 @keyframes hero-enter {
@@ -285,7 +308,7 @@ main article[class*="rounded-3xl"], main form[class*="rounded-3xl"], main div[cl
 }
 
 /* Switch to the roomy menu before desktop navigation becomes cramped. */
-@media (min-width: 1024px) and (max-width: 1150px) {
+@media (min-width: 1024px) and (max-width: 1100px) {
   .site-header nav { display: none; }
   .site-header [data-mobile-menu-toggle] { display: inline-flex; }
   .site-header [data-mobile-menu] { display: none; }

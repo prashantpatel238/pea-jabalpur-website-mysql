@@ -114,7 +114,9 @@ function buildAdminMemberPayload(body, existingMember) {
     show_photo_in_directory: parseCheckbox(body, "show_photo_in_directory"),
     show_in_leadership_section: existingMember?.show_in_leadership_section ?? isLeadershipRole,
     is_important_member: existingMember?.is_important_member ?? isLeadershipRole,
-    important_member_order: Number(body.important_member_order || 0),
+    important_member_order: body.important_member_order === undefined
+      ? Number(existingMember?.important_member_order || 0)
+      : Number(body.important_member_order || 0),
     registration_source: (body.registration_source || existingMember?.registration_source || "admin").trim(),
     age: calculateAge(body.dob ?? existingMember?.dob ?? null)
   });

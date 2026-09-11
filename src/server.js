@@ -1,13 +1,13 @@
 const dotenv = require("dotenv");
 
+dotenv.config();
+
 const { createApp } = require("./app");
 const { connectToDatabase, disconnectFromDatabase, formatDatabaseConnectionError } = require("./config/database");
 const { getAppConfig, validateEnvironment } = require("./config/env");
 const { ensureInitialAdmin } = require("./services/adminBootstrap");
 const { ensureSiteSettings } = require("./services/siteSettingsService");
 const { bootstrapDatabase } = require("./services/databaseBootstrap");
-
-dotenv.config();
 
 let httpServer = null;
 let shuttingDown = false;

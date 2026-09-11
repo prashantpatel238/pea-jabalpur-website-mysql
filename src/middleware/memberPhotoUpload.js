@@ -4,7 +4,10 @@ const path = require("path");
 
 const multer = require("multer");
 
-const uploadDirectory = path.join(__dirname, "..", "..", "public", "uploads", "members");
+const { getStoredFilePath, getUploadStorageConfig } = require("../config/uploads");
+
+const uploadStorage = getUploadStorageConfig().members;
+const uploadDirectory = uploadStorage.directory;
 const allowedMimeTypes = new Map([
   ["image/jpeg", ".jpg"],
   ["image/png", ".png"],
@@ -54,21 +57,17 @@ function getPhotoPath(file) {
     return "";
   }
 
-  return `/uploads/members/${file.filename}`;
+  return `${uploadStorage.publicPath}/${file.filename}`;
 }
 
 function removeUploadedMemberPhoto(photoPath) {
-  if (!photoPath || !photoPath.startsWith("/uploads/members/")) {
+  const resolvedPath = getStoredFilePath(photoPath, uploadStorage);
+
+  if (!resolvedPath) {
     return;
   }
 
-  const resolvedPath = path.resolve(path.join(__dirname, "..", "..", "public", photoPath.replace(/^\//, "")));
-
-  if (!resolvedPath.startsWith(path.resolve(uploadDirectory))) {
-    return;
-  }
-
-  if (fs.existsSync(resolvedPath)) {
+  if (fs.existsSync(resolvedPath) && fs.lstatSync(resolvedPath).isFile()) {
     fs.unlinkSync(resolvedPath);
   }
 }

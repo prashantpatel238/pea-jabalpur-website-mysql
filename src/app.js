@@ -15,7 +15,7 @@ const { getAppConfig } = require("./config/env");
 
 function createApp() {
   const app = express();
-  const { isProduction, sessionSecret } = getAppConfig();
+  const { isProduction, sessionSecret, uploads } = getAppConfig();
 
   if (isProduction) {
     app.set("trust proxy", 1);
@@ -27,6 +27,10 @@ function createApp() {
   app.use(secureHeaders);
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
+  app.use("/uploads", express.static(uploads.root, {
+    dotfiles: "deny",
+    index: false
+  }));
   app.use(express.static(path.join(__dirname, "..", "public")));
   app.use(session({
     secret: sessionSecret,

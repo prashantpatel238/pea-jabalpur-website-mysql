@@ -36,37 +36,14 @@ test("upload configuration preserves public URLs while using an external root", 
   }
 });
 
-test("production uses a home-directory fallback when UPLOAD_ROOT is missing", () => {
+test("production rejects missing or deployment-local upload roots", () => {
   const previousRoot = process.env.UPLOAD_ROOT;
   const previousEnvironment = process.env.NODE_ENV;
-  const previousHome = process.env.HOME;
-  const home = fs.mkdtempSync(path.join(os.tmpdir(), "pea-home-"));
 
   try {
     process.env.NODE_ENV = "production";
-    process.env.HOME = home;
     delete process.env.UPLOAD_ROOT;
-    const config = getUploadStorageConfig();
-
-    assert.equal(config.root, path.join(home, ".pea-jabalpur", "uploads"));
-    assert.equal(config.usingProductionFallback, true);
-  } finally {
-    restoreEnvironmentVariable("NODE_ENV", previousEnvironment);
-    restoreEnvironmentVariable("UPLOAD_ROOT", previousRoot);
-    restoreEnvironmentVariable("HOME", previousHome);
-    fs.rmSync(home, { recursive: true, force: true });
-  }
-});
-
-test("production rejects relative or deployment-local configured upload roots", () => {
-  const previousRoot = process.env.UPLOAD_ROOT;
-  const previousEnvironment = process.env.NODE_ENV;
-
-  try {
-    process.env.NODE_ENV = "production";
-
-    process.env.UPLOAD_ROOT = "relative/uploads";
-    assert.throws(() => getUploadStorageConfig(), /absolute filesystem path/);
+    assert.throws(() => getUploadStorageConfig(), /UPLOAD_ROOT is required/);
 
     process.env.UPLOAD_ROOT = path.resolve(__dirname, "..", "data", "uploads");
     assert.throws(() => getUploadStorageConfig(), /outside the deployed application/);

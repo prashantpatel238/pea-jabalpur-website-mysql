@@ -9,25 +9,25 @@ const homeFeatures = [
   {
     title: "Professional Networking",
     description: "Build trusted relationships with engineers across disciplines and career stages.",
-    image: "https://images.unsplash.com/photo-1470781125250-124de17ebdea?q=80&w=1600&auto=format&fit=crop",
+    image: "/images/home/professional-networking.jpeg",
     icon: "users"
   },
   {
     title: "Knowledge Sharing",
     description: "Exchange field experience, technical perspectives, and practical approaches with peers.",
-    image: "https://images.unsplash.com/photo-1674403867232-9a278b2889ca?q=80&w=1600&auto=format&fit=crop",
+    image: "/images/home/knowledge-sharing.jpeg",
     icon: "book-open"
   },
   {
     title: "Professional Development",
     description: "Learn through association activities and keep pace with engineering practice and standards.",
-    image: "https://images.unsplash.com/photo-1580894736036-7a68513983ec?q=80&w=1600&auto=format&fit=crop",
+    image: "/images/home/community-growth.jpeg",
     icon: "trending-up"
   },
   {
     title: "Community Contribution",
     description: "Contribute engineering knowledge to constructive initiatives for Jabalpur and the region.",
-    image: "https://images.unsplash.com/photo-1683199804561-ce75c2c7bf61?q=80&w=1600&auto=format&fit=crop",
+    image: "/images/home/home-hero-engineers-day.jpeg",
     icon: "landmark"
   }
 ];
@@ -45,25 +45,25 @@ const aboutValues = [
   {
     title: "Collaboration",
     description: "Fostering teamwork and knowledge sharing among peers across all engineering disciplines.",
-    image: "https://images.unsplash.com/photo-1565841327798-694bc2074762?q=80&w=1200&auto=format&fit=crop",
+    image: "/images/about/about-association-event.jpeg",
     icon: "users"
   },
   {
     title: "Continuous Learning",
     description: "Promoting ongoing education, skill development, and adaptation to new technologies.",
-    image: "https://images.unsplash.com/photo-1695370992939-be4eb6fddf35?q=80&w=1200&auto=format&fit=crop",
+    image: "/images/about/about-engineers-day.jpeg",
     icon: "book-open"
   },
   {
     title: "Excellence",
     description: "Striving for the highest standards in engineering practice and project execution.",
-    image: "https://images.unsplash.com/photo-1620928491723-e1a4f8222181?q=80&w=1200&auto=format&fit=crop",
+    image: "/images/about/about-award-recognition.jpeg",
     icon: "award"
   },
   {
     title: "Integrity",
     description: "Upholding strict ethical standards and transparency in all professional endeavors.",
-    image: "https://images.unsplash.com/photo-1573951265735-7f377a9455a0?q=80&w=1200&auto=format&fit=crop",
+    image: "/images/about/about-member-recognition.jpeg",
     icon: "shield"
   }
 ];

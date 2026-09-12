@@ -34,9 +34,11 @@ function getUploadStorageConfig() {
 
   const membersDirectory = path.join(root, "members");
   const siteDirectory = path.join(root, "site");
+  const galleryDirectory = path.join(root, "gallery");
 
   fs.mkdirSync(membersDirectory, { recursive: true });
   fs.mkdirSync(siteDirectory, { recursive: true });
+  fs.mkdirSync(galleryDirectory, { recursive: true });
 
   return {
     root,
@@ -47,7 +49,8 @@ function getUploadStorageConfig() {
     site: {
       directory: siteDirectory,
       publicPath: "/uploads/site"
-    }
+    },
+    gallery: { directory: galleryDirectory, publicPath: "/uploads/gallery" }
   };
 }
 

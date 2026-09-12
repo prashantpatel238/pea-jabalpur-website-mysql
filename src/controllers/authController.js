@@ -84,6 +84,7 @@ async function findLoginUserByEmail(email) {
 }
 
 async function completeLogin(req, user) {
+  const returnTo = req.session.returnTo;
   if (user.role === "admin") {
     await updateAdminLastLoginAt(user.id);
   } else if (user.role === "member") {
@@ -101,6 +102,7 @@ async function completeLogin(req, user) {
     display_name: user.display_name
   };
   req.session.flash = { type: "success", message: "Login successful." };
+  if (returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")) req.session.returnTo = returnTo;
 }
 
 async function handleLogin(req, res) {
@@ -129,7 +131,9 @@ async function handleLogin(req, res) {
   }
 
   await completeLogin(req, user);
-  return res.redirect(user.role === "admin" ? "/admin/dashboard" : "/member/dashboard");
+  const destination = req.session.returnTo || (user.role === "admin" ? "/admin/dashboard" : "/member/dashboard");
+  delete req.session.returnTo;
+  return res.redirect(destination);
 }
 
 async function handleRequestOtpLogin(req, res) {
@@ -210,7 +214,9 @@ async function handleVerifyOtpLogin(req, res) {
 
   delete req.session.authOtp;
   await completeLogin(req, user);
-  return res.redirect(user.role === "admin" ? "/admin/dashboard" : "/member/dashboard");
+  const destination = req.session.returnTo || (user.role === "admin" ? "/admin/dashboard" : "/member/dashboard");
+  delete req.session.returnTo;
+  return res.redirect(destination);
 }
 
 async function handleLogout(req, res) {

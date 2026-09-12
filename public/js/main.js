@@ -39,6 +39,40 @@ if (window.lucide) {
   window.lucide.createIcons();
 }
 
+// Enhance every current and future password form without changing its validation.
+document.querySelectorAll('input[type="password"]').forEach((input) => {
+  if (input.dataset.passwordToggleReady === "true") {
+    return;
+  }
+
+  input.dataset.passwordToggleReady = "true";
+  const wrapper = document.createElement("div");
+  wrapper.className = "password-field";
+  Array.from(input.classList)
+    .filter((className) => className.includes("col-span"))
+    .forEach((className) => {
+      wrapper.classList.add(className);
+      input.classList.remove(className);
+    });
+  input.parentNode.insertBefore(wrapper, input);
+  wrapper.appendChild(input);
+
+  const toggle = document.createElement("button");
+  toggle.type = "button";
+  toggle.className = "password-toggle";
+  toggle.setAttribute("aria-label", "Show password");
+  toggle.setAttribute("aria-pressed", "false");
+  toggle.textContent = "Show";
+  toggle.addEventListener("click", () => {
+    const showPassword = input.type === "password";
+    input.type = showPassword ? "text" : "password";
+    toggle.textContent = showPassword ? "Hide" : "Show";
+    toggle.setAttribute("aria-label", showPassword ? "Hide password" : "Show password");
+    toggle.setAttribute("aria-pressed", String(showPassword));
+  });
+  wrapper.appendChild(toggle);
+});
+
 function showPopupMessage(message) {
   if (!message) {
     return;

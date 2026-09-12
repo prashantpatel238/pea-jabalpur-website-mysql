@@ -11,8 +11,7 @@ const {
   isValidChildrenCount,
   normalizeBloodGroup,
   normalizeChildrenCount,
-  normalizeFamilyFields,
-  parseCheckbox
+  normalizeFamilyFields
 } = require("../utils/memberData");
 const { getPhotoPath, removeUploadedMemberPhoto } = require("../middleware/memberPhotoUpload");
 const { setFormState } = require("../utils/formState");
@@ -56,6 +55,25 @@ async function renderMemberProfile(req, res) {
   });
 }
 
+function buildMemberProfileUpdate(member, body, nextPhoto) {
+  return normalizeFamilyFields({
+    ...member,
+    full_name: (body.full_name || "").trim(),
+    phone: normalizeMobileNumber(body.phone),
+    photo: nextPhoto,
+    profession: (body.profession || "").trim(),
+    city: (body.city || "").trim(),
+    address: (body.address || "").trim(),
+    dob: body.dob || null,
+    gender: (body.gender || "").toLowerCase(),
+    blood_group: normalizeBloodGroup(body.blood_group),
+    marital_status: (body.marital_status || "").toLowerCase(),
+    marriage_date: body.marriage_date || null,
+    spouse_name: (body.spouse_name || "").trim(),
+    children_count: normalizeChildrenCount(body.children_count)
+  });
+}
+
 async function handleUpdateMemberProfile(req, res) {
   const member = await findMemberById(req.session.user.id);
 
@@ -88,28 +106,7 @@ async function handleUpdateMemberProfile(req, res) {
     return res.redirect("/member/profile");
   }
 
-  const updatedMember = normalizeFamilyFields({
-    ...member,
-    full_name: (req.body.full_name || "").trim(),
-    phone: normalizedPhone,
-    photo: nextPhoto,
-    profession: (req.body.profession || "").trim(),
-    city: (req.body.city || "").trim(),
-    address: (req.body.address || "").trim(),
-    dob: req.body.dob || null,
-    gender: (req.body.gender || "").toLowerCase(),
-    blood_group: normalizeBloodGroup(req.body.blood_group),
-    marital_status: (req.body.marital_status || "").toLowerCase(),
-    marriage_date: req.body.marriage_date || null,
-    spouse_name: (req.body.spouse_name || "").trim(),
-    children_count: normalizeChildrenCount(req.body.children_count),
-    show_in_directory: parseCheckbox(req.body, "show_in_directory"),
-    show_mobile_in_directory: parseCheckbox(req.body, "show_mobile_in_directory"),
-    show_email_in_directory: parseCheckbox(req.body, "show_email_in_directory"),
-    show_city_in_directory: parseCheckbox(req.body, "show_city_in_directory"),
-    show_profession_in_directory: parseCheckbox(req.body, "show_profession_in_directory"),
-    show_photo_in_directory: parseCheckbox(req.body, "show_photo_in_directory")
-  });
+  const updatedMember = buildMemberProfileUpdate(member, req.body, nextPhoto);
   updatedMember.age = calculateAge(updatedMember.dob);
 
   if (req.body.password) {
@@ -131,5 +128,6 @@ module.exports = {
   redirectMemberLogin,
   renderMemberDashboard,
   renderMemberProfile,
-  handleUpdateMemberProfile
+  handleUpdateMemberProfile,
+  buildMemberProfileUpdate
 };

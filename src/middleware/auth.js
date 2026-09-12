@@ -16,7 +16,15 @@ function requireMember(req, res, next) {
   return res.redirect("/auth/login");
 }
 
+function requireAuthenticated(req, res, next) {
+  if (req.session?.user && ["admin", "member"].includes(req.session.user.role)) return next();
+  req.session.returnTo = req.originalUrl;
+  req.session.flash = { type: "error", message: "Please sign in to view the member directory." };
+  return res.redirect("/auth/login");
+}
+
 module.exports = {
   requireAdmin,
-  requireMember
+  requireMember,
+  requireAuthenticated
 };

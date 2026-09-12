@@ -13,6 +13,8 @@ const {
   handleRegistrationRequest,
   handleContactRequest
 } = require("../controllers/publicController");
+const { renderGallery } = require("../controllers/galleryController");
+const { requireAuthenticated } = require("../middleware/auth");
 
 const router = express.Router();
 
@@ -24,8 +26,9 @@ router.get("/contact", renderContact);
 router.post("/contact", handleContactRequest);
 router.get("/leadership", renderLeadership);
 router.get("/important-members", (req, res) => res.redirect(301, "/leadership"));
-router.get("/member-directory", renderDirectory);
-router.get("/directory", (req, res) => res.redirect(301, "/member-directory"));
+router.get("/member-directory", requireAuthenticated, renderDirectory);
+router.get("/directory", requireAuthenticated, (req, res) => res.redirect(302, "/member-directory"));
+router.get("/gallery", renderGallery);
 router.get("/register", renderRegistration);
 router.post("/register", uploadMemberPhoto, handleRegistrationRequest);
 router.get("/notices", renderNotices);

@@ -1,4 +1,36 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="/js/main.js"></script>
+    <script>
+      document.querySelectorAll("[data-account-menu]").forEach((accountMenu) => {
+        const toggle = accountMenu.querySelector("[data-account-menu-toggle]");
+        const dropdown = accountMenu.querySelector("[data-account-menu-dropdown]");
+
+        if (!toggle || !dropdown) return;
+
+        const closeAccountMenu = (restoreFocus = false) => {
+          dropdown.classList.add("hidden");
+          toggle.setAttribute("aria-expanded", "false");
+          if (restoreFocus) toggle.focus();
+        };
+
+        toggle.addEventListener("click", () => {
+          const willOpen = dropdown.classList.contains("hidden");
+          dropdown.classList.toggle("hidden", !willOpen);
+          toggle.setAttribute("aria-expanded", String(willOpen));
+          if (willOpen) dropdown.querySelector('[role="menuitem"]')?.focus();
+        });
+
+        document.addEventListener("click", (event) => {
+          if (!accountMenu.contains(event.target)) closeAccountMenu();
+        });
+
+        accountMenu.addEventListener("keydown", (event) => {
+          if (event.key === "Escape" && toggle.getAttribute("aria-expanded") === "true") {
+            event.preventDefault();
+            closeAccountMenu(true);
+          }
+        });
+      });
+    </script>
   </body>
 </html>

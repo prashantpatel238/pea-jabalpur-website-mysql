@@ -43,7 +43,7 @@
         <% features.forEach((feature) => { %>
           <article class="group flex h-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/50">
             <div class="h-40 overflow-hidden">
-              <img src="<%= feature.image %>" alt="<%= feature.title %>" class="h-full w-full object-cover transition duration-300" />
+              <img src="<%= feature.image %>" loading="lazy" alt="<%= feature.title %>" class="h-full w-full object-cover transition duration-300" />
             </div>
             <div class="flex flex-1 flex-col p-6">
               <div class="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-slate-50 text-primary">
@@ -72,7 +72,7 @@
         <% leaders.forEach((leader) => { %>
           <article class="rounded-3xl border border-slate-100 bg-slate-50 p-6 text-center transition duration-300 hover:bg-white hover:shadow-xl hover:shadow-slate-200/50">
             <div class="mx-auto mb-6 flex h-32 w-32 items-center justify-center rounded-3xl border-4 border-white bg-white shadow-md">
-              <img src="<%= leader.photo %>" alt="Portrait of <%= leader.full_name %>" class="h-24 w-24 rounded-3xl object-cover" />
+              <img src="<%= leader.photo %>" loading="lazy" alt="Portrait of <%= leader.full_name %>" class="h-24 w-24 rounded-3xl object-cover" />
             </div>
             <div class="mb-4 inline-flex rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary"><%= leader.leadership_title %></div>
             <h3 class="mb-2 text-xl font-bold text-slate-900"><%= leader.full_name %></h3>

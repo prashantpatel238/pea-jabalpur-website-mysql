@@ -20,6 +20,7 @@
   <div id="mobile-navigation" class="hidden border-t border-slate-200 bg-white lg:hidden" data-mobile-menu>
     <div class="mx-auto max-w-7xl space-y-2 px-4 py-2.5 sm:px-6">
       <% site.primaryNav.forEach((link) => { %>
+        <% if (link.href === '/member-directory' && !currentUser) { return; } %>
         <a href="<%= link.href %>" class="block rounded-2xl px-4 py-3 text-sm font-semibold <%= page.path === link.href ? 'bg-primary/10 text-primary' : 'text-slate-700 hover:bg-slate-100' %>"><%= link.label %></a>
       <% }) %>
       <% if (!currentUser) { %>

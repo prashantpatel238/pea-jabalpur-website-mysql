@@ -47,6 +47,12 @@ function createApp() {
   app.use(attachViewLocals);
 
   app.use("/", publicRoutes);
+  const passwordReset = require("./controllers/passwordResetController");
+  const { loginRateLimit } = require("./middleware/loginRateLimit");
+  app.get("/forgot-password", passwordReset.renderForgot);
+  app.post("/forgot-password", loginRateLimit, passwordReset.requestReset);
+  app.get("/reset-password/:token", passwordReset.renderReset);
+  app.post("/reset-password/:token", loginRateLimit, passwordReset.resetPassword);
   app.use("/auth", authRoutes);
   app.use("/admin", adminRoutes);
   app.use("/member", memberRoutes);

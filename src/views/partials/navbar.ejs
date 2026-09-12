@@ -1,5 +1,6 @@
 <nav class="desktop-navigation hidden items-center lg:flex">
   <% site.primaryNav.forEach((link) => { %>
+    <% if (link.href === '/member-directory' && !currentUser) { return; } %>
     <a href="<%= link.href %>" <%- page.path === link.href ? 'aria-current="page"' : '' %> class="nav-link rounded-lg text-sm font-semibold transition <%= page.path === link.href ? 'bg-primary/5 text-primary' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' %>"><%= link.label %></a>
   <% }) %>
   <% if (!currentUser) { %>

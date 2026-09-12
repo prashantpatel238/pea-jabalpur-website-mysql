@@ -23,6 +23,7 @@ const site = {
     { label: "Home", href: "/" },
     { label: "About", href: "/about" },
     { label: "Important Members", href: "/important-members" },
+    { label: "Gallery", href: "/gallery" },
     { label: "Directory", href: "/member-directory" },
     { label: "Notices", href: "/notices" },
     { label: "Contact", href: "/contact" }

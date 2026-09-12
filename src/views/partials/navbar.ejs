@@ -1,16 +1,35 @@
-<nav class="desktop-navigation hidden items-center lg:flex">
+<% const accountDisplayName = currentUser && (currentUser.full_name || currentUser.name || currentUser.display_name || currentUser.email); %>
+<nav class="desktop-navigation hidden items-center lg:flex" aria-label="Primary navigation">
   <% site.primaryNav.forEach((link) => { %>
     <% if (link.href === '/member-directory' && !currentUser) { return; } %>
     <a href="<%= link.href %>" <%- page.path === link.href ? 'aria-current="page"' : '' %> class="nav-link rounded-lg text-sm font-semibold transition <%= page.path === link.href ? 'bg-primary/5 text-primary' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900' %>"><%= link.label %></a>
   <% }) %>
   <% if (!currentUser) { %>
     <a href="/auth/login" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">Login</a>
-  <% } else { %>
-    <span class="max-w-40 truncate px-2 text-sm font-semibold text-slate-700" title="<%= currentUser.display_name || currentUser.email %>">Hi, <%= currentUser.display_name || currentUser.email %></span>
-    <a href="<%= isAdmin ? '/admin/dashboard' : '/member/dashboard' %>" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">Dashboard</a>
-    <form action="/auth/logout" method="post">
-      <button type="submit" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900">Logout</button>
-    </form>
   <% } %>
   <a href="/register" class="ml-2 inline-flex min-w-[108px] items-center justify-center whitespace-nowrap rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold leading-none text-white shadow-primary-soft transition duration-200 hover:-translate-y-0.5 hover:bg-blue-700">Join Now</a>
+  <% if (currentUser) { %>
+    <div class="account-menu relative ml-1" data-account-menu>
+      <button type="button" class="account-menu__trigger inline-flex max-w-48 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900" data-account-menu-toggle aria-expanded="false" aria-haspopup="menu" aria-controls="account-navigation-menu" title="<%= accountDisplayName %>">
+        <i data-lucide="user-round" class="h-4 w-4 shrink-0 text-primary" aria-hidden="true"></i>
+        <span class="truncate"><%= accountDisplayName %></span>
+        <i data-lucide="chevron-down" class="account-menu__chevron h-4 w-4 shrink-0 text-slate-400" aria-hidden="true"></i>
+      </button>
+      <div id="account-navigation-menu" class="account-menu__dropdown hidden" data-account-menu-dropdown role="menu">
+        <div class="border-b border-slate-100 px-4 py-3">
+          <div class="break-words text-sm font-bold text-slate-900"><%= accountDisplayName %></div>
+          <div class="mt-0.5 text-xs font-semibold text-slate-500"><%= isAdmin ? 'Administrator' : 'Member' %></div>
+        </div>
+        <div class="p-1.5">
+          <a href="<%= isAdmin ? '/admin/dashboard' : '/member/dashboard' %>" class="account-menu__item" role="menuitem">Dashboard</a>
+          <% if (!isAdmin) { %>
+            <a href="/member/profile" class="account-menu__item" role="menuitem">My Profile</a>
+          <% } %>
+          <form action="/auth/logout" method="post">
+            <button type="submit" class="account-menu__item w-full text-left" role="menuitem">Logout</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  <% } %>
 </nav>

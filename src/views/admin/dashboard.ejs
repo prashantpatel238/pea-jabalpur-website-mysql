@@ -101,97 +101,62 @@
       </section>
     </div>
 
-    <div class="mb-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
-      <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
-        <div class="mb-6">
-          <h2 class="text-2xl font-bold text-slate-900">Notice & Event Manager</h2>
-          <p class="mt-2 text-sm text-slate-600">Create polished updates with clearly defined publish, event, and expiry dates so admins and visitors know exactly what each notice means.</p>
-        </div>
-        <form action="/admin/notices" method="post" class="grid grid-cols-1 gap-5" data-single-submit>
-          <div class="space-y-2">
-            <label for="notice-title" class="block text-sm font-semibold text-slate-700">Title</label>
-            <input id="notice-title" name="title" required placeholder="Enter notice or event title" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-          </div>
-          <div class="space-y-2">
-            <label for="notice-content" class="block text-sm font-semibold text-slate-700">Description</label>
-            <textarea id="notice-content" name="content" placeholder="Write the message members should see" class="min-h-[140px] w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900"></textarea>
-          </div>
-          <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <div class="space-y-2">
-              <label for="notice-type" class="block text-sm font-semibold text-slate-700">Type</label>
-              <select id="notice-type" name="type" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900">
-                <option value="notice">Notice</option>
-                <option value="event">Event</option>
-              </select>
-            </div>
-            <div class="space-y-2">
-              <label for="notice-sort-order" class="block text-sm font-semibold text-slate-700">Display Priority</label>
-              <input id="notice-sort-order" name="sort_order" type="number" min="0" value="0" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" />
-              <p class="text-xs text-slate-500">Lower numbers appear first when dates are the same.</p>
-            </div>
-          </div>
-          <div class="rounded-3xl border border-slate-200 bg-slate-50/80 p-5">
-            <div class="mb-4 text-sm font-semibold text-slate-900">Notice Timeline</div>
-            <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-              <div class="space-y-2">
-                <label for="notice-publish-date" class="block text-sm font-semibold text-slate-700">Publish Date</label>
-                <input id="notice-publish-date" name="publish_date" type="date" class="w-full rounded-xl border-slate-200 bg-white text-slate-900" />
-                <p class="text-xs text-slate-500">When this notice becomes officially active.</p>
-              </div>
-              <div class="space-y-2">
-                <label for="notice-event-date" class="block text-sm font-semibold text-slate-700">Event Date</label>
-                <input id="notice-event-date" name="event_date" type="date" class="w-full rounded-xl border-slate-200 bg-white text-slate-900" />
-                <p class="text-xs text-slate-500">Use this for the actual event day or key notice date.</p>
-              </div>
-              <div class="space-y-2">
-                <label for="notice-expiry-date" class="block text-sm font-semibold text-slate-700">Expiry Date</label>
-                <input id="notice-expiry-date" name="expiry_date" type="date" class="w-full rounded-xl border-slate-200 bg-white text-slate-900" />
-                <p class="text-xs text-slate-500">Optional. After this date, the notice is no longer relevant.</p>
-              </div>
-            </div>
-          </div>
-          <label class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"><input type="checkbox" name="is_published" checked /> Publish immediately</label>
-          <button type="submit" class="rounded-2xl bg-primary px-6 py-4 text-base font-semibold text-white">Save Notice</button>
-        </form>
-      </section>
-
-      <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
-        <div class="mb-6">
-          <h2 class="text-2xl font-bold text-slate-900">Current Notices</h2>
-          <p class="mt-2 text-sm text-slate-600">A quick admin view of each notice’s type, publishing state, and important dates.</p>
-        </div>
-        <div class="space-y-4">
-          <% if (!notices.length) { %><div class="rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm text-slate-600">No notices or events have been added yet.</div><% } %>
-          <% notices.forEach((notice) => { %>
-            <div class="rounded-3xl border border-slate-200 bg-slate-50 p-5">
-              <div class="mb-4 flex flex-wrap items-start justify-between gap-4">
-                <div>
-                  <div class="mb-2 text-lg font-bold text-slate-900"><%= notice.title %></div>
-                  <div class="flex flex-wrap items-center gap-2">
-                    <span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary"><%= notice.type %></span>
-                    <span class="rounded-full px-3 py-1 text-xs font-semibold <%= notice.is_published ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' %>"><%= notice.is_published ? 'Published' : 'Draft' %></span>
-                  </div>
-                </div>
-                <div class="grid grid-cols-1 gap-2 text-sm text-slate-500 sm:text-right">
-                  <div><span class="font-semibold text-slate-700">Publish:</span> <%= notice.publish_date ? new Date(notice.publish_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Not set' %></div>
-                  <div><span class="font-semibold text-slate-700">Event:</span> <%= notice.event_date ? new Date(notice.event_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Not set' %></div>
-                  <div><span class="font-semibold text-slate-700">Expiry:</span> <%= notice.expiry_date ? new Date(notice.expiry_date).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Not set' %></div>
-                </div>
-              </div>
-              <% if (notice.content) { %>
-                <p class="mb-4 line-clamp-3 text-sm leading-6 text-slate-600"><%= notice.content %></p>
-              <% } %>
-              <div class="flex gap-3">
-                <a href="/admin/notices/<%= notice.id %>/edit" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Edit</a>
-                <form action="/admin/notices/<%= notice.id %>/delete" method="post"><button type="submit" class="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white">Delete</button></form>
-              </div>
-            </div>
-          <% }) %>
-        </div>
-      </section>
+    <div id="notices-events" class="mb-12 space-y-8">
+  <section class="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+    <div class="mb-6">
+      <h2 class="text-2xl font-bold text-slate-900">Notices &amp; Events</h2>
+      <p class="mt-2 text-sm text-slate-600">Manage both record types in one place. Limits include published records and drafts.</p>
     </div>
+    <div class="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <% ['notice', 'event'].forEach((recordType) => { const count = noticeCounts[recordType]; const full = count >= noticeCounts.limit; %>
+        <div class="rounded-2xl border p-5 <%= full ? 'border-red-200 bg-red-50' : 'border-slate-200 bg-slate-50' %>">
+          <div class="text-sm font-bold uppercase tracking-wide text-slate-600"><%= recordType === 'notice' ? 'Notices' : 'Events' %></div>
+          <div class="mt-2 text-3xl font-extrabold <%= full ? 'text-red-700' : 'text-primary' %>"><%= count %> / <%= noticeCounts.limit %></div>
+          <% if (full) { %><div class="mt-2 text-sm font-semibold text-red-700">Limit reached</div><% } %>
+        </div>
+      <% }) %>
+    </div>
+    <% if (noticeCounts.notice >= noticeCounts.limit) { %><p class="mb-3 rounded-xl bg-red-50 p-3 text-sm text-red-700">Notice limit reached. Delete an old notice to add a new one.</p><% } %>
+    <% if (noticeCounts.event >= noticeCounts.limit) { %><p class="mb-3 rounded-xl bg-red-50 p-3 text-sm text-red-700">Event limit reached. Delete an old event to add a new one.</p><% } %>
 
-    <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
+    <form action="/admin/notices" method="post" enctype="multipart/form-data" class="grid grid-cols-1 gap-5" data-notice-form data-notice-count="<%= noticeCounts.notice %>" data-event-count="<%= noticeCounts.event %>" data-limit="<%= noticeCounts.limit %>" data-single-submit>
+      <div class="space-y-2"><label for="notice-type" class="block text-sm font-semibold text-slate-700">Type</label><select id="notice-type" name="type" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900"><option value="notice">Notice</option><option value="event">Event</option></select></div>
+      <div class="space-y-2"><label for="notice-title" class="block text-sm font-semibold text-slate-700">Title</label><input id="notice-title" name="title" required class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" /></div>
+      <div class="space-y-2"><label for="notice-content" class="block text-sm font-semibold text-slate-700">Description</label><textarea id="notice-content" name="content" class="min-h-[140px] w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900"></textarea></div>
+      <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div class="space-y-2"><label for="notice-sort-order" class="block text-sm font-semibold text-slate-700">Display Priority</label><input id="notice-sort-order" name="sort_order" type="number" min="0" value="0" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" /></div>
+        <div class="space-y-2" data-event-field><label for="notice-event-date" class="block text-sm font-semibold text-slate-700">Event Date</label><input id="notice-event-date" name="event_date" type="date" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" /></div>
+        <div class="space-y-2"><label for="notice-publish-date" class="block text-sm font-semibold text-slate-700">Publish Date</label><input id="notice-publish-date" name="publish_date" type="date" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" /></div>
+        <div class="space-y-2" data-notice-field><label for="notice-expiry-date" class="block text-sm font-semibold text-slate-700">Expiry Date (Optional)</label><input id="notice-expiry-date" name="expiry_date" type="date" class="w-full rounded-xl border-slate-200 bg-slate-50 text-slate-900" /></div>
+      </div>
+      <div class="space-y-2" data-event-field><label for="event-photo" class="block text-sm font-semibold text-slate-700">Event Photo (Optional)</label><input id="event-photo" name="event_photo" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" class="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm" /><p class="text-xs text-slate-500">JPEG, JPG, PNG, or WebP; maximum 5 MB.</p></div>
+      <label class="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700"><input type="checkbox" name="is_published" checked /> Published</label>
+      <p class="hidden rounded-xl bg-red-50 p-3 text-sm font-semibold text-red-700" data-limit-message></p>
+      <button type="submit" class="rounded-2xl bg-primary px-6 py-4 text-base font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50" data-submit>Add Notice</button>
+    </form>
+  </section>
+
+  <% ['notice', 'event'].forEach((recordType) => { const records = notices.filter((item) => item.type === recordType); %>
+    <section class="rounded-4xl border border-slate-200 bg-white p-5 shadow-sm sm:p-8">
+      <h3 class="mb-5 text-2xl font-bold text-slate-900"><%= recordType === 'notice' ? 'Notices' : 'Events' %> <span class="text-base font-semibold text-slate-500"><%= records.length %> / <%= noticeCounts.limit %></span></h3>
+      <div class="space-y-4">
+        <% if (!records.length) { %><p class="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">No <%= recordType %> records have been added.</p><% } %>
+        <% records.forEach((notice) => { %>
+          <article class="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div><h4 class="text-lg font-bold text-slate-900"><%= notice.title %></h4><div class="mt-2 flex flex-wrap gap-2"><span class="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold uppercase text-primary"><%= notice.type %></span><span class="rounded-full px-3 py-1 text-xs font-semibold <%= notice.is_published ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' %>"><%= notice.is_published ? 'Published' : 'Draft' %></span></div></div>
+              <div class="text-sm text-slate-600"><span class="font-semibold"><%= recordType === 'event' ? 'Event date:' : 'Publish date:' %></span> <%= (recordType === 'event' ? notice.event_date : notice.publish_date) ? new Date(recordType === 'event' ? notice.event_date : notice.publish_date).toLocaleDateString('en-IN') : 'Not set' %></div>
+            </div>
+            <div class="mt-4 flex flex-wrap gap-3"><a href="/admin/notices/<%= notice.id %>/edit" class="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Edit</a><form action="/admin/notices/<%= notice.id %>/delete" method="post" data-confirm-message="Delete this <%= recordType %>? This action cannot be undone."><button class="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white" type="submit">Delete</button></form></div>
+          </article>
+        <% }) %>
+      </div>
+    </section>
+  <% }) %>
+</div>
+
+
+        <section class="rounded-4xl border border-slate-200 bg-white p-8 shadow-sm">
       <h2 class="mb-6 text-2xl font-bold text-slate-900">All Members</h2>
       <div class="overflow-x-auto">
         <table class="min-w-full text-left text-sm">
@@ -248,5 +213,29 @@
 
     maritalStatusInput.addEventListener("change", updateFamilyFields);
     updateFamilyFields();
+  })();
+</script>
+<script>
+  (() => {
+    const form = document.querySelector('[data-notice-form]');
+    if (!form) return;
+    const type = form.querySelector('[name="type"]');
+    const submit = form.querySelector('[data-submit]');
+    const message = form.querySelector('[data-limit-message]');
+    const eventFields = form.querySelectorAll('[data-event-field]');
+    const noticeFields = form.querySelectorAll('[data-notice-field]');
+    const update = () => {
+      const isEvent = type.value === 'event';
+      eventFields.forEach((field) => field.classList.toggle('hidden', !isEvent));
+      noticeFields.forEach((field) => field.classList.toggle('hidden', isEvent));
+      const count = Number(form.dataset[isEvent ? 'eventCount' : 'noticeCount']);
+      const full = count >= Number(form.dataset.limit);
+      submit.disabled = full;
+      submit.textContent = `Add ${isEvent ? 'Event' : 'Notice'}`;
+      message.classList.toggle('hidden', !full);
+      message.textContent = `${isEvent ? 'Event' : 'Notice'} limit reached. Delete an old ${isEvent ? 'event' : 'notice'} to add a new one.`;
+    };
+    type.addEventListener('change', update);
+    update();
   })();
 </script>

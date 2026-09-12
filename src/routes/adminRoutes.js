@@ -1,6 +1,7 @@
 const express = require("express");
 const { uploadMemberPhoto } = require("../middleware/memberPhotoUpload");
 const { uploadSiteAssets } = require("../middleware/siteSettingsUpload");
+const { uploadEventPhoto } = require("../middleware/eventPhotoUpload");
 
 const {
   renderDashboard,
@@ -47,9 +48,9 @@ router.post("/members/:id/edit", requireAdmin, uploadMemberPhoto, handleUpdateMe
 router.post("/members/:id/approve", requireAdmin, handleApproveMember);
 router.post("/members/:id/reject", requireAdmin, handleRejectMember);
 router.post("/members/:id/delete", requireAdmin, handleDeleteMember);
-router.post("/notices", requireAdmin, handleCreateNotice);
+router.post("/notices", requireAdmin, uploadEventPhoto, handleCreateNotice);
 router.get("/notices/:id/edit", requireAdmin, renderEditNotice);
-router.post("/notices/:id/edit", requireAdmin, handleUpdateNotice);
+router.post("/notices/:id/edit", requireAdmin, uploadEventPhoto, handleUpdateNotice);
 router.post("/notices/:id/delete", requireAdmin, handleDeleteNotice);
 
 module.exports = router;

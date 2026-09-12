@@ -27,8 +27,10 @@ test("upload configuration preserves public URLs while using an external root", 
     assert.equal(config.root, root);
     assert.equal(config.members.publicPath, "/uploads/members");
     assert.equal(config.site.publicPath, "/uploads/site");
+    assert.equal(config.events.publicPath, "/uploads/events");
     assert.ok(fs.statSync(config.members.directory).isDirectory());
     assert.ok(fs.statSync(config.site.directory).isDirectory());
+    assert.ok(fs.statSync(config.events.directory).isDirectory());
   } finally {
     restoreEnvironmentVariable("NODE_ENV", previousEnvironment);
     restoreEnvironmentVariable("UPLOAD_ROOT", previousRoot);
@@ -70,6 +72,8 @@ test("stored file resolution rejects traversal and cross-area paths", () => {
     assert.equal(getStoredFilePath("/uploads/members/../site/logo.png", config.members), null);
     assert.equal(getStoredFilePath("/uploads/site/logo.png", config.members), null);
     assert.equal(getStoredFilePath("/etc/passwd", config.members), null);
+    assert.equal(getStoredFilePath("/uploads/events/event.jpg", config.events), path.join(root, "events", "event.jpg"));
+    assert.equal(getStoredFilePath("/uploads/events/../members/photo.jpg", config.events), null);
   } finally {
     restoreEnvironmentVariable("NODE_ENV", previousEnvironment);
     restoreEnvironmentVariable("UPLOAD_ROOT", previousRoot);

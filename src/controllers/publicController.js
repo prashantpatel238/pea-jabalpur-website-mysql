@@ -27,6 +27,10 @@ const {
 const { buildMemberCelebrationNotices } = require("../utils/noticeFeed");
 const { getPhotoPath, removeUploadedMemberPhoto } = require("../middleware/memberPhotoUpload");
 const { getLeadershipMembers } = require("../services/leadershipService");
+const {
+  sendNewRegistrationAdminEmail,
+  sendRegistrationReceivedEmail
+} = require("../services/notificationEmailService");
 const { sanitizeFormState } = require("../utils/formState");
 const { getEventStatus, toDateKey } = require("../utils/eventDate");
 const {
@@ -342,8 +346,9 @@ async function handleRegistrationRequest(req, res) {
 
   const password_hash = await bcrypt.hash(password, 12);
 
+  let registeredMember;
   try {
-    await createPendingMemberRegistration({
+    const memberId = await createPendingMemberRegistration({
       ...input,
       photo,
       password_hash,
@@ -352,6 +357,13 @@ async function handleRegistrationRequest(req, res) {
       registration_source: "public_form",
       show_in_directory: false
     });
+    registeredMember = {
+      ...input,
+      id: memberId,
+      created_at: new Date(),
+      membership_status: "pending",
+      registration_source: "public_form"
+    };
   } catch (error) {
     removeUploadedMemberPhoto(photo);
 
@@ -366,6 +378,18 @@ async function handleRegistrationRequest(req, res) {
 
     throw error;
   }
+
+  const notifications = [
+    ["registration acknowledgement", sendRegistrationReceivedEmail],
+    ["new registration admin notification", sendNewRegistrationAdminEmail]
+  ];
+  await Promise.all(notifications.map(async ([label, sender]) => {
+    try {
+      await sender(registeredMember);
+    } catch (error) {
+      console.error(`Email delivery failed (${label}, member ${registeredMember.id}):`, error?.message || "Unknown email error");
+    }
+  }));
 
   return res.status(201).render("public/register", {
     ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),

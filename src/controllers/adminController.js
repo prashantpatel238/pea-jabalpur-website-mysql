@@ -250,15 +250,9 @@ async function handleUpdateMember(req, res) {
 
   try {
     if (nextStatus === "approved") {
-      updatedMember = await approveMember({
-        ...nextMember,
-        membership_status: nextStatus
-      });
+      updatedMember = await approveMember(nextMember);
     } else if (nextStatus === "rejected") {
-      updatedMember = await rejectMember({
-        ...nextMember,
-        membership_status: nextStatus
-      });
+      updatedMember = await rejectMember(nextMember);
     } else {
       updatedMember = await updateMemberById(member.id, {
         ...nextMember,

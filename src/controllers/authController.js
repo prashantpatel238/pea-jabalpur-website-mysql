@@ -1,6 +1,13 @@
 const bcrypt = require("bcryptjs");
 
-const { buildOtpSessionRecord, generateOtpCode, sendLoginOtp, verifyOtpCode } = require("../services/authOtpService");
+const {
+  buildOtpSessionRecord,
+  generateOtpCode,
+  MAX_OTP_ATTEMPTS,
+  OTP_RESEND_COOLDOWN_MS,
+  sendLoginOtp,
+  verifyOtpCode
+} = require("../services/authOtpService");
 const {
   findActiveAdminByEmail,
   updateAdminLastLoginAt
@@ -138,6 +145,17 @@ async function handleLogin(req, res) {
 
 async function handleRequestOtpLogin(req, res) {
   const email = (req.body.email || "").trim().toLowerCase();
+  const currentOtp = req.session.authOtp;
+
+  if (currentOtp?.user?.email === email && Date.now() - new Date(currentOtp.sentAt).getTime() < OTP_RESEND_COOLDOWN_MS) {
+    return res.status(429).render("auth/login", {
+      page: buildPage("/auth/login", "Login"),
+      errorMessage: "Please wait 60 seconds before requesting another OTP.",
+      formData: { email },
+      otpState: currentOtp
+    });
+  }
+
   const user = await findLoginUserByEmail(email);
 
   if (!user) {
@@ -190,13 +208,28 @@ async function handleVerifyOtpLogin(req, res) {
   const verification = verifyOtpCode(otpState, otp);
 
   if (!verification.ok) {
+    if (verification.reason === "expired") {
+      delete req.session.authOtp;
+    } else {
+      otpState.attempts = Number(otpState.attempts || 0) + 1;
+      if (otpState.attempts >= MAX_OTP_ATTEMPTS) {
+        delete req.session.authOtp;
+        return res.status(401).render("auth/login", {
+          page: buildPage("/auth/login", "Login"),
+          errorMessage: "Too many invalid attempts. Please request a new OTP.",
+          formData: { email },
+          otpState: null
+        });
+      }
+    }
+
     return res.status(401).render("auth/login", {
       page: buildPage("/auth/login", "Login"),
       errorMessage: verification.reason === "expired"
         ? "Your OTP has expired. Please request a new one."
         : "Invalid OTP. Please try again.",
       formData: { email },
-      otpState
+      otpState: req.session.authOtp || null
     });
   }
 

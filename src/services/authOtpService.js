@@ -1,7 +1,10 @@
 const crypto = require("crypto");
 
 const { getAppConfig } = require("../config/env");
-const { sendEmail } = require("./emailService");
+const { sendLoginOtpEmail } = require("./notificationEmailService");
+
+const MAX_OTP_ATTEMPTS = 5;
+const OTP_RESEND_COOLDOWN_MS = 60 * 1000;
 
 function generateOtpCode() {
   return String(crypto.randomInt(100000, 1000000));
@@ -24,6 +27,7 @@ function buildOtpSessionRecord(user, code) {
     },
     codeHash: hashOtpCode(code),
     expiresAt: expiresAt.toISOString(),
+    sentAt: new Date().toISOString(),
     attempts: 0
   };
 }
@@ -37,7 +41,9 @@ function verifyOtpCode(record, code) {
     return { ok: false, reason: "expired" };
   }
 
-  if (record.codeHash !== hashOtpCode(code)) {
+  const actualHash = Buffer.from(hashOtpCode(code), "hex");
+  const expectedHash = Buffer.from(record.codeHash, "hex");
+  if (actualHash.length !== expectedHash.length || !crypto.timingSafeEqual(actualHash, expectedHash)) {
     return { ok: false, reason: "invalid" };
   }
 
@@ -45,39 +51,14 @@ function verifyOtpCode(record, code) {
 }
 
 async function sendLoginOtp(user, code) {
-  const { auth, siteUrl } = getAppConfig();
-  const subject = `Your PEA Jabalpur login OTP is ${code}`;
-  const text = [
-    `Hello ${user.display_name || "Member"},`,
-    "",
-    `Your one-time login code is: ${code}`,
-    `This code will expire in ${auth.otpExpiresMinutes} minutes.`,
-    "",
-    `If you did not request this login, you can ignore this email.`,
-    siteUrl ? `Site: ${siteUrl}` : ""
-  ].filter(Boolean).join("\n");
-
-  const html = `
-    <div style="font-family: Arial, sans-serif; color: #0f172a;">
-      <p>Hello ${user.display_name || "Member"},</p>
-      <p>Your one-time login code is:</p>
-      <p style="font-size: 28px; font-weight: 700; letter-spacing: 4px;">${code}</p>
-      <p>This code will expire in ${auth.otpExpiresMinutes} minutes.</p>
-      <p>If you did not request this login, you can ignore this email.</p>
-    </div>
-  `;
-
-  await sendEmail({
-    to: user.email,
-    subject,
-    text,
-    html
-  });
+  await sendLoginOtpEmail(user, code);
 }
 
 module.exports = {
   buildOtpSessionRecord,
   generateOtpCode,
+  MAX_OTP_ATTEMPTS,
+  OTP_RESEND_COOLDOWN_MS,
   sendLoginOtp,
   verifyOtpCode
 };

@@ -3,6 +3,9 @@ const bcrypt = require("bcryptjs");
 const { BLOOD_GROUP_OPTIONS } = require("../constants/memberFields");
 const { MEMBER_ROLES } = require("../constants/memberRoles");
 const {
+  NOTICE_LIMIT,
+  NoticeLimitError,
+  countNoticesByType,
   countMembers,
   createMember,
   deleteMemberById,
@@ -18,6 +21,7 @@ const {
   listNotices,
   updateNoticeById
 } = require("../repositories/noticeRepository");
+const { getEventPhotoPath, removeEventPhoto } = require("../middleware/eventPhotoUpload");
 const { buildPage } = require("../utils/page");
 const {
   buildAdminMemberPayload,
@@ -48,14 +52,16 @@ function getAdminMemberRedirectPath(status) {
 }
 
 async function renderDashboard(req, res) {
-  const [pendingMembers, members, notices, totalMembers, pendingCount, approvedCount, leadershipCount] = await Promise.all([
+  const [pendingMembers, members, notices, totalMembers, pendingCount, approvedCount, leadershipCount, noticeCount, eventCount] = await Promise.all([
     listMembers({ membershipStatus: "pending" }),
     listMembers(),
     listNotices(),
     countMembers(),
     countMembers({ membershipStatus: "pending" }),
     countMembers({ membershipStatus: "approved" }),
-    countMembers({ membershipStatus: "approved", leadershipOnly: true })
+    countMembers({ membershipStatus: "approved", leadershipOnly: true }),
+    countNoticesByType("notice"),
+    countNoticesByType("event")
   ]);
 
   res.render("admin/dashboard", {
@@ -63,6 +69,7 @@ async function renderDashboard(req, res) {
     pendingMembers,
     members,
     notices,
+    noticeCounts: { notice: noticeCount, event: eventCount, limit: NOTICE_LIMIT },
     memberRoles: MEMBER_ROLES,
     bloodGroupOptions: BLOOD_GROUP_OPTIONS,
     summary: {
@@ -326,28 +333,51 @@ async function handleExportMembers(req, res) {
 }
 
 async function handleCreateNotice(req, res) {
+  const uploadedPhoto = getEventPhotoPath(req.file);
+  const type = req.body.type === "event" ? "event" : "notice";
+
+  if (req.eventPhotoUploadError) {
+    req.session.flash = { type: "error", message: req.eventPhotoUploadError };
+    return res.redirect("/admin/dashboard#notices-events");
+  }
+
+  if (type !== "event" && uploadedPhoto) {
+    removeEventPhoto(uploadedPhoto);
+  }
+
   const noticePayload = {
     title: (req.body.title || "").trim(),
     content: (req.body.content || "").trim(),
-    type: req.body.type || "notice",
+    type,
     event_date: req.body.event_date || null,
     publish_date: req.body.publish_date || new Date(),
     expiry_date: req.body.expiry_date || null,
     is_published: parseCheckbox(req.body, "is_published"),
     sort_order: Number(req.body.sort_order || 0),
-    created_by_admin: req.session.user.email
+    created_by_admin: req.session.user.email,
+    image_path: type === "event" ? uploadedPhoto : null
   };
 
   const existingNotice = await findRecentMatchingNotice(noticePayload);
 
   if (existingNotice) {
+    removeEventPhoto(uploadedPhoto);
     req.session.flash = { type: "success", message: "A matching notice was already saved recently, so a duplicate entry was skipped." };
     return res.redirect("/admin/dashboard");
   }
 
-  await createNotice(noticePayload);
+  try {
+    await createNotice(noticePayload);
+  } catch (error) {
+    removeEventPhoto(uploadedPhoto);
+    if (error instanceof NoticeLimitError) {
+      req.session.flash = { type: "error", message: error.message };
+      return res.redirect("/admin/dashboard#notices-events");
+    }
+    throw error;
+  }
 
-  req.session.flash = { type: "success", message: "Notice saved successfully." };
+  req.session.flash = { type: "success", message: `${type === "event" ? "Event" : "Notice"} saved successfully.` };
   return res.redirect("/admin/dashboard");
 }
 
@@ -366,24 +396,51 @@ async function renderEditNotice(req, res) {
 }
 
 async function handleUpdateNotice(req, res) {
-  await updateNoticeById(req.params.id, {
+  const notice = await findNoticeById(req.params.id);
+  const uploadedPhoto = getEventPhotoPath(req.file);
+  if (!notice) {
+    removeEventPhoto(uploadedPhoto);
+    req.session.flash = { type: "error", message: "Notice or event not found." };
+    return res.redirect("/admin/dashboard#notices-events");
+  }
+  if (req.eventPhotoUploadError) {
+    req.session.flash = { type: "error", message: req.eventPhotoUploadError };
+    return res.redirect(`/admin/notices/${req.params.id}/edit`);
+  }
+  const type = req.body.type === "event" ? "event" : "notice";
+  const imagePath = type === "event" ? uploadedPhoto || notice.image_path : null;
+
+  try {
+    await updateNoticeById(req.params.id, {
     title: (req.body.title || "").trim(),
     content: (req.body.content || "").trim(),
-    type: req.body.type || "notice",
+    type,
     event_date: req.body.event_date || null,
     publish_date: req.body.publish_date || new Date(),
     expiry_date: req.body.expiry_date || null,
     is_published: parseCheckbox(req.body, "is_published"),
-    sort_order: Number(req.body.sort_order || 0)
-  });
+      sort_order: Number(req.body.sort_order || 0),
+      image_path: imagePath
+    });
+  } catch (error) {
+    removeEventPhoto(uploadedPhoto);
+    if (error instanceof NoticeLimitError) {
+      req.session.flash = { type: "error", message: error.message };
+      return res.redirect(`/admin/notices/${req.params.id}/edit`);
+    }
+    throw error;
+  }
 
-  req.session.flash = { type: "success", message: "Notice updated successfully." };
+  if (notice.image_path && notice.image_path !== imagePath) removeEventPhoto(notice.image_path);
+
+  req.session.flash = { type: "success", message: `${type === "event" ? "Event" : "Notice"} updated successfully.` };
   return res.redirect("/admin/dashboard");
 }
 
 async function handleDeleteNotice(req, res) {
-  await deleteNoticeById(req.params.id);
-  req.session.flash = { type: "success", message: "Notice deleted successfully." };
+  const notice = await deleteNoticeById(req.params.id);
+  if (notice && notice.image_path) removeEventPhoto(notice.image_path);
+  req.session.flash = { type: "success", message: `${notice && notice.type === "event" ? "Event" : "Notice"} deleted successfully.` };
   return res.redirect("/admin/dashboard");
 }
 

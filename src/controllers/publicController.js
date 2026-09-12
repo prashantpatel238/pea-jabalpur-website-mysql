@@ -199,6 +199,7 @@ async function renderNotices(req, res) {
       event_date: notice.event_date || notice.publish_date,
       publish_date: notice.publish_date || null,
       expiry_date: notice.expiry_date || null,
+      image_path: notice.type === "event" ? notice.image_path : null,
       sort_order: notice.sort_order || 0,
       event_status: notice.type === "event" ? getEventStatus(notice.event_date) : ""
     })),

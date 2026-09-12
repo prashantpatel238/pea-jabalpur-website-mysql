@@ -35,10 +35,12 @@ function getUploadStorageConfig() {
   const membersDirectory = path.join(root, "members");
   const siteDirectory = path.join(root, "site");
   const galleryDirectory = path.join(root, "gallery");
+  const eventsDirectory = path.join(root, "events");
 
   fs.mkdirSync(membersDirectory, { recursive: true });
   fs.mkdirSync(siteDirectory, { recursive: true });
   fs.mkdirSync(galleryDirectory, { recursive: true });
+  fs.mkdirSync(eventsDirectory, { recursive: true });
 
   return {
     root,
@@ -50,7 +52,8 @@ function getUploadStorageConfig() {
       directory: siteDirectory,
       publicPath: "/uploads/site"
     },
-    gallery: { directory: galleryDirectory, publicPath: "/uploads/gallery" }
+    gallery: { directory: galleryDirectory, publicPath: "/uploads/gallery" },
+    events: { directory: eventsDirectory, publicPath: "/uploads/events" }
   };
 }
 

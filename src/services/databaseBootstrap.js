@@ -74,12 +74,22 @@ async function ensureMemberColumns(connection) {
   );
 }
 
+async function ensureNoticeColumns(connection) {
+  await addColumnIfMissing(
+    connection,
+    "notices",
+    "image_path",
+    "VARCHAR(500) NULL DEFAULT NULL AFTER `expiry_date`"
+  );
+}
+
 async function bootstrapDatabase() {
   const connection = await getConnection();
 
   try {
     await createTablesIfNotExist(connection);
     await ensureMemberColumns(connection);
+    await ensureNoticeColumns(connection);
     await ensureDefaultSiteSettingsRow(connection);
   } finally {
     connection.release();
@@ -92,5 +102,6 @@ module.exports = {
   bootstrapDatabase,
   createTablesIfNotExist,
   ensureMemberColumns,
+  ensureNoticeColumns,
   ensureDefaultSiteSettingsRow
 };

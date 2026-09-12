@@ -4,6 +4,7 @@ const {
   buildOtpSessionRecord,
   generateOtpCode,
   MAX_OTP_ATTEMPTS,
+  maskEmailAddress,
   OTP_RESEND_COOLDOWN_MS,
   sendLoginOtp,
   verifyOtpCode
@@ -57,7 +58,8 @@ async function renderLogin(req, res) {
   return res.render("auth/login", {
     page: buildPage("/auth/login", "Login"),
     formData: res.locals.formState.authLogin || {},
-    otpState: req.session.authOtp || null
+    otpState: req.session.authOtp || null,
+    otpDestination: maskEmailAddress(req.session.authOtp?.user?.email)
   });
 }
 
@@ -144,15 +146,16 @@ async function handleLogin(req, res) {
 }
 
 async function handleRequestOtpLogin(req, res) {
-  const email = (req.body.email || "").trim().toLowerCase();
   const currentOtp = req.session.authOtp;
+  const email = (req.body.email || currentOtp?.user?.email || "").trim().toLowerCase();
 
   if (currentOtp?.user?.email === email && Date.now() - new Date(currentOtp.sentAt).getTime() < OTP_RESEND_COOLDOWN_MS) {
     return res.status(429).render("auth/login", {
       page: buildPage("/auth/login", "Login"),
       errorMessage: "Please wait 60 seconds before requesting another OTP.",
       formData: { email },
-      otpState: currentOtp
+      otpState: currentOtp,
+      otpDestination: maskEmailAddress(currentOtp.user.email)
     });
   }
 
@@ -187,23 +190,24 @@ async function handleRequestOtpLogin(req, res) {
     page: buildPage("/auth/login", "Login"),
     formData: { email: user.email },
     otpState: req.session.authOtp,
-    otpRequested: true
+    otpDestination: maskEmailAddress(user.email)
   });
 }
 
 async function handleVerifyOtpLogin(req, res) {
-  const email = (req.body.email || "").trim().toLowerCase();
   const otp = (req.body.otp || "").trim();
   const otpState = req.session.authOtp;
 
-  if (!otpState || !otpState.user || otpState.user.email !== email) {
+  if (!otpState?.user?.email) {
     return res.status(400).render("auth/login", {
       page: buildPage("/auth/login", "Login"),
       errorMessage: "Please request a new OTP and try again.",
-      formData: { email },
+      formData: {},
       otpState: null
     });
   }
+
+  const email = otpState.user.email;
 
   const verification = verifyOtpCode(otpState, otp);
 
@@ -229,13 +233,14 @@ async function handleVerifyOtpLogin(req, res) {
         ? "Your OTP has expired. Please request a new one."
         : "Invalid OTP. Please try again.",
       formData: { email },
-      otpState: req.session.authOtp || null
+      otpState: req.session.authOtp || null,
+      otpDestination: maskEmailAddress(req.session.authOtp?.user?.email)
     });
   }
 
   const user = await findLoginUserByEmail(email);
 
-  if (!user) {
+  if (!user || String(user.id) !== String(otpState.user.id) || user.role !== otpState.user.role) {
     delete req.session.authOtp;
     return res.status(401).render("auth/login", {
       page: buildPage("/auth/login", "Login"),
@@ -252,6 +257,11 @@ async function handleVerifyOtpLogin(req, res) {
   return res.redirect(destination);
 }
 
+function handleChangeOtpEmail(req, res) {
+  delete req.session.authOtp;
+  return res.redirect("/auth/login");
+}
+
 async function handleLogout(req, res) {
   await destroySession(req);
   res.clearCookie("connect.sid");
@@ -263,5 +273,6 @@ module.exports = {
   handleLogin,
   handleRequestOtpLogin,
   handleVerifyOtpLogin,
+  handleChangeOtpEmail,
   handleLogout
 };

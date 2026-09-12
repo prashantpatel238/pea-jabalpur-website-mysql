@@ -5,6 +5,7 @@ const {
   buildOtpSessionRecord,
   generateOtpCode,
   MAX_OTP_ATTEMPTS,
+  maskEmailAddress,
   OTP_RESEND_COOLDOWN_MS,
   verifyOtpCode
 } = require("../src/services/authOtpService");
@@ -27,6 +28,22 @@ test("OTP records contain only a hash and enforce configured security limits", (
   assert.equal(verifyOtpCode({ ...record, expiresAt: new Date(Date.now() - 1).toISOString() }, code).reason, "expired");
   assert.equal(MAX_OTP_ATTEMPTS, 5);
   assert.equal(OTP_RESEND_COOLDOWN_MS, 60_000);
+  assert.equal(maskEmailAddress("prashantpatel238@gmail.com"), "pr**************@gmail.com");
+  assert.equal(maskEmailAddress("a@example.com"), "a****@example.com");
+});
+
+test("OTP login UI uses a single email field before request and only the code after request", () => {
+  const fs = require("node:fs");
+  const template = fs.readFileSync(require.resolve("../src/views/auth/login.ejs"), "utf8");
+  const emailInputs = template.match(/<input name="email"/g) || [];
+
+  // One email input belongs to password login and one to the pre-request OTP state.
+  assert.equal(emailInputs.length, 2);
+  assert.match(template, /<% if \(!otpState\) \{ %>[\s\S]*name="email"[\s\S]*<% \} else \{ %>/);
+  assert.doesNotMatch(template.match(/<% \} else \{ %>[\s\S]*?<% \} %>/)?.[0] || "", /name="email"/);
+  assert.match(template, /action="\/auth\/login\/otp\/verify"[\s\S]*name="otp"/);
+  assert.match(template, /Resend OTP/);
+  assert.match(template, /Change Email/);
 });
 
 test("transactional templates use safe recipients, URLs, subjects, and omit secrets", async () => {

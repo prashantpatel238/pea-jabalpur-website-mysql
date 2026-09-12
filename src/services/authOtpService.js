@@ -14,6 +14,14 @@ function hashOtpCode(code) {
   return crypto.createHash("sha256").update(String(code)).digest("hex");
 }
 
+function maskEmailAddress(email) {
+  const [localPart, domain] = String(email || "").split("@");
+  if (!localPart || !domain) return "your registered email";
+
+  const visibleLength = Math.min(2, localPart.length);
+  return `${localPart.slice(0, visibleLength)}${"*".repeat(Math.max(4, localPart.length - visibleLength))}@${domain}`;
+}
+
 function buildOtpSessionRecord(user, code) {
   const { auth } = getAppConfig();
   const expiresAt = new Date(Date.now() + auth.otpExpiresMinutes * 60 * 1000);
@@ -58,6 +66,7 @@ module.exports = {
   buildOtpSessionRecord,
   generateOtpCode,
   MAX_OTP_ATTEMPTS,
+  maskEmailAddress,
   OTP_RESEND_COOLDOWN_MS,
   sendLoginOtp,
   verifyOtpCode

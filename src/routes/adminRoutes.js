@@ -25,14 +25,14 @@ const {
 } = require("../controllers/adminSettingsController");
 const { requireAdmin } = require("../middleware/auth");
 const { uploadGalleryImage } = require("../middleware/galleryUpload");
-const { renderAdminGallery, handleCreate, handleUpdate, handleDelete } = require("../controllers/galleryController");
+const { renderAdminGallery, checkGalleryCapacity, handleCreate, handleUpdate, handleDelete } = require("../controllers/galleryController");
 
 const router = express.Router();
 
 router.get("/", requireAdmin, (req, res) => res.redirect("/admin/dashboard"));
 router.get("/dashboard", requireAdmin, renderDashboard);
 router.get("/gallery", requireAdmin, renderAdminGallery);
-router.post("/gallery", requireAdmin, uploadGalleryImage, handleCreate);
+router.post("/gallery", requireAdmin, checkGalleryCapacity, uploadGalleryImage, handleCreate);
 router.post("/gallery/:id/edit", requireAdmin, uploadGalleryImage, handleUpdate);
 router.post("/gallery/:id/delete", requireAdmin, handleDelete);
 router.get("/settings", requireAdmin, renderSettings);

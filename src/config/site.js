@@ -11,7 +11,7 @@ const site = {
     ],
     phone: "9425412820",
     whatsapp: "919425412820",
-    email: "info@pea.org"
+    email: "admin@professionalpeajbp.in"
   },
   socialLinks: [
     { label: "Facebook", href: "#" },

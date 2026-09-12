@@ -34,7 +34,7 @@ async function sendEmail({ to, subject, text, html }) {
 
   if (!hasSmtpConfig()) {
     if (isProduction) {
-      throw new Error("OTP email delivery is not configured. Please set SMTP environment variables.");
+      throw new Error("Email delivery is not configured. Please set SMTP environment variables.");
     }
 
     console.log("[DEV EMAIL FALLBACK]");

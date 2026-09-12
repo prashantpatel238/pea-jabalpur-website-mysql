@@ -1,5 +1,17 @@
 const { updateMemberById } = require("../repositories/adminMemberRepository");
 const { generateMemberId } = require("../utils/memberId");
+const {
+  sendMembershipApprovedEmail,
+  sendMembershipRejectedEmail
+} = require("./notificationEmailService");
+
+async function sendStatusNotification(label, sender, member) {
+  try {
+    await sender(member);
+  } catch (error) {
+    console.error(`Email delivery failed (${label}, member ${member.id}):`, error?.message || "Unknown email error");
+  }
+}
 
 async function approveMember(member) {
   if (member.membership_status === "approved" && member.member_id) {
@@ -10,7 +22,7 @@ async function approveMember(member) {
     });
   }
 
-  return updateMemberById(member.id, {
+  const updatedMember = await updateMemberById(member.id, {
     ...member,
     membership_status: "approved",
     show_in_directory: member.registration_source === "public_form" && !member.show_in_directory
@@ -20,16 +32,23 @@ async function approveMember(member) {
     approval_date: new Date(),
     approved_by_admin: true
   });
+  await sendStatusNotification("membership approval", sendMembershipApprovedEmail, updatedMember);
+  return updatedMember;
 }
 
 async function rejectMember(member) {
-  return updateMemberById(member.id, {
+  const wasRejected = member.membership_status === "rejected";
+  const updatedMember = await updateMemberById(member.id, {
     ...member,
     membership_status: "rejected",
     member_id: null,
     approval_date: null,
     approved_by_admin: false
   });
+  if (!wasRejected) {
+    await sendStatusNotification("membership rejection", sendMembershipRejectedEmail, updatedMember);
+  }
+  return updatedMember;
 }
 
 module.exports = {

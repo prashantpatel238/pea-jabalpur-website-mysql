@@ -68,7 +68,7 @@ function getAppConfig() {
       user: process.env.SMTP_USER || "",
       password: process.env.SMTP_PASS || "",
       fromEmail: process.env.SMTP_FROM_EMAIL || "",
-      fromName: process.env.SMTP_FROM_NAME || "PEA Jabalpur"
+      fromName: process.env.SMTP_FROM_NAME || "Professional Engineers Association Jabalpur"
     },
     admin: {
       email: process.env.ADMIN_EMAIL,

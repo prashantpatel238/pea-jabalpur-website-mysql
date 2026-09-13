@@ -58,14 +58,7 @@
             <div class="space-y-2">
               <label for="role" class="text-sm font-medium text-slate-700">Role</label>
               <select id="role" name="role" class="w-full rounded-xl border-slate-200 text-slate-900">
-                <option <%= (values.role || 'General Member') === 'General Member' ? 'selected' : '' %>>General Member</option>
-                <option <%= values.role === 'Core Committee Member' ? 'selected' : '' %>>Core Committee Member</option>
-                <option <%= values.role === 'Media Prabhari' ? 'selected' : '' %>>Media Prabhari</option>
-                <option <%= values.role === 'Treasurer' ? 'selected' : '' %>>Treasurer</option>
-                <option <%= values.role === 'Joint Secretary' ? 'selected' : '' %>>Joint Secretary</option>
-                <option <%= values.role === 'Secretary' ? 'selected' : '' %>>Secretary</option>
-                <option <%= values.role === 'Vice President' ? 'selected' : '' %>>Vice President</option>
-                <option <%= values.role === 'President' ? 'selected' : '' %>>President</option>
+                <% memberRoles.forEach((role) => { %><option <%= (values.role || 'General Member') === role ? 'selected' : '' %>><%= role %></option><% }) %>
               </select>
             </div>
             <div class="space-y-2">

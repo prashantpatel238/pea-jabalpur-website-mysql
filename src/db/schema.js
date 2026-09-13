@@ -28,6 +28,7 @@ const createTableStatements = [
       'Treasurer',
       'Media Prabhari',
       'Core Committee Member',
+      'KARYAKARINI SADASYA',
       'General Member'
     ) NOT NULL DEFAULT 'General Member',
     city VARCHAR(120) NOT NULL DEFAULT '',

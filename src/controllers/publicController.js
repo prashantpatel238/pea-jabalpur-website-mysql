@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 
 const site = require("../config/site");
 const { BLOOD_GROUP_OPTIONS, DIRECTORY_SORT_OPTIONS } = require("../constants/memberFields");
+const { MEMBER_ROLES } = require("../constants/memberRoles");
 const {
   homeStats,
   homeFeatures,
@@ -173,7 +174,8 @@ function renderRegistration(req, res) {
       canonical: "/register"
     }),
     formData: res.locals.formState.register || {},
-    bloodGroupOptions: BLOOD_GROUP_OPTIONS
+    bloodGroupOptions: BLOOD_GROUP_OPTIONS,
+    memberRoles: MEMBER_ROLES
   });
 }
 
@@ -279,7 +281,8 @@ async function handleRegistrationRequest(req, res) {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
       errorMessage: req.photoUploadError,
       formData: sanitizeFormState(req.body),
-      bloodGroupOptions: BLOOD_GROUP_OPTIONS
+      bloodGroupOptions: BLOOD_GROUP_OPTIONS,
+      memberRoles: MEMBER_ROLES
     });
   }
 
@@ -289,7 +292,8 @@ async function handleRegistrationRequest(req, res) {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
       errorMessage: "Full name, email, phone, and password are required.",
       formData: sanitizeFormState(req.body),
-      bloodGroupOptions: BLOOD_GROUP_OPTIONS
+      bloodGroupOptions: BLOOD_GROUP_OPTIONS,
+      memberRoles: MEMBER_ROLES
     });
   }
 
@@ -299,7 +303,8 @@ async function handleRegistrationRequest(req, res) {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
       errorMessage: "Password and confirm password must match.",
       formData: sanitizeFormState(req.body),
-      bloodGroupOptions: BLOOD_GROUP_OPTIONS
+      bloodGroupOptions: BLOOD_GROUP_OPTIONS,
+      memberRoles: MEMBER_ROLES
     });
   }
 
@@ -309,7 +314,8 @@ async function handleRegistrationRequest(req, res) {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
       errorMessage: getEmailValidationMessage("email address"),
       formData: sanitizeFormState(req.body),
-      bloodGroupOptions: BLOOD_GROUP_OPTIONS
+      bloodGroupOptions: BLOOD_GROUP_OPTIONS,
+      memberRoles: MEMBER_ROLES
     });
   }
 
@@ -319,7 +325,8 @@ async function handleRegistrationRequest(req, res) {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
       errorMessage: getMobileValidationMessage("mobile number"),
       formData: sanitizeFormState(req.body),
-      bloodGroupOptions: BLOOD_GROUP_OPTIONS
+      bloodGroupOptions: BLOOD_GROUP_OPTIONS,
+      memberRoles: MEMBER_ROLES
     });
   }
 
@@ -329,7 +336,8 @@ async function handleRegistrationRequest(req, res) {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
       errorMessage: "Children count must be a non-negative whole number.",
       formData: sanitizeFormState(req.body),
-      bloodGroupOptions: BLOOD_GROUP_OPTIONS
+      bloodGroupOptions: BLOOD_GROUP_OPTIONS,
+      memberRoles: MEMBER_ROLES
     });
   }
 
@@ -341,7 +349,8 @@ async function handleRegistrationRequest(req, res) {
       ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
       errorMessage: "A member with this email already exists.",
       formData: sanitizeFormState(req.body),
-      bloodGroupOptions: BLOOD_GROUP_OPTIONS
+      bloodGroupOptions: BLOOD_GROUP_OPTIONS,
+      memberRoles: MEMBER_ROLES
     });
   }
 
@@ -373,7 +382,8 @@ async function handleRegistrationRequest(req, res) {
         ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
         errorMessage: "A member with this email already exists.",
         formData: sanitizeFormState(req.body),
-        bloodGroupOptions: BLOOD_GROUP_OPTIONS
+        bloodGroupOptions: BLOOD_GROUP_OPTIONS,
+        memberRoles: MEMBER_ROLES
       });
     }
 
@@ -396,7 +406,8 @@ async function handleRegistrationRequest(req, res) {
     ...getBaseViewData({ title: `Join Now - ${site.title}`, path: "/register" }),
     formSubmitted: true,
     formData: {},
-    bloodGroupOptions: BLOOD_GROUP_OPTIONS
+    bloodGroupOptions: BLOOD_GROUP_OPTIONS,
+    memberRoles: MEMBER_ROLES
   });
 }
 

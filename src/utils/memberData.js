@@ -1,6 +1,6 @@
 const { BLOOD_GROUP_OPTIONS } = require("../constants/memberFields");
 const { normalizeEmail, normalizeMobileNumber } = require("./validation");
-const { MEMBER_ROLES } = require("../constants/memberRoles");
+const { LEADERSHIP_ROLES, isMemberRole } = require("../constants/memberRoles");
 
 function calculateAge(dob) {
   if (!dob) {
@@ -63,13 +63,17 @@ function normalizeFamilyFields(payload) {
   return payload;
 }
 
+function normalizeMemberRole(value, fallback = "General Member") {
+  return isMemberRole(value) ? value : fallback;
+}
+
 function normalizePublicMemberInput(body) {
   return normalizeFamilyFields({
     full_name: body.full_name || body.name || "",
     email: normalizeEmail(body.email),
     phone: normalizeMobileNumber(body.phone),
     profession: (body.profession || "").trim(),
-    role: body.role || "General Member",
+    role: normalizeMemberRole(body.role),
     city: (body.city || "").trim(),
     address: (body.address || "").trim(),
     dob: body.dob || body.date_of_birth || null,
@@ -83,8 +87,9 @@ function normalizePublicMemberInput(body) {
 }
 
 function buildAdminMemberPayload(body, existingMember) {
-  const role = body.role || existingMember?.role || "General Member";
-  const isLeadershipRole = MEMBER_ROLES.slice(0, -1).includes(role);
+  const fallbackRole = normalizeMemberRole(existingMember?.role);
+  const role = normalizeMemberRole(body.role, fallbackRole);
+  const isLeadershipRole = LEADERSHIP_ROLES.includes(role);
 
   return normalizeFamilyFields({
     full_name: (body.full_name ?? existingMember?.full_name ?? "").trim(),
@@ -129,6 +134,7 @@ module.exports = {
   normalizeBloodGroup,
   normalizeChildrenCount,
   normalizeFamilyFields,
+  normalizeMemberRole,
   normalizePublicMemberInput,
   parseCheckbox
 };

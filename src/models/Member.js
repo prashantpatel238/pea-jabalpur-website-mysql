@@ -1,16 +1,6 @@
 const { Schema, model } = require("mongoose");
 const { isValidEmail, isValidIndianMobileNumber } = require("../utils/validation");
-
-const MEMBER_ROLES = [
-  "President",
-  "Vice President",
-  "Secretary",
-  "Joint Secretary",
-  "Treasurer",
-  "Media Prabhari",
-  "Core Committee Member",
-  "General Member"
-];
+const { MEMBER_ROLES } = require("../constants/memberRoles");
 
 const memberSchema = new Schema(
   {

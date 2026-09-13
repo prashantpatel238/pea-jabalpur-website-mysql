@@ -29,6 +29,7 @@ CREATE TABLE IF NOT EXISTS `members` (
     'Treasurer',
     'Media Prabhari',
     'Core Committee Member',
+    'KARYAKARINI SADASYA',
     'General Member'
   ) NOT NULL DEFAULT 'General Member',
   `city` VARCHAR(120) NOT NULL DEFAULT '',
